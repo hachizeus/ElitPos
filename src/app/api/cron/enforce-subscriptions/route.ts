@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { tenants, subscriptions, lockoutEvents, accountNotifications } from '@/lib/db/schema'
 import { eq, and, lt, isNull, isNotNull, sql, or } from 'drizzle-orm'
 import { cascadeDeleteTenant } from '@/lib/billing/delete-tenant'
+import { renewFromWallet } from '@/lib/billing/renew-from-wallet'
 import { logError } from '@/lib/ai/error-logger'
 
 // POST /api/cron/enforce-subscriptions
@@ -20,6 +21,8 @@ export async function POST(request: NextRequest) {
     const stats = {
       trialsExpired: 0,
       subscriptionsExpired: 0,
+      walletRenewed: 0,
+      walletSkipped: 0,
       storageLocked: 0,
       companiesDeleted: 0,
       warningsSent: 0,
@@ -82,7 +85,43 @@ export async function POST(request: NextRequest) {
       stats.trialsExpired++
     }
 
-    // 2. Expire paid subscriptions: status='active' AND currentPeriodEnd < NOW() - 3 days grace
+    // 2. Attempt wallet auto-renewal for subscriptions past their period end (within grace period)
+    // Do this BEFORE locking — if wallet has enough funds, renew automatically
+    const renewableStats = { renewed: 0, skipped: 0 }
+
+    const subsForRenewal = await db
+      .select({
+        id: subscriptions.id,
+        billingAccountId: subscriptions.billingAccountId,
+        tenantId: subscriptions.tenantId,
+      })
+      .from(subscriptions)
+      .innerJoin(tenants, eq(tenants.id, subscriptions.tenantId))
+      .where(and(
+        or(
+          eq(subscriptions.status, 'active'),
+          eq(subscriptions.status, 'past_due'),
+        ),
+        lt(subscriptions.currentPeriodEnd, now),
+        or(
+          eq(tenants.status, 'active'),
+          eq(tenants.status, 'locked'),
+        ),
+      ))
+
+    for (const sub of subsForRenewal) {
+      const result = await renewFromWallet(sub.id)
+      if (result.success) {
+        renewableStats.renewed++
+      } else {
+        renewableStats.skipped++
+      }
+    }
+
+      stats.walletRenewed = renewableStats.renewed
+      stats.walletSkipped = renewableStats.skipped
+
+    // 2b. Expire paid subscriptions that couldn't be auto-renewed
     const threeDaysAgo = new Date(now)
     threeDaysAgo.setDate(threeDaysAgo.getDate() - 3)
 

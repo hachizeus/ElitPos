@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/providers/ThemeProvider"
 import { ErrorCaptureProvider } from "@/components/providers/ErrorCaptureProvider"
+import ServiceWorkerRegistration from "@/components/providers/ServiceWorkerRegistration"
 import "./globals.css"
 
 const inter = Inter({
@@ -12,29 +13,29 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.retailsmarterp.com'),
+  metadataBase: new URL('https://elitpos.elitjohnsdigital.co.ke'),
   title: {
-    default: 'RetailSmart ERP - AI-Powered POS & Business Management',
-    template: '%s | RetailSmart ERP',
+    default: 'ElitPOS - AI-Powered POS & Business Management',
+    template: '%s | ElitPOS',
   },
   description: 'AI-powered cloud POS and ERP for retail, restaurants, supermarkets, and auto service. Unlimited users, unlimited transactions. Free to start.',
-  keywords: ['POS system', 'point of sale', 'ERP software', 'retail management', 'restaurant POS', 'supermarket POS', 'auto service management', 'inventory management', 'AI business', 'cloud POS', 'free POS'],
-  authors: [{ name: 'RetailSmart ERP' }],
-  creator: 'RetailSmart ERP',
-  publisher: 'RetailSmart ERP Pvt. Ltd.',
+  keywords: ['POS system', 'point of sale', 'ERP software', 'retail management', 'restaurant POS', 'supermarket POS', 'auto service management', 'inventory management', 'AI business', 'cloud POS', 'ElitPOS'],
+  authors: [{ name: 'Elitjohns Digital Agency' }],
+  creator: 'Elitjohns Digital Agency',
+  publisher: 'Elitjohns Digital Agency',
   formatDetection: { email: false, address: false, telephone: false },
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://www.retailsmarterp.com',
-    siteName: 'RetailSmart ERP',
-    title: 'RetailSmart ERP - AI-Powered POS & Business Management',
+    url: 'https://elitpos.elitjohnsdigital.co.ke',
+    siteName: 'ElitPOS',
+    title: 'ElitPOS - AI-Powered POS & Business Management',
     description: 'AI-powered cloud POS and ERP. Unlimited users, unlimited transactions. All features on every plan. Free to start.',
-    images: [{ url: '/og/home', width: 1200, height: 630, alt: 'RetailSmart ERP - AI-Powered POS & Business Management' }],
+    images: [{ url: '/og/home', width: 1200, height: 630, alt: 'ElitPOS - AI-Powered POS & Business Management' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RetailSmart ERP - AI-Powered POS & Business Management',
+    title: 'ElitPOS - AI-Powered POS & Business Management',
     description: 'AI-powered cloud POS and ERP. Unlimited users, unlimited transactions.',
     images: ['/og/home'],
   },
@@ -44,14 +45,14 @@ export const metadata: Metadata = {
     google: '', // TODO: Add Google Search Console verification code
   },
   other: {
-    'application-name': 'RetailSmart ERP',
+    'application-name': 'ElitPOS',
     'subject': 'Business Management Software, Point of Sale, ERP',
     'classification': 'Business',
     'coverage': 'Worldwide',
     'distribution': 'Global',
   },
   icons: {
-    icon: '/icons/icon-192.png',
+    icon: '/icons/iconlogo.svg',
     apple: '/icons/icon-512.png',
   },
 }
@@ -100,6 +101,7 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <ThemeProvider>
           <ErrorCaptureProvider>
+            <ServiceWorkerRegistration />
             {children}
           </ErrorCaptureProvider>
         </ThemeProvider>

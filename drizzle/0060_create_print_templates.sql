@@ -28,8 +28,11 @@ ALTER TABLE "print_templates" ENABLE ROW LEVEL SECURITY;
 
 -- RLS policy: tenant isolation
 DROP POLICY IF EXISTS "print_templates_tenant_isolation" ON "print_templates";
-CREATE POLICY "print_templates_tenant_isolation" ON "print_templates"
-  USING (tenant_id::text = current_setting('app.tenant_id', true));
+DO $$ BEGIN
+  CREATE POLICY "print_templates_tenant_isolation" ON "print_templates"
+    USING (tenant_id::text = current_setting('app.tenant_id', true));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS "idx_print_templates_tenant" ON "print_templates" ("tenant_id");

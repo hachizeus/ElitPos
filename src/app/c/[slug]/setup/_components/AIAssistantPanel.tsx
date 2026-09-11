@@ -144,7 +144,7 @@ export function AIAssistantPanel({ companySlug, currentStep, context }: AIAssist
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 bg-[#00e67a] text-white rounded-full shadow-lg hover:bg-[#00cc6e] transition-all"
         >
           <Sparkles size={18} />
           <span className="text-sm font-medium">AI</span>
@@ -165,7 +165,7 @@ export function AIAssistantPanel({ companySlug, currentStep, context }: AIAssist
           {/* Header */}
           <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sparkles size={18} className="text-blue-600" />
+              <Sparkles size={18} className="text-[#00cc6e]" />
               <h3 className="font-semibold text-gray-900 dark:text-white text-sm">
                 AI Setup Assistant
               </h3>
@@ -190,12 +190,12 @@ export function AIAssistantPanel({ companySlug, currentStep, context }: AIAssist
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
                     msg.role === 'user'
-                      ? 'bg-blue-100 dark:bg-blue-900/30'
+                      ? 'bg-green-100 dark:bg-green-900/30'
                       : 'bg-gray-100 dark:bg-slate-700'
                   }`}
                 >
                   {msg.role === 'user' ? (
-                    <User size={14} className="text-blue-600 dark:text-blue-400" />
+                    <User size={14} className="text-[#00cc6e] dark:text-green-400" />
                   ) : (
                     <Bot size={14} className="text-gray-500 dark:text-gray-400" />
                   )}
@@ -203,7 +203,7 @@ export function AIAssistantPanel({ companySlug, currentStep, context }: AIAssist
                 <div
                   className={
                     msg.role === 'user'
-                      ? 'ml-auto max-w-[80%] px-3 py-2 bg-blue-600 text-white rounded rounded-br-none text-sm'
+                      ? 'ml-auto max-w-[80%] px-3 py-2 bg-[#00e67a] text-white rounded rounded-br-none text-sm'
                       : 'mr-auto max-w-[80%] px-3 py-2 bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white rounded rounded-bl-none text-sm'
                   }
                 >
@@ -237,7 +237,7 @@ export function AIAssistantPanel({ companySlug, currentStep, context }: AIAssist
                   key={suggestion}
                   onClick={() => handleSuggestionClick(suggestion)}
                   disabled={loading}
-                  className="px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors disabled:opacity-50"
+                  className="px-3 py-1.5 text-xs font-medium text-[#00cc6e] dark:text-green-400 border border-green-200 dark:border-green-800 rounded-full hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors disabled:opacity-50"
                 >
                   {suggestion}
                 </button>
@@ -257,12 +257,12 @@ export function AIAssistantPanel({ companySlug, currentStep, context }: AIAssist
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask a question..."
               disabled={loading}
-              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-[#00FF88] focus:border-transparent disabled:opacity-50"
             />
             <button
               type="submit"
               disabled={!input.trim() || loading}
-              className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 bg-[#00e67a] text-white rounded hover:bg-[#00cc6e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Send size={18} />
             </button>

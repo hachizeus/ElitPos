@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       .from(tenants)
       .where(eq(tenants.id, tenantId))
       .limit(1)
-    const tenantCurrency = tenant[0]?.currency || 'LKR'
+    const tenantCurrency = tenant[0]?.currency || 'KES'
 
     // Generate request number
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('payment_request_' || ${tenantId}))`)

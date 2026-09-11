@@ -330,45 +330,75 @@ ALTER TABLE advance_recovery_records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE module_access ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
-CREATE POLICY tenant_isolation_policy ON employee_profiles
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON employee_profiles
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY tenant_isolation_policy ON salary_components
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON salary_components
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY tenant_isolation_policy ON salary_structures
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON salary_structures
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY tenant_isolation_policy ON salary_structure_components
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON salary_structure_components
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY tenant_isolation_policy ON salary_slips
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON salary_slips
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY tenant_isolation_policy ON salary_slip_components
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON salary_slip_components
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY tenant_isolation_policy ON payroll_runs
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON payroll_runs
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY tenant_isolation_policy ON employee_advances
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON employee_advances
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY tenant_isolation_policy ON advance_recovery_records
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON advance_recovery_records
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY tenant_isolation_policy ON module_access
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON module_access
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- ==================== GRANTS ====================
 

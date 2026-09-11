@@ -297,44 +297,80 @@ ALTER TABLE "dunning_types" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "dunnings" ENABLE ROW LEVEL SECURITY;
 
 -- RLS policies for tenant-scoped tables
-CREATE POLICY "modes_of_payment_tenant_isolation" ON "modes_of_payment"
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "modes_of_payment_tenant_isolation" ON "modes_of_payment"
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "payment_terms_tenant_isolation" ON "payment_terms"
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "payment_terms_tenant_isolation" ON "payment_terms"
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "payment_terms_templates_tenant_isolation" ON "payment_terms_templates"
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "payment_terms_templates_tenant_isolation" ON "payment_terms_templates"
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- payment_terms_template_items uses template_id join, but add policy via subquery
-CREATE POLICY "payment_terms_template_items_tenant_isolation" ON "payment_terms_template_items"
-  USING (template_id IN (SELECT id FROM payment_terms_templates WHERE tenant_id = current_setting('app.tenant_id', true)::uuid));
+DO $$ BEGIN
+  CREATE POLICY "payment_terms_template_items_tenant_isolation" ON "payment_terms_template_items"
+    USING (template_id IN (SELECT id FROM payment_terms_templates WHERE tenant_id = current_setting('app.tenant_id', true)::uuid));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "payment_schedules_tenant_isolation" ON "payment_schedules"
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "payment_schedules_tenant_isolation" ON "payment_schedules"
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "payment_entries_tenant_isolation" ON "payment_entries"
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "payment_entries_tenant_isolation" ON "payment_entries"
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- payment_entry_references via payment_entry_id join
-CREATE POLICY "payment_entry_references_tenant_isolation" ON "payment_entry_references"
-  USING (payment_entry_id IN (SELECT id FROM payment_entries WHERE tenant_id = current_setting('app.tenant_id', true)::uuid));
+DO $$ BEGIN
+  CREATE POLICY "payment_entry_references_tenant_isolation" ON "payment_entry_references"
+    USING (payment_entry_id IN (SELECT id FROM payment_entries WHERE tenant_id = current_setting('app.tenant_id', true)::uuid));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- payment_entry_deductions via payment_entry_id join
-CREATE POLICY "payment_entry_deductions_tenant_isolation" ON "payment_entry_deductions"
-  USING (payment_entry_id IN (SELECT id FROM payment_entries WHERE tenant_id = current_setting('app.tenant_id', true)::uuid));
+DO $$ BEGIN
+  CREATE POLICY "payment_entry_deductions_tenant_isolation" ON "payment_entry_deductions"
+    USING (payment_entry_id IN (SELECT id FROM payment_entries WHERE tenant_id = current_setting('app.tenant_id', true)::uuid));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "payment_ledger_tenant_isolation" ON "payment_ledger"
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "payment_ledger_tenant_isolation" ON "payment_ledger"
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "payment_requests_tenant_isolation" ON "payment_requests"
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "payment_requests_tenant_isolation" ON "payment_requests"
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "dunning_types_tenant_isolation" ON "dunning_types"
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "dunning_types_tenant_isolation" ON "dunning_types"
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "dunnings_tenant_isolation" ON "dunnings"
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "dunnings_tenant_isolation" ON "dunnings"
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- ==================== INDEXES ====================
 

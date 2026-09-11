@@ -32,13 +32,13 @@ export function SetupCompletePage({ slug }: SetupCompletePageProps) {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <a
             href={`/c/${slug}/dashboard`}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-semibold text-sm shadow-sm shadow-blue-500/20"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-[#00e67a] to-[#00cc6e] text-white rounded-xl hover:from-[#00cc6e] hover:to-[#00b35e] transition-all duration-200 font-semibold text-sm shadow-sm shadow-green-500/20"
           >
             Go to Dashboard
             <ArrowRight size={16} />
           </a>
           <a
-            href="/account/companies"
+            href="/account/sites"
             className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 hover:border-gray-300 transition-all duration-200 font-medium text-sm"
           >
             <Building2 size={16} />

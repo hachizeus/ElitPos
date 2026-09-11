@@ -6,7 +6,7 @@ import { sendWithResend } from './providers/resend'
 
 /**
  * Send email via platform Resend account.
- * All tenant notification emails are sent from slug@retailsmarterp.com
+ * All tenant notification emails are sent from info@elitjohnsdigital.co.ke
  */
 export async function sendEmail(
   tenantId: string,
@@ -36,7 +36,7 @@ export async function sendEmail(
     }
   }
 
-  const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'retailsmarterp.com'
+  const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'elitpos.elitjohnsdigital.co.ke'
   const config: ResendConfig = {
     apiKey,
     fromName: tenant.name,

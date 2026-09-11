@@ -54,12 +54,13 @@ const FALLBACK_RATES: Record<string, number> = {
   KES: 155,
 }
 
-// Supported currencies for the selector
+// Move KES to the top as the primary currency
 export const commonCurrencies = [
+  { code: 'KES', name: 'Kenyan Shilling', symbol: 'KSh' },
   { code: 'USD', name: 'US Dollar', symbol: '$' },
-  { code: 'LKR', name: 'Sri Lankan Rupee', symbol: 'Rs' },
   { code: 'EUR', name: 'Euro', symbol: '€' },
   { code: 'GBP', name: 'British Pound', symbol: '£' },
+  { code: 'LKR', name: 'Sri Lankan Rupee', symbol: 'Rs' },
   { code: 'INR', name: 'Indian Rupee', symbol: '₹' },
   { code: 'AUD', name: 'Australian Dollar', symbol: 'A$' },
   { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$' },
@@ -70,7 +71,8 @@ export const commonCurrencies = [
   { code: 'BDT', name: 'Bangladeshi Taka', symbol: '৳' },
   { code: 'ZAR', name: 'South African Rand', symbol: 'R' },
   { code: 'NGN', name: 'Nigerian Naira', symbol: '₦' },
-  { code: 'KES', name: 'Kenyan Shilling', symbol: 'KSh' },
+  { code: 'UGX', name: 'Ugandan Shilling', symbol: 'USh' },
+  { code: 'TZS', name: 'Tanzanian Shilling', symbol: 'TSh' },
 ]
 
 /**
@@ -179,7 +181,7 @@ export async function fetchExchangeRates(): Promise<ExchangeRates | null> {
   // Try APIs in order of preference (ExchangeRate-API has best currency coverage)
   let rates: ExchangeRates | null = null
 
-  // Try ExchangeRate-API first (best coverage, includes LKR)
+  // Try ExchangeRate-API first (best coverage, includes KES)
   rates = await fetchFromExchangeRateAPI()
 
   // Fallback to Currency-API (CDN-based, very reliable)
@@ -334,7 +336,7 @@ export function formatCurrencyWithSymbol(amount: number, currencyCode: string): 
     maximumFractionDigits: 2,
   })
 
-  // For LKR, put "Rs" before the number (e.g., "Rs 1,234.56")
+  // For KES, put "KSh" before the number (e.g., "KSh 1,234.56")
   // For USD, put "$" before the number (e.g., "$1,234.56")
   return `${symbol} ${formatted}`
 }
@@ -393,6 +395,8 @@ export function getCurrencyConfig(currencyCode: string): {
       return { ...defaultConfig, symbolPlacement: 'after', spacing: true }
     case 'LKR':
       return { ...defaultConfig, symbol: 'Rs' }
+    case 'KES':
+      return { ...defaultConfig, symbol: 'KSh' }
     default:
       return defaultConfig
   }

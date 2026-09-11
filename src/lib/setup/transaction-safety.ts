@@ -267,7 +267,7 @@ export async function createCompanySafely(options: CompanyCreationOptions): Prom
         })
 
         const countryInfo = getCountryByCode(options.country)
-        const currency = countryInfo?.currency || 'LKR'
+        const currency = countryInfo?.currency || 'KES'
         const now = new Date()
 
         // Create tenant - first company is free forever (no expiry)
@@ -478,8 +478,8 @@ export function getCountryBusinessDefaults(
   
   // Currency defaults from country mapping
   const countryInfo = getCountryByCode(countryCode)
-  defaults.currency = countryInfo?.currency || 'LKR'
-  defaults.currencySymbol = countryInfo?.currencySymbol || 'Rs'
+  defaults.currency = countryInfo?.currency || 'KES'
+  defaults.currencySymbol = countryInfo?.currencySymbol || 'KSh'
   
   // Get tax suggestions
   const taxSuggestion = getTaxSuggestionForCountryCode(countryCode, businessType)

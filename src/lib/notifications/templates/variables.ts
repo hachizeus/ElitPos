@@ -25,8 +25,8 @@ export const businessVariables: TemplateVariableGroup = {
   variables: [
     { key: 'business_name', label: 'Business Name', description: 'Your company name', example: 'Auto Care Center' },
     { key: 'business_phone', label: 'Business Phone', description: 'Your contact number', example: '0112345678' },
-    { key: 'business_email', label: 'Business Email', description: 'Your email address', example: 'info@autocare.lk' },
-    { key: 'business_address', label: 'Business Address', description: 'Your business address', example: '123 Main St, Colombo' },
+    { key: 'business_email', label: 'Business Email', description: 'Your email address', example: 'info@autocare.co.ke' },
+    { key: 'business_address', label: 'Business Address', description: 'Your business address', example: '123 Main St, Nairobi' },
   ],
 }
 
@@ -63,7 +63,7 @@ export const workOrderVariables: TemplateVariableGroup = {
   variables: [
     { key: 'work_order_no', label: 'Work Order #', description: 'Work order number', example: 'WO-2024-0001' },
     { key: 'work_order_status', label: 'Status', description: 'Current status', example: 'In Progress' },
-    { key: 'work_order_total', label: 'Total Amount', description: 'Total cost', example: 'LKR 25,000.00' },
+    { key: 'work_order_total', label: 'Total Amount', description: 'Total cost', example: 'KES 25,000.00' },
     { key: 'work_order_date', label: 'Date', description: 'Work order date', example: '2024-01-15' },
     { key: 'work_order_services', label: 'Services', description: 'List of services', example: 'Oil Change, Brake Inspection' },
     { key: 'work_order_notes', label: 'Notes', description: 'Additional notes', example: 'Customer requested pickup by 5pm' },
@@ -89,15 +89,15 @@ export const saleVariables: TemplateVariableGroup = {
   description: 'Sales and invoice details',
   variables: [
     { key: 'invoice_no', label: 'Invoice #', description: 'Invoice number', example: 'INV-2024-0042' },
-    { key: 'sale_total', label: 'Total', description: 'Invoice total', example: 'LKR 15,500.00' },
-    { key: 'sale_subtotal', label: 'Subtotal', description: 'Before tax', example: 'LKR 15,000.00' },
-    { key: 'sale_tax', label: 'Tax', description: 'Tax amount', example: 'LKR 500.00' },
-    { key: 'sale_discount', label: 'Discount', description: 'Discount amount', example: 'LKR 1,000.00' },
+    { key: 'sale_total', label: 'Total', description: 'Invoice total', example: 'KES 15,500.00' },
+    { key: 'sale_subtotal', label: 'Subtotal', description: 'Before tax', example: 'KES 15,000.00' },
+    { key: 'sale_tax', label: 'Tax', description: 'Tax amount', example: 'KES 500.00' },
+    { key: 'sale_discount', label: 'Discount', description: 'Discount amount', example: 'KES 1,000.00' },
     { key: 'sale_date', label: 'Date', description: 'Sale date', example: '2024-01-15' },
     { key: 'sale_items', label: 'Items', description: 'List of items', example: '2x Oil Filter, 5L Engine Oil' },
     { key: 'payment_method', label: 'Payment Method', description: 'How it was paid', example: 'Cash' },
-    { key: 'amount_paid', label: 'Amount Paid', description: 'Payment received', example: 'LKR 15,500.00' },
-    { key: 'balance_due', label: 'Balance Due', description: 'Remaining amount', example: 'LKR 0.00' },
+    { key: 'amount_paid', label: 'Amount Paid', description: 'Payment received', example: 'KES 15,500.00' },
+    { key: 'balance_due', label: 'Balance Due', description: 'Remaining amount', example: 'KES 0.00' },
   ],
 }
 
@@ -108,9 +108,9 @@ export const estimateVariables: TemplateVariableGroup = {
   variables: [
     { key: 'estimate_no', label: 'Estimate #', description: 'Estimate number', example: 'EST-2024-0015' },
     { key: 'estimate_status', label: 'Status', description: 'Current status', example: 'Approved' },
-    { key: 'estimate_total', label: 'Total', description: 'Estimate total', example: 'LKR 150,000.00' },
-    { key: 'estimate_approved_amount', label: 'Approved Amount', description: 'Insurance approved', example: 'LKR 140,000.00' },
-    { key: 'insurance_company', label: 'Insurance Co.', description: 'Insurance company name', example: 'Sri Lanka Insurance' },
+    { key: 'estimate_total', label: 'Total', description: 'Estimate total', example: 'KES 150,000.00' },
+    { key: 'estimate_approved_amount', label: 'Approved Amount', description: 'Insurance approved', example: 'KES 140,000.00' },
+    { key: 'insurance_company', label: 'Insurance Co.', description: 'Insurance company name', example: 'Kenya Insurance' },
     { key: 'claim_no', label: 'Claim #', description: 'Insurance claim number', example: 'CLM-2024-1234' },
   ],
 }

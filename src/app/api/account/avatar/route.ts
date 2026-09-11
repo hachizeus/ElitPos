@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm'
 import crypto from 'crypto'
 import { logError } from '@/lib/ai/error-logger'
 import { uploadToR2, deleteFromR2, keyFromUrl } from '@/lib/files'
+import { imagekitEnabled, uploadToImageKit } from '@/lib/files/imagekit'
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp']
 const MAX_SIZE = 2 * 1024 * 1024 // 2MB
@@ -38,21 +39,31 @@ export async function POST(request: NextRequest) {
     const hash = crypto.createHash('sha256').update(buffer).digest('hex').slice(0, 12)
     const ext = file.name.split('.').pop() || 'png'
 
-    // Delete old avatar from R2 if exists
+    // Delete old avatar if exists
     const account = await db.query.accounts.findFirst({
       where: eq(accounts.id, accountId),
       columns: { avatarUrl: true }
     })
 
     if (account?.avatarUrl) {
-      const oldKey = keyFromUrl(account.avatarUrl)
-      if (oldKey) {
-        try { await deleteFromR2(oldKey) } catch { /* ignore */ }
+      const ikOld = decodeImageKitUrl(account.avatarUrl)
+      if (ikOld) {
+        const { deleteFromImageKit } = await import('@/lib/files/imagekit')
+        await deleteFromImageKit(ikOld.fileId).catch(() => {})
+      } else {
+        const oldKey = keyFromUrl(account.avatarUrl)
+        if (oldKey) await deleteFromR2(oldKey).catch(() => {})
       }
     }
 
-    const r2Key = `avatars/${hash}.${ext}`
-    const avatarUrl = await uploadToR2(r2Key, buffer, file.type)
+    let avatarUrl: string
+    if (imagekitEnabled()) {
+      const ikResult = await uploadToImageKit(buffer, `avatar-${hash}.${ext}`, file.type, 'avatars')
+      avatarUrl = ikResult.url  // store plain URL — works directly as <img src>
+    } else {
+      const r2Key = `avatars/${hash}.${ext}`
+      avatarUrl = await uploadToR2(r2Key, buffer, file.type)
+    }
 
     await db.update(accounts)
       .set({ avatarUrl, updatedAt: new Date() })
@@ -80,9 +91,10 @@ export async function DELETE() {
     })
 
     if (account?.avatarUrl) {
-      const key = keyFromUrl(account.avatarUrl)
-      if (key) {
-        try { await deleteFromR2(key) } catch { /* ignore */ }
+      // ImageKit URLs can't be deleted by URL alone — just unset in DB
+      if (!account.avatarUrl.includes('imagekit.io')) {
+        const key = keyFromUrl(account.avatarUrl)
+        if (key) await deleteFromR2(key).catch(() => {})
       }
     }
 

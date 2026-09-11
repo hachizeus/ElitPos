@@ -5,25 +5,25 @@ import { motion } from 'framer-motion'
 const categories = ['All', 'Food', 'Drinks', 'Desserts', 'Snacks']
 
 const products = [
-  { name: 'Chicken Burger', price: '$12.99', bg: 'bg-orange-100', icon: 'bg-orange-400' },
-  { name: 'French Fries', price: '$4.99', bg: 'bg-yellow-100', icon: 'bg-yellow-400' },
-  { name: 'Cola', price: '$2.99', bg: 'bg-red-100', icon: 'bg-red-400' },
-  { name: 'Caesar Salad', price: '$8.99', bg: 'bg-green-100', icon: 'bg-green-400' },
-  { name: 'Margherita Pizza', price: '$14.99', bg: 'bg-rose-100', icon: 'bg-rose-400' },
-  { name: 'Fish & Chips', price: '$11.99', bg: 'bg-blue-100', icon: 'bg-blue-400' },
-  { name: 'Latte', price: '$5.49', bg: 'bg-amber-100', icon: 'bg-amber-400' },
-  { name: 'Brownie', price: '$6.99', bg: 'bg-purple-100', icon: 'bg-purple-400' },
-  { name: 'Iced Tea', price: '$3.49', bg: 'bg-teal-100', icon: 'bg-teal-400' },
-  { name: 'Pasta Carbonara', price: '$13.49', bg: 'bg-pink-100', icon: 'bg-pink-400' },
-  { name: 'Chicken Wrap', price: '$9.99', bg: 'bg-indigo-100', icon: 'bg-indigo-400' },
-  { name: 'Berry Smoothie', price: '$7.49', bg: 'bg-emerald-100', icon: 'bg-emerald-400' },
+  { name: 'Chicken Burger', price: 'KSh 1,299', bg: 'bg-orange-100', icon: 'bg-orange-400' },
+  { name: 'French Fries', price: 'KSh 499', bg: 'bg-yellow-100', icon: 'bg-yellow-400' },
+  { name: 'Cola', price: 'KSh 299', bg: 'bg-red-100', icon: 'bg-red-400' },
+  { name: 'Caesar Salad', price: 'KSh 899', bg: 'bg-green-100', icon: 'bg-green-400' },
+  { name: 'Margherita Pizza', price: 'KSh 1,499', bg: 'bg-rose-100', icon: 'bg-rose-400' },
+  { name: 'Fish & Chips', price: 'KSh 1,199', bg: 'bg-blue-100', icon: 'bg-blue-400' },
+  { name: 'Latte', price: 'KSh 549', bg: 'bg-amber-100', icon: 'bg-amber-400' },
+  { name: 'Brownie', price: 'KSh 699', bg: 'bg-purple-100', icon: 'bg-purple-400' },
+  { name: 'Iced Tea', price: 'KSh 349', bg: 'bg-teal-100', icon: 'bg-teal-400' },
+  { name: 'Pasta Carbonara', price: 'KSh 1,349', bg: 'bg-pink-100', icon: 'bg-pink-400' },
+  { name: 'Chicken Wrap', price: 'KSh 999', bg: 'bg-indigo-100', icon: 'bg-indigo-400' },
+  { name: 'Berry Smoothie', price: 'KSh 749', bg: 'bg-emerald-100', icon: 'bg-emerald-400' },
 ]
 
 const cartItems = [
-  { name: 'Chicken Burger', qty: 2, price: '$25.98' },
-  { name: 'Cola', qty: 1, price: '$2.99' },
-  { name: 'French Fries', qty: 1, price: '$4.99' },
-  { name: 'Margherita Pizza', qty: 1, price: '$14.99' },
+  { name: 'Chicken Burger', qty: 2, price: 'KSh 2,598' },
+  { name: 'Cola', qty: 1, price: 'KSh 299' },
+  { name: 'French Fries', qty: 1, price: 'KSh 499' },
+  { name: 'Margherita Pizza', qty: 1, price: 'KSh 1,499' },
 ]
 
 export function MockPOS() {
@@ -116,19 +116,19 @@ export function MockPOS() {
         <div className="border-t border-gray-200 px-2.5 py-1.5 space-y-0.5">
           <div className="flex justify-between text-gray-500">
             <span>Subtotal</span>
-            <span>$48.95</span>
+            <span>KSh 4,895</span>
           </div>
           <div className="flex justify-between text-gray-500">
             <span>Discount (10%)</span>
-            <span className="text-red-500">-$4.90</span>
+            <span className="text-red-500">-KSh 490</span>
           </div>
           <div className="flex justify-between text-gray-500">
             <span>Tax (8%)</span>
-            <span>$3.52</span>
+            <span>KSh 352</span>
           </div>
           <div className="flex justify-between font-bold text-gray-900 text-[11px] pt-0.5 border-t border-dashed border-gray-200">
             <span>Total</span>
-            <span>$47.57</span>
+            <span>KSh 4,757</span>
           </div>
         </div>
 

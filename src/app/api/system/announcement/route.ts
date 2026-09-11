@@ -25,7 +25,9 @@ export async function GET() {
       return NextResponse.json({ enabled: false })
     }
 
-    return NextResponse.json(announcement)
+    return NextResponse.json(announcement, {
+      headers: { 'Cache-Control': 'public, max-age=300, stale-while-revalidate=600' },
+    })
   } catch (error) {
     logError('api/system/announcement', error)
     return NextResponse.json({ enabled: false })

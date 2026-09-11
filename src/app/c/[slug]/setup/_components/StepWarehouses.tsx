@@ -140,7 +140,7 @@ export function StepWarehouses({ data, companySlug, businessType, country, count
             transition={{ duration: 0.2 }}
             className={`rounded-xl border p-4 transition-all duration-200 ${
               warehouse.isDefault
-                ? 'border-blue-200 dark:border-blue-800/60 bg-gradient-to-r from-blue-50/80 to-white dark:from-blue-950/20 dark:to-slate-800/40 shadow-sm shadow-blue-500/5'
+                ? 'border-green-200 dark:border-green-800/60 bg-gradient-to-r from-green-50/80 to-white dark:from-green-950/20 dark:to-slate-800/40 shadow-sm shadow-green-500/5'
                 : 'border-gray-200/60 dark:border-gray-700/50 bg-white dark:bg-slate-800/40'
             }`}
           >
@@ -170,14 +170,14 @@ export function StepWarehouses({ data, companySlug, businessType, country, count
 
               <div className="flex items-center gap-1 pt-1">
                 {warehouse.isDefault ? (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">
                     <Star size={10} fill="currentColor" />
                     Default
                   </span>
                 ) : (
                   <button
                     onClick={() => setDefault(index)}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all"
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium text-gray-400 dark:text-gray-500 hover:text-[#00cc6e] dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/30 transition-all"
                     title="Set as default"
                   >
                     <Star size={10} />
@@ -241,7 +241,7 @@ export function StepWarehouses({ data, companySlug, businessType, country, count
         <button
           onClick={addWarehouse}
           disabled={warehouses.length >= 5}
-          className="flex items-center gap-2 py-3 border-2 border-dashed border-gray-200 dark:border-gray-700/50 rounded-xl text-sm text-gray-400 dark:text-gray-500 hover:border-blue-300 hover:text-blue-600 dark:hover:border-blue-700 dark:hover:text-blue-400 transition-all w-full justify-center disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:text-gray-400"
+          className="flex items-center gap-2 py-3 border-2 border-dashed border-gray-200 dark:border-gray-700/50 rounded-xl text-sm text-gray-400 dark:text-gray-500 hover:border-green-300 hover:text-[#00cc6e] dark:hover:border-green-700 dark:hover:text-green-400 transition-all w-full justify-center disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-200 disabled:hover:text-gray-400"
         >
           <Plus size={16} />
           Add Warehouse

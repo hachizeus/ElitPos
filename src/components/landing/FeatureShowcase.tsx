@@ -49,7 +49,7 @@ export default function FeatureShowcase({
   gradient = 'from-emerald-500 to-emerald-600',
 }: FeatureShowcaseProps) {
   const ImageBlock = mockup ? (
-    <BrowserMockup url="app.retailsmarterp.com">
+    <BrowserMockup url="app.elitpos.elitjohnsdigital.co.ke">
       {mockup}
     </BrowserMockup>
   ) : image ? (

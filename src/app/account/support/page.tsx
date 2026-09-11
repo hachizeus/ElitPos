@@ -56,7 +56,7 @@ const resources = [
     title: 'Documentation',
     description: 'Comprehensive guides and API reference',
     icon: Book,
-    color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+    color: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
   },
   {
     title: 'Video Tutorials',
@@ -89,8 +89,8 @@ export default function SupportPage() {
   })
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
-  const [contactEmail, setContactEmail] = useState('hello@retailsmarterp.com')
-  const [contactPhone, setContactPhone] = useState('+94 77 840 7616')
+  const [contactEmail, setContactEmail] = useState('info@elitjohnsdigital.co.ke')
+  const [contactPhone, setContactPhone] = useState('+254 759 001 048')
   const [contactHours, setContactHours] = useState('Available 9am - 6pm IST')
 
   useEffect(() => {
@@ -130,7 +130,7 @@ export default function SupportPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-500 to-green-500 rounded-2xl mb-4">
           <HelpCircle className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Help & Support</h1>
@@ -153,8 +153,8 @@ export default function SupportPage() {
       <div className="grid md:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg hover:border-gray-300 dark:hover:border-gray-600 transition-all">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-md flex items-center justify-center flex-shrink-0">
-              <Mail className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-md flex items-center justify-center flex-shrink-0">
+              <Mail className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white">Email Support</h3>
@@ -217,7 +217,7 @@ export default function SupportPage() {
                   >
                     <span className="font-medium text-gray-900 dark:text-white pr-4">{faq.question}</span>
                     <div className={`w-8 h-8 rounded flex items-center justify-center transition-colors ${
-                      expandedFAQ === index ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900' : 'bg-gray-100 dark:bg-gray-700 text-gray-400'
+                      expandedFAQ === index ? 'bg-green-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-400'
                     }`}>
                       {expandedFAQ === index ? (
                         <ChevronUp className="w-5 h-5" />
@@ -240,8 +240,8 @@ export default function SupportPage() {
         {/* Submit Ticket */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-md flex items-center justify-center">
-              <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-md flex items-center justify-center">
+              <MessageSquare className="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Submit a Ticket</h2>
@@ -322,7 +322,7 @@ export default function SupportPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-md hover:bg-gray-800 dark:hover:bg-gray-200 disabled:opacity-50 transition-colors font-medium"
+                  className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 transition-colors font-medium"
                 >
                   {submitting ? (
                     <>

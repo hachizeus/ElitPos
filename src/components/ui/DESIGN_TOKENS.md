@@ -1,7 +1,7 @@
 # Design Tokens System
 
 ## Overview
-This document describes the design token system used throughout the Retail Smart POS application. Design tokens are centralized values that define the visual design language, ensuring consistency across all UI components.
+This document describes the design token system used throughout the ElitPOS application. Design tokens are centralized values that define the visual design language, ensuring consistency across all UI components.
 
 ## Token Categories
 

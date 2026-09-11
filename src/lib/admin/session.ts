@@ -5,8 +5,8 @@ import { headers, cookies } from 'next/headers'
 import { randomBytes } from 'crypto'
 import bcrypt from 'bcryptjs'
 
-// Admin session timeout: 15 minutes of inactivity
-const SESSION_TIMEOUT_MS = 15 * 60 * 1000 // 15 minutes
+// Admin session timeout: 1 hour of inactivity
+const SESSION_TIMEOUT_MS = 60 * 60 * 1000 // 1 hour
 const SESSION_COOKIE_NAME = 'admin_session'
 
 interface AdminSession {
@@ -15,6 +15,39 @@ interface AdminSession {
   sessionToken: string
   lastActivityAt: Date
   expiresAt: Date
+}
+
+// ── In-process session cache ──────────────────────────────────────────────────
+// Caches validated session + admin data for 30 seconds per token.
+// Eliminates the repeated DB round-trips when the same worker handles
+// multiple page navigations in quick succession for the same admin.
+interface CachedAdminSession {
+  session: AdminSession
+  admin: { id: string; email: string; fullName: string }
+  cachedAt: number
+}
+const SESSION_CACHE_TTL = 30_000 // 30 seconds
+const sessionCache = new Map<string, CachedAdminSession>()
+
+function getCachedSession(token: string): CachedAdminSession | null {
+  const entry = sessionCache.get(token)
+  if (!entry) return null
+  if (Date.now() - entry.cachedAt > SESSION_CACHE_TTL) {
+    sessionCache.delete(token)
+    return null
+  }
+  return entry
+}
+
+function setCachedSession(token: string, session: AdminSession, admin: { id: string; email: string; fullName: string }) {
+  // Prune stale entries to prevent unbounded growth
+  if (sessionCache.size > 50) {
+    const now = Date.now()
+    for (const [k, v] of sessionCache) {
+      if (now - v.cachedAt > SESSION_CACHE_TTL) sessionCache.delete(k)
+    }
+  }
+  sessionCache.set(token, { session, admin, cachedAt: Date.now() })
 }
 
 /**
@@ -59,21 +92,22 @@ export async function createAdminSession(superAdminId: string): Promise<string> 
 }
 
 /**
- * Validate admin session (read-only, for Server Components)
- * Returns the session if valid, null if invalid/expired
- * Does NOT refresh the cookie - use validateAdminSessionWithRefresh for Route Handlers
+ * Validate admin session (read-only, for Server Components).
+ * Returns the session if valid, null if invalid/expired.
+ * Uses a 30-second in-process cache to avoid a DB hit on every page render.
+ * Does NOT refresh the cookie — use validateAdminSessionWithRefresh for Route Handlers.
  */
 export async function validateAdminSession(): Promise<AdminSession | null> {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value
+  if (!sessionToken) return null
 
-  if (!sessionToken) {
-    return null
-  }
+  // Fast path: serve from in-process cache
+  const cached = getCachedSession(sessionToken)
+  if (cached) return cached.session
 
   const now = new Date()
 
-  // Find valid session
   const session = await db.query.adminSessions.findFirst({
     where: and(
       eq(adminSessions.sessionToken, sessionToken),
@@ -81,15 +115,17 @@ export async function validateAdminSession(): Promise<AdminSession | null> {
     ),
   })
 
-  if (!session) {
-    return null
-  }
+  if (!session) return null
 
-  // Check if session has timed out due to inactivity
   const inactivityLimit = new Date(now.getTime() - SESSION_TIMEOUT_MS)
-  if (session.lastActivityAt < inactivityLimit) {
-    return null
-  }
+  if (session.lastActivityAt < inactivityLimit) return null
+
+  // Populate cache with admin data (avoid second query in getAdminFromSession)
+  const admin = await db.query.superAdmins.findFirst({
+    where: eq(superAdmins.id, session.superAdminId),
+    columns: { id: true, email: true, fullName: true },
+  })
+  if (admin) setCachedSession(sessionToken, session, admin)
 
   return session
 }
@@ -163,6 +199,7 @@ export async function destroyAdminSession(sessionToken?: string): Promise<void> 
   }
 
   if (sessionToken) {
+    sessionCache.delete(sessionToken)
     await db.delete(adminSessions)
       .where(eq(adminSessions.sessionToken, sessionToken))
   }
@@ -206,25 +243,34 @@ export async function hasActiveAdminSession(superAdminId: string): Promise<boole
 }
 
 /**
- * Get super admin data from session
+ * Get super admin data from session.
+ * Served from the in-process cache when validateAdminSession was called first
+ * (which is always the case in the layout), so this is effectively free.
  */
 export async function getAdminFromSession(): Promise<{
   id: string
   email: string
   fullName: string
 } | null> {
+  const cookieStore = await cookies()
+  const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value
+  if (!sessionToken) return null
+
+  // Try the fast path first
+  const cached = getCachedSession(sessionToken)
+  if (cached) return cached.admin
+
+  // Fallback: full DB lookup (cache miss, e.g. after restart)
   const session = await validateAdminSession()
   if (!session) return null
 
+  const cached2 = getCachedSession(sessionToken)
+  if (cached2) return cached2.admin
+
   const admin = await db.query.superAdmins.findFirst({
     where: eq(superAdmins.id, session.superAdminId),
-    columns: {
-      id: true,
-      email: true,
-      fullName: true,
-    },
+    columns: { id: true, email: true, fullName: true },
   })
-
   return admin || null
 }
 

@@ -48,8 +48,14 @@ export async function POST(request: NextRequest) {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     })
 
-    // Send OTP email
-    await sendOtpEmail(normalizedEmail, otp)
+    // Send OTP email — don't fail the whole flow if email delivery fails
+    // (e.g. domain not yet verified in Resend). OTP is always printed to console as fallback.
+    try {
+      await sendOtpEmail(normalizedEmail, otp)
+    } catch (emailErr) {
+      // Email failed but OTP is stored — log and continue so dev/test flows still work
+      console.warn('[send-otp] Email delivery failed, OTP stored in DB:', emailErr instanceof Error ? emailErr.message : emailErr)
+    }
 
     return NextResponse.json({ success: true, message: 'Verification code sent' })
   } catch (error) {

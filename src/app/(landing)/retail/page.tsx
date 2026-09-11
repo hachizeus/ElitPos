@@ -7,19 +7,19 @@ export const metadata: Metadata = {
   description: 'Complete retail point of sale with barcode scanning, multi-warehouse inventory, loyalty programs, gift cards, and AI-powered analytics. Unlimited users, free to start.',
   keywords: ['retail POS', 'barcode scanning POS', 'retail inventory', 'loyalty program', 'gift card management', 'retail analytics', 'point of sale system'],
   openGraph: {
-    title: 'Retail POS System with AI Analytics | RetailSmart ERP',
+    title: 'Retail POS System with AI Analytics | ElitPOS',
     description: 'Lightning-fast checkout, smart inventory, loyalty programs. Unlimited users. All features included.',
-    url: 'https://www.retailsmarterp.com/retail',
-    images: [{ url: '/og/retail', width: 1200, height: 630, alt: 'RetailSmart ERP Retail POS' }],
+    url: 'https://www.elitpos.elitjohnsdigital.co.ke/retail',
+    images: [{ url: '/og/retail', width: 1200, height: 630, alt: 'ElitPOS Retail POS' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Retail POS System with AI Analytics | RetailSmart ERP',
+    title: 'Retail POS System with AI Analytics | ElitPOS',
     description: 'Lightning-fast checkout, smart inventory, loyalty programs. Unlimited users.',
     images: ['/og/retail'],
   },
   alternates: {
-    canonical: 'https://www.retailsmarterp.com/retail',
+    canonical: 'https://www.elitpos.elitjohnsdigital.co.ke/retail',
   },
 }
 
@@ -44,7 +44,7 @@ export default function RetailPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            "name": "RetailSmart ERP - Retail POS",
+            "name": "ElitPOS - Retail POS",
             "applicationCategory": "BusinessApplication",
             "applicationSubCategory": "Point of Sale",
             "operatingSystem": "Web",

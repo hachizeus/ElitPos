@@ -1,4 +1,4 @@
-const BASE_URL = 'https://www.retailsmarterp.com'
+const BASE_URL = 'https://elitpos.elitjohnsdigital.co.ke'
 
 export function generateBreadcrumbJsonLd(items: { name: string; url?: string }[]) {
   return {

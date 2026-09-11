@@ -193,7 +193,7 @@ export default function DealershipClient() {
             {/* Right: Hero mockup */}
             <FadeInRight className="hidden lg:block">
               <FloatingMockup>
-                <BrowserMockup url="retailsmarterp.com/vehicles">
+                <BrowserMockup url="elitpos.elitjohnsdigital.co.ke/vehicles">
                   <MockVehicleInventory />
                 </BrowserMockup>
               </FloatingMockup>
@@ -326,7 +326,7 @@ export default function DealershipClient() {
             badge="Also Available"
             title="Solutions for every business type"
             highlight="every business type"
-            subtitle="RetailSmart ERP adapts to your industry. Explore other purpose-built solutions."
+            subtitle="ElitPOS adapts to your industry. Explore other purpose-built solutions."
           />
 
           <StaggerContainer staggerDelay={0.1} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -336,7 +336,7 @@ export default function DealershipClient() {
                 description="Complete POS and inventory management for boutiques, shops, and retail chains."
                 href="/retail"
                 icon={Store}
-                gradient="from-blue-600 to-sky-500"
+                gradient="from-green-600 to-sky-500"
               />
             </StaggerItem>
             <StaggerItem>

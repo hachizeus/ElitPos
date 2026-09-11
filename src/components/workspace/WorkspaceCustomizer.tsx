@@ -301,15 +301,15 @@ export function WorkspaceCustomizer({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-200 dark:border-blue-800">
+      <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-2xl border border-green-200 dark:border-green-800">
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line react-hooks/static-components */}
-          <Icon className="w-5 h-5 text-blue-600" />
+          <Icon className="w-5 h-5 text-green-600" />
           <div>
-            <h2 className="font-semibold text-blue-900 dark:text-blue-100">
+            <h2 className="font-semibold text-green-900 dark:text-green-100">
               Customize {config.title}
             </h2>
-            <p className="text-sm text-blue-600 dark:text-blue-300">
+            <p className="text-sm text-green-600 dark:text-green-300">
               Drag to reorder, resize edges, or remove blocks.
             </p>
           </div>
@@ -331,7 +331,7 @@ export function WorkspaceCustomizer({
           </button>
           <button
             onClick={() => onSave(blocks)}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium text-black bg-green-400 rounded hover:bg-green-500 transition-colors"
           >
             <Check className="w-3.5 h-3.5" />
             Save
@@ -441,7 +441,7 @@ export function WorkspaceCustomizer({
       {!showAddPanel ? (
         <button
           onClick={() => setShowAddPanel(true)}
-          className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md text-gray-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50/50 transition-colors"
+          className="w-full flex items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md text-gray-400 hover:border-green-400 hover:text-green-600 hover:bg-green-50/50 transition-colors"
         >
           <Plus className="w-5 h-5" />
           <span className="text-sm font-medium">Add Block</span>

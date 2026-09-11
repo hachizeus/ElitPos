@@ -2,22 +2,22 @@ import { Metadata } from 'next'
 import { generateBreadcrumbJsonLd } from '@/lib/seo/breadcrumbs'
 
 export const metadata: Metadata = {
-  title: 'Terms of Service - RetailSmart ERP',
-  description: 'Terms of Service for RetailSmart ERP. Read our terms and conditions for using the platform.',
-  keywords: ['terms of service', 'terms and conditions', 'RetailSmart ERP terms', 'user agreement', 'service agreement'],
+  title: 'Terms of Service - ElitPOS',
+  description: 'Terms of Service for ElitPOS. Read our terms and conditions for using the platform.',
+  keywords: ['terms of service', 'terms and conditions', 'ElitPOS terms', 'user agreement', 'service agreement'],
   openGraph: {
-    title: 'Terms of Service - RetailSmart ERP',
-    description: 'Terms of Service for RetailSmart ERP. Read our terms and conditions for using the platform.',
-    url: 'https://www.retailsmarterp.com/terms',
+    title: 'Terms of Service - ElitPOS',
+    description: 'Terms of Service for ElitPOS. Read our terms and conditions for using the platform.',
+    url: 'https://www.elitpos.elitjohnsdigital.co.ke/terms',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: 'Terms of Service - RetailSmart ERP',
-    description: 'Terms of Service for RetailSmart ERP. Read our terms and conditions for using the platform.',
+    title: 'Terms of Service - ElitPOS',
+    description: 'Terms of Service for ElitPOS. Read our terms and conditions for using the platform.',
   },
   alternates: {
-    canonical: 'https://www.retailsmarterp.com/terms',
+    canonical: 'https://www.elitpos.elitjohnsdigital.co.ke/terms',
   },
 }
 
@@ -43,12 +43,12 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-white mt-8 mb-3">1. Acceptance of Terms</h2>
-            <p>By creating an account or using RetailSmart ERP, you agree to be bound by these Terms of Service and our <a href="/privacy" className="text-emerald-400 hover:text-emerald-300 hover:underline">Privacy Policy</a>. If you do not agree to these terms, do not use our services.</p>
+            <p>By creating an account or using ElitPOS, you agree to be bound by these Terms of Service and our <a href="/privacy" className="text-emerald-400 hover:text-emerald-300 hover:underline">Privacy Policy</a>. If you do not agree to these terms, do not use our services.</p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-white mt-8 mb-3">2. Service Description</h2>
-            <p>RetailSmart ERP is a multi-tenant cloud-based business management platform providing Point of Sale, inventory management, accounting, HR, restaurant management, auto service management, and AI-powered analytics for retail, restaurant, supermarket, and auto service businesses.</p>
+            <p>ElitPOS is a multi-tenant cloud-based business management platform providing Point of Sale, inventory management, accounting, HR, restaurant management, auto service management, and AI-powered analytics for retail, restaurant, supermarket, and auto service businesses.</p>
           </section>
 
           <section>
@@ -67,7 +67,7 @@ export default function TermsPage() {
             <ul className="list-disc pl-5 space-y-2 text-zinc-400">
               <li>Additional companies require a paid subscription (Starter, Professional, or custom plans)</li>
               <li>Plans differ <span className="text-white font-medium">only in storage capacity</span> — all features are identical across all plans</li>
-              <li>Prices are listed in LKR (Sri Lankan Rupees); approximate conversions to your local currency are shown for reference only</li>
+              <li>Prices are listed in KES (Kenyan Shillings); approximate conversions to your local currency are shown for reference only</li>
               <li>Billing cycles available: Monthly or Annual (with discount)</li>
               <li><span className="text-white font-medium">Grandfather Pricing:</span> Your subscription price is locked at the rate when you subscribed. If we increase prices, your existing subscriptions remain at the original rate for as long as they stay active</li>
               <li>Volume discounts apply automatically when managing multiple companies under one account</li>
@@ -78,7 +78,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-white mt-8 mb-3">5. Payment & Billing</h2>
             <ul className="list-disc pl-5 space-y-2 text-zinc-400">
-              <li>Payments are processed securely through PayHere (payhere.lk), supporting major credit and debit cards</li>
+              <li>Payments are processed securely through M-Pesa, Stripe, Paystack, or PayHero, supporting mobile money, credit, and debit cards</li>
               <li>Bank transfer payments are accepted with receipt verification and admin approval</li>
               <li>Your account includes a wallet balance that may hold credits from downgrades, promotions, or subscription refunds</li>
               <li>Annual subscriptions are billed upfront for the full year</li>
@@ -124,7 +124,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-white mt-8 mb-3">9. AI-Powered Features</h2>
             <ul className="list-disc pl-5 space-y-2 text-zinc-400">
-              <li>RetailSmart ERP includes AI-powered features such as a chat assistant, anomaly detection, and setup suggestions</li>
+              <li>ElitPOS includes AI-powered features such as a chat assistant, anomaly detection, and setup suggestions</li>
               <li>AI features process your business data (sales figures, item names, customer names, stock levels) through third-party AI providers (currently Google Gemini and DeepSeek) to generate insights</li>
               <li>AI-generated responses are for informational purposes only and should not be solely relied upon for critical business decisions</li>
               <li>You may use the platform without AI features if you prefer not to have your data processed by AI providers</li>
@@ -160,7 +160,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-white mt-8 mb-3">12. Intellectual Property</h2>
             <ul className="list-disc pl-5 space-y-2 text-zinc-400">
-              <li>RetailSmart ERP, its brand, design, code, and documentation are our intellectual property</li>
+              <li>ElitPOS, its brand, design, code, and documentation are our intellectual property</li>
               <li>You are granted a non-exclusive, non-transferable license to use the platform for your business operations</li>
               <li>You may not reproduce, distribute, or create derivative works from the platform</li>
             </ul>
@@ -179,9 +179,9 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-white mt-8 mb-3">14. Limitation of Liability</h2>
             <ul className="list-disc pl-5 space-y-2 text-zinc-400">
-              <li>RetailSmart ERP is provided &quot;as is&quot; without warranties of any kind, express or implied</li>
+              <li>ElitPOS is provided &quot;as is&quot; without warranties of any kind, express or implied</li>
               <li>Our total liability is limited to the amount you have paid for the service in the preceding 12 months</li>
-              <li>For Free plan users, our maximum liability is limited to LKR 5,000</li>
+              <li>For Free plan users, our maximum liability is limited to KES 5,000</li>
               <li>We are not responsible for business decisions made based on AI-generated insights or reports</li>
             </ul>
           </section>
@@ -213,7 +213,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-white mt-8 mb-3">18. Contact</h2>
-            <p>For questions about these terms, please reach out through our <a href="/contact" className="text-emerald-400 hover:text-emerald-300 hover:underline">contact page</a> or email <a href="mailto:support@retailsmarterp.com" className="text-emerald-400 hover:text-emerald-300 hover:underline">support@retailsmarterp.com</a>.</p>
+            <p>For questions about these terms, please reach out through our <a href="/contact" className="text-emerald-400 hover:text-emerald-300 hover:underline">contact page</a> or email <a href="mailto:support@elitpos.elitjohnsdigital.co.ke" className="text-emerald-400 hover:text-emerald-300 hover:underline">support@elitpos.elitjohnsdigital.co.ke</a>.</p>
           </section>
         </div>
       </div>

@@ -197,7 +197,7 @@ export default function RestaurantClient() {
             {/* Right: Hero mockup */}
             <FadeInRight className="hidden lg:block">
               <FloatingMockup>
-                <BrowserMockup url="retailsmarterp.com/kitchen">
+                <BrowserMockup url="elitpos.elitjohnsdigital.co.ke/kitchen">
                   <MockKitchenDisplay />
                 </BrowserMockup>
               </FloatingMockup>
@@ -327,7 +327,7 @@ export default function RestaurantClient() {
             badge="Multi-Business Platform"
             title="Also built for other industries"
             highlight="other industries"
-            subtitle="RetailSmart ERP adapts to your business type with specialized modules and features."
+            subtitle="ElitPOS adapts to your business type with specialized modules and features."
             gradientClass="gradient-text-restaurant"
           />
 
@@ -339,7 +339,7 @@ export default function RestaurantClient() {
                 href="/retail"
                 icon={Store}
                 mockup={<MockInventory />}
-                gradient="from-blue-600 to-sky-500"
+                gradient="from-green-600 to-sky-500"
               />
             </StaggerItem>
             <StaggerItem>

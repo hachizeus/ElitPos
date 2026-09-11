@@ -309,7 +309,7 @@ export default function SubscriptionsPage() {
             onClick={() => setFilter(status)}
             className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
               filter === status
-                ? 'bg-gray-900 text-white'
+                ? 'bg-[#00FF88] text-black'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
             }`}
           >
@@ -393,8 +393,8 @@ export default function SubscriptionsPage() {
                       <p className="text-gray-900 dark:text-white">{sub.tier?.displayName || sub.tier?.name || 'N/A'}</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {sub.subscribedPriceMonthly
-                          ? `${formatCurrencyWithSymbol(Number(sub.subscribedPriceMonthly), 'LKR')}/mo`
-                          : sub.tier?.priceMonthly ? `${formatCurrencyWithSymbol(Number(sub.tier.priceMonthly), 'LKR')}/mo` : ''}
+                          ? `${formatCurrencyWithSymbol(Number(sub.subscribedPriceMonthly), 'KES')}/mo`
+                          : sub.tier?.priceMonthly ? `${formatCurrencyWithSymbol(Number(sub.tier.priceMonthly), 'KES')}/mo` : ''}
                       </p>
                       {sub.subscribedPriceMonthly && sub.tier?.priceMonthly && Number(sub.subscribedPriceMonthly) !== Number(sub.tier.priceMonthly) && (
                         <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 mt-1">
@@ -557,7 +557,7 @@ export default function SubscriptionsPage() {
               <button
                 onClick={saveOverride}
                 disabled={savingOverride}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded hover:bg-gray-800 disabled:opacity-50 font-medium"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#00FF88] text-black rounded hover:bg-[#00e67a] disabled:opacity-50 font-medium"
               >
                 {savingOverride ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Save Override
@@ -717,7 +717,7 @@ export default function SubscriptionsPage() {
               <button
                 onClick={savePeriod}
                 disabled={savingPeriod || (periodMode === 'adjust' && periodMonths === 0) || (periodMode === 'exact' && !periodDate)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded hover:bg-gray-800 disabled:opacity-50 font-medium"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#00FF88] text-black rounded hover:bg-[#00e67a] disabled:opacity-50 font-medium"
               >
                 {savingPeriod ? <Loader2 className="w-4 h-4 animate-spin" /> : <CalendarClock className="w-4 h-4" />}
                 Update Period

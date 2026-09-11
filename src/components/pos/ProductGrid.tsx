@@ -260,7 +260,7 @@ export function ProductGrid({
                   </div>
                 )}
                 {(config.enableCoreChargeDisplay && item.coreCharge && parseFloat(item.coreCharge) > 0) && (
-                  <div className="text-xs text-purple-600 font-medium mb-1">
+                  <div className="text-xs text-green-600 font-medium mb-1">
                     +Core: {currencyCode} {parseFloat(item.coreCharge).toFixed(0)}
                   </div>
                 )}

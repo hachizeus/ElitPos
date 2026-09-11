@@ -1,1 +1,1 @@
-ALTER TABLE "insurance_estimates" ADD COLUMN "odometer_in" integer;
+ALTER TABLE "insurance_estimates" ADD COLUMN IF NOT EXISTS "odometer_in" integer;

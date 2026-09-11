@@ -1,5 +1,5 @@
 -- SMS Settings (per tenant)
-CREATE TABLE sms_settings (
+CREATE TABLE IF NOT EXISTS sms_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
 
@@ -34,7 +34,7 @@ CREATE TABLE sms_settings (
 );
 
 -- Email Settings (per tenant)
-CREATE TABLE email_settings (
+CREATE TABLE IF NOT EXISTS email_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
 
@@ -68,7 +68,7 @@ CREATE TABLE email_settings (
 );
 
 -- Notification Templates
-CREATE TABLE notification_templates (
+CREATE TABLE IF NOT EXISTS notification_templates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
 
@@ -93,7 +93,7 @@ CREATE TABLE notification_templates (
 );
 
 -- Notification Logs (message history)
-CREATE TABLE notification_logs (
+CREATE TABLE IF NOT EXISTS notification_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
 
@@ -134,7 +134,7 @@ CREATE TABLE notification_logs (
 );
 
 -- Usage Tracking (monthly aggregates)
-CREATE TABLE notification_usage (
+CREATE TABLE IF NOT EXISTS notification_usage (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   channel VARCHAR(20) NOT NULL, -- 'sms', 'email'
@@ -146,13 +146,13 @@ CREATE TABLE notification_usage (
 );
 
 -- Indexes for performance
-CREATE INDEX idx_notification_logs_tenant_date ON notification_logs(tenant_id, created_at DESC);
-CREATE INDEX idx_notification_logs_status ON notification_logs(tenant_id, status);
-CREATE INDEX idx_notification_logs_channel ON notification_logs(tenant_id, channel);
-CREATE INDEX idx_notification_logs_recipient ON notification_logs(tenant_id, recipient_contact);
-CREATE INDEX idx_notification_templates_tenant ON notification_templates(tenant_id);
-CREATE INDEX idx_notification_templates_trigger ON notification_templates(tenant_id, trigger_event) WHERE is_auto_trigger = true;
-CREATE INDEX idx_notification_usage_tenant_period ON notification_usage(tenant_id, period_month);
+CREATE INDEX IF NOT EXISTS idx_notification_logs_tenant_date ON notification_logs(tenant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notification_logs_status ON notification_logs(tenant_id, status);
+CREATE INDEX IF NOT EXISTS idx_notification_logs_channel ON notification_logs(tenant_id, channel);
+CREATE INDEX IF NOT EXISTS idx_notification_logs_recipient ON notification_logs(tenant_id, recipient_contact);
+CREATE INDEX IF NOT EXISTS idx_notification_templates_tenant ON notification_templates(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_notification_templates_trigger ON notification_templates(tenant_id, trigger_event) WHERE is_auto_trigger = true;
+CREATE INDEX IF NOT EXISTS idx_notification_usage_tenant_period ON notification_usage(tenant_id, period_month);
 
 -- Enable Row Level Security
 ALTER TABLE sms_settings ENABLE ROW LEVEL SECURITY;
@@ -162,17 +162,32 @@ ALTER TABLE notification_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notification_usage ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies (tenant isolation)
-CREATE POLICY tenant_isolation_sms_settings ON sms_settings
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_sms_settings ON sms_settings
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY tenant_isolation_email_settings ON email_settings
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_email_settings ON email_settings
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY tenant_isolation_notification_templates ON notification_templates
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_notification_templates ON notification_templates
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY tenant_isolation_notification_logs ON notification_logs
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_notification_logs ON notification_logs
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY tenant_isolation_notification_usage ON notification_usage
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_notification_usage ON notification_usage
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

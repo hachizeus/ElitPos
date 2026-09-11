@@ -20,7 +20,9 @@ export async function GET() {
         eq(accountNotifications.isRead, false)
       ))
 
-    return NextResponse.json({ unreadCount: result?.count ?? 0 })
+    return NextResponse.json({ unreadCount: result?.count ?? 0 }, {
+      headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=120' },
+    })
   } catch {
     return NextResponse.json({ unreadCount: 0 })
   }

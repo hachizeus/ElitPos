@@ -48,7 +48,21 @@ const dev = process.env.NODE_ENV !== 'production'
 const hostname = '0.0.0.0'
 const port = parseInt(process.env.PORT || '3000', 10)
 
-const app = next({ dev, hostname, port })
+// FORCE Webpack by setting environment variable before Next.js initializes
+// Next.js 16 defaults to Turbopack, which crashes with PostCSS on Windows
+process.env.TURBOPACK = '0'
+
+// Disable Turbopack to avoid PostCSS crash - use stable Webpack instead
+const app = next({ 
+  dev, 
+  hostname, 
+  port,
+  turbo: false,  // Force Webpack instead of Turbopack
+  // Explicitly disable turbopack
+  experimental: {
+    turbo: undefined,
+  }
+})
 const handle = app.getRequestHandler()
 
 /**
@@ -57,7 +71,15 @@ const handle = app.getRequestHandler()
 const MAX_BODY_SIZE = 1024 * 1024 // 1 MB
 function parseJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
   return new Promise((resolve, reject) => {
-    let body = ''
+    // Guard: only accumulate data once — re-attaching listeners on a reused
+    // keep-alive socket would double-collect chunks and produce concatenated JSON.
+    if ((req as NodeJS.EventEmitter & { _bodyConsumed?: boolean })._bodyConsumed) {
+      reject(new Error('Request body already consumed'))
+      return
+    }
+    ;(req as NodeJS.EventEmitter & { _bodyConsumed?: boolean })._bodyConsumed = true
+
+    const chunks: Buffer[] = []
     let size = 0
     req.on('data', (chunk: Buffer) => {
       size += chunk.length
@@ -66,12 +88,20 @@ function parseJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
         reject(new Error('Request body too large'))
         return
       }
-      body += chunk.toString()
+      chunks.push(chunk)
     })
     req.on('end', () => {
+      const body = Buffer.concat(chunks).toString('utf8').trim()
+      if (!body) {
+        // Empty body — not a valid broadcast; return a clear error
+        reject(new Error('Empty request body'))
+        return
+      }
       try {
         resolve(JSON.parse(body))
       } catch (err) {
+        // Log the raw body prefix to help diagnose malformed payloads
+        console.error('[Server] parseJsonBody failed — body prefix:', body.slice(0, 80))
         reject(err)
       }
     })
@@ -172,11 +202,19 @@ async function handleInternalBroadcast(
 
     res.statusCode = 200
     res.setHeader('Content-Type', 'application/json')
+    res.setHeader('Connection', 'close') // Prevent HTTP/1.1 keep-alive pipelining on loopback
     res.end(JSON.stringify({ success: true }))
   } catch (err) {
-    console.error('[Server] Error handling internal broadcast:', err)
-    res.statusCode = 500
-    res.end('Internal Server Error')
+    const isBadJson = err instanceof SyntaxError || (err instanceof Error && err.message === 'Empty request body')
+    if (isBadJson) {
+      res.statusCode = 400
+      res.setHeader('Connection', 'close')
+      res.end('Invalid JSON body')
+    } else {
+      console.error('[Server] Error handling internal broadcast:', err)
+      res.statusCode = 500
+      res.end('Internal Server Error')
+    }
   }
 
   return true

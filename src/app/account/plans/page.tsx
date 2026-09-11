@@ -90,7 +90,7 @@ export default function PlansPage() {
   const [selectedTier, setSelectedTier] = useState<string | null>(null)
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null)
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly')
-  const [updating, setUpdating] = useState(false)
+  // updating removed — navigation is synchronous now
   const [contactModalOpen, setContactModalOpen] = useState(false)
 
   const fetchData = useCallback(async () => {
@@ -120,29 +120,11 @@ export default function PlansPage() {
     fetchData()
   }, [fetchData])
 
-  const handleSelectPlan = async () => {
+  const handleSelectPlan = () => {
     if (!selectedTier || !selectedCompany) return
-
-    setUpdating(true)
-    try {
-      const res = await fetch(`/api/account/subscriptions/${selectedCompany}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tierId: selectedTier }),
-      })
-
-      if (res.ok) {
-        router.push(`/account/payments?plan=${selectedTier}&company=${selectedCompany}`)
-      } else {
-        const data = await res.json()
-        alert(data.error || 'Failed to select plan')
-      }
-    } catch (error) {
-      console.error('Failed to select plan:', error)
-      alert('Failed to select plan')
-    } finally {
-      setUpdating(false)
-    }
+    // Navigate to the subscription management page — it handles plan selection,
+    // proration calculation, and payment via the /upgrade endpoint
+    router.push(`/account/subscription/${selectedCompany}`)
   }
 
   if (loading) {
@@ -168,7 +150,7 @@ export default function PlansPage() {
 
       {/* Hero Section */}
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-green-500 rounded-2xl mb-4">
           <Sparkles className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Simple, Transparent Pricing</h1>
@@ -233,15 +215,15 @@ export default function PlansPage() {
                 isEnterprise
                   ? 'border-gray-200 dark:border-gray-700 cursor-default'
                   : isSelected
-                  ? 'border-blue-500 ring-4 ring-blue-100 dark:ring-blue-900/50 cursor-pointer'
+                  ? 'border-green-400 ring-4 ring-green-100 dark:ring-green-900/50 cursor-pointer'
                   : isPopular
-                  ? 'border-blue-500 shadow-lg cursor-pointer'
+                  ? 'border-green-400 shadow-lg cursor-pointer'
                   : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 cursor-pointer'
               }`}
             >
               {isPopular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-semibold rounded-full">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-green-600 to-green-400 text-white text-xs font-semibold rounded-full">
                     <Crown className="w-3 h-3" />
                     Most Popular
                   </span>
@@ -249,7 +231,7 @@ export default function PlansPage() {
               )}
               {isSelected && !isEnterprise && (
                 <div className="absolute top-4 right-4">
-                  <div className="w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center">
+                  <div className="w-7 h-7 bg-green-400 rounded-full flex items-center justify-center">
                     <Check className="w-4 h-4 text-white" />
                   </div>
                 </div>
@@ -327,13 +309,13 @@ export default function PlansPage() {
                 <div className="space-y-3">
                   <button
                     onClick={(e) => { e.stopPropagation(); setContactModalOpen(true) }}
-                    className="w-full py-3 px-4 rounded-md font-medium transition-all bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200"
+                    className="w-full py-3 px-4 rounded-md font-medium transition-all bg-green-600 text-white hover:bg-green-700"
                   >
                     Contact Us
                   </button>
                   <div className="flex items-center justify-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                     <a href="tel:+94778407616" className="inline-flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-300">
-                      <Phone className="w-3 h-3" /> 077 840 7616
+                      <Phone className="w-3 h-3" /> 0759001048
                     </a>
                     <a href="https://wa.me/94778407616" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-300">
                       <MessageSquare className="w-3 h-3" /> WhatsApp
@@ -344,9 +326,9 @@ export default function PlansPage() {
                 <button
                   className={`w-full py-3 px-4 rounded-md font-medium transition-all ${
                     isSelected
-                      ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-lg'
+                      ? 'bg-green-400 text-white hover:bg-green-500 shadow-lg'
                       : isPopular
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      ? 'bg-green-500 text-white hover:bg-green-600'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
@@ -448,8 +430,8 @@ export default function PlansPage() {
       {selectedTier && companies.length > 0 && (
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-md flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-md flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Select a company to upgrade</h2>
@@ -464,16 +446,16 @@ export default function PlansPage() {
                   onClick={() => setSelectedCompany(company.id)}
                   className={`p-4 rounded-md border-2 text-left transition-all ${
                     selectedCompany === company.id
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                      ? 'border-green-400 bg-green-50 dark:bg-green-900/30'
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-12 h-12 rounded-md flex items-center justify-center ${
-                      selectedCompany === company.id ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-gray-100 dark:bg-gray-700'
+                      selectedCompany === company.id ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'
                     }`}>
                       <Building2 className={`w-6 h-6 ${
-                        selectedCompany === company.id ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
+                        selectedCompany === company.id ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'
                       }`} />
                     </div>
                     <div>
@@ -485,7 +467,7 @@ export default function PlansPage() {
                       </p>
                     </div>
                     {selectedCompany === company.id && (
-                      <Check className="w-5 h-5 text-blue-500 ml-auto" />
+                      <Check className="w-5 h-5 text-green-500 ml-auto" />
                     )}
                   </div>
                 </button>
@@ -500,20 +482,11 @@ export default function PlansPage() {
         <div className="flex justify-end">
           <button
             onClick={handleSelectPlan}
-            disabled={updating}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-md hover:from-blue-700 hover:to-blue-600 transition-all disabled:opacity-50 font-semibold text-lg shadow-lg shadow-blue-500/25"
+            disabled={!selectedTier || !selectedCompany}
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-green-600 to-blue-500 text-white rounded-md hover:from-blue-700 hover:to-green-500 transition-all disabled:opacity-50 font-semibold text-lg shadow-lg shadow-blue-500/25"
           >
-            {updating ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              <>
-                <CreditCard className="w-5 h-5" />
-                Continue to Payment
-              </>
-            )}
+            <CreditCard className="w-5 h-5" />
+            Continue to Payment
           </button>
         </div>
       )}

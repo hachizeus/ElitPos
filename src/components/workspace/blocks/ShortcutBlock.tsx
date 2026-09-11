@@ -9,9 +9,9 @@ const COLOR_BG: Record<string, string> = {
   blue: 'bg-blue-500',
   green: 'bg-green-500',
   red: 'bg-red-500',
-  purple: 'bg-purple-500',
+  purple: 'bg-green-600',   // remapped to brand green
   amber: 'bg-amber-500',
-  violet: 'bg-violet-500',
+  violet: 'bg-green-600',   // remapped to brand green
   emerald: 'bg-emerald-500',
   slate: 'bg-slate-500',
 }
@@ -27,24 +27,25 @@ export function ShortcutBlock({ block, metrics, colorScheme, onAddShortcut }: Sh
   const { shortcuts } = block.data
 
   const schemeClasses: Record<string, { bg: string; border: string; hover: string; text: string; iconBg: string }> = {
-    blue: { bg: 'bg-blue-50/50', border: 'border-blue-100', hover: 'hover:bg-blue-100/70 hover:border-blue-200', text: 'text-blue-700', iconBg: 'bg-blue-500' },
-    green: { bg: 'bg-green-50/50', border: 'border-green-100', hover: 'hover:bg-green-100/70 hover:border-green-200', text: 'text-green-700', iconBg: 'bg-green-500' },
-    violet: { bg: 'bg-violet-50/50', border: 'border-violet-100', hover: 'hover:bg-violet-100/70 hover:border-violet-200', text: 'text-violet-700', iconBg: 'bg-violet-500' },
-    amber: { bg: 'bg-amber-50/50', border: 'border-amber-100', hover: 'hover:bg-amber-100/70 hover:border-amber-200', text: 'text-amber-700', iconBg: 'bg-amber-500' },
+    blue:    { bg: 'bg-blue-50/50',    border: 'border-blue-100',    hover: 'hover:bg-blue-100/70 hover:border-blue-200',    text: 'text-blue-700',    iconBg: 'bg-blue-500'    },
+    green:   { bg: 'bg-green-50/50',   border: 'border-green-100',   hover: 'hover:bg-green-100/70 hover:border-green-200',   text: 'text-green-700',   iconBg: 'bg-green-500'   },
+    violet:  { bg: 'bg-green-50/50',   border: 'border-green-100',   hover: 'hover:bg-green-100/70 hover:border-green-200',   text: 'text-green-700',   iconBg: 'bg-green-500'   },
+    purple:  { bg: 'bg-green-50/50',   border: 'border-green-100',   hover: 'hover:bg-green-100/70 hover:border-green-200',   text: 'text-green-700',   iconBg: 'bg-green-500'   },
+    amber:   { bg: 'bg-amber-50/50',   border: 'border-amber-100',   hover: 'hover:bg-amber-100/70 hover:border-amber-200',   text: 'text-amber-700',   iconBg: 'bg-amber-500'   },
     emerald: { bg: 'bg-emerald-50/50', border: 'border-emerald-100', hover: 'hover:bg-emerald-100/70 hover:border-emerald-200', text: 'text-emerald-700', iconBg: 'bg-emerald-500' },
-    slate: { bg: 'bg-gray-50/50', border: 'border-gray-200', hover: 'hover:bg-gray-100/70 hover:border-gray-300', text: 'text-gray-700', iconBg: 'bg-gray-500' },
+    slate:   { bg: 'bg-gray-50/50',    border: 'border-gray-200',    hover: 'hover:bg-gray-100/70 hover:border-gray-300',     text: 'text-gray-700',    iconBg: 'bg-gray-500'    },
   }
 
   const scheme = schemeClasses[colorScheme] || schemeClasses.blue
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 overflow-hidden w-full">
-      <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
-        <h2 className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden w-full shadow-sm">
+      <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800">
+        <h2 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
           Shortcuts
         </h2>
       </div>
-      <div className="p-3">
+      <div className="p-4">
         <div className="flex flex-wrap gap-2">
           {shortcuts.map((shortcut) => {
             const Icon = getIcon(shortcut.icon)

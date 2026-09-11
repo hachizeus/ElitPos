@@ -1,11 +1,11 @@
 'use client'
 
-import { useCompany } from '@/components/providers/CompanyContextProvider'
+import { useCompanyOptional } from '@/components/providers/CompanyContextProvider'
 import type { POSBusinessConfig } from '@/components/pos/types'
 
 export function usePOSBusinessConfig(): POSBusinessConfig {
-  const company = useCompany()
-  const bt = company.businessType
+  const company = useCompanyOptional()
+  const bt = company?.businessType ?? 'retail'
 
   const isServiceCapable = bt === 'auto_service' || bt === 'dealership'
 

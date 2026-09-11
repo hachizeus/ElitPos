@@ -1,7 +1,7 @@
 -- Migration: Workspace Configs (ERPNext-style customizable workspaces)
 -- Stores per-user workspace block customizations
 
--- ==================== CREATE TABLE ====================
+-- ==================== CREATE TABLE IF NOT EXISTS ====================
 
 CREATE TABLE IF NOT EXISTS workspace_configs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

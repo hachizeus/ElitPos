@@ -22,20 +22,23 @@ CREATE TABLE IF NOT EXISTS supplier_balance_audit (
 -- ============================================================
 -- 2. Create indexes for efficient querying
 -- ============================================================
-CREATE INDEX idx_supplier_balance_audit_tenant ON supplier_balance_audit(tenant_id);
-CREATE INDEX idx_supplier_balance_audit_supplier ON supplier_balance_audit(supplier_id);
-CREATE INDEX idx_supplier_balance_audit_created ON supplier_balance_audit(created_at);
-CREATE INDEX idx_supplier_balance_audit_type ON supplier_balance_audit(type);
-CREATE INDEX idx_supplier_balance_audit_reference ON supplier_balance_audit(reference_type, reference_id);
+CREATE INDEX IF NOT EXISTS idx_supplier_balance_audit_tenant ON supplier_balance_audit(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_supplier_balance_audit_supplier ON supplier_balance_audit(supplier_id);
+CREATE INDEX IF NOT EXISTS idx_supplier_balance_audit_created ON supplier_balance_audit(created_at);
+CREATE INDEX IF NOT EXISTS idx_supplier_balance_audit_type ON supplier_balance_audit(type);
+CREATE INDEX IF NOT EXISTS idx_supplier_balance_audit_reference ON supplier_balance_audit(reference_type, reference_id);
 
 -- ============================================================
 -- 3. Enable Row Level Security
 -- ============================================================
 ALTER TABLE supplier_balance_audit ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY tenant_isolation_policy ON supplier_balance_audit
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON supplier_balance_audit
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- ============================================================
 -- 4. Grant access to app_user

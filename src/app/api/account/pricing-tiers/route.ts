@@ -23,15 +23,22 @@ export async function GET() {
         id: t.id,
         name: t.name,
         displayName: t.displayName,
-        priceMonthly: Number(t.priceMonthly), // Convert Decimal to Number
-        priceYearly: Number(t.priceYearly),   // Convert Decimal to Number
-        currency: t.currency || 'LKR',         // Include currency field
+        priceMonthly: Number(t.priceMonthly),
+        priceYearly: Number(t.priceYearly),
+        currency: t.currency || 'KES',
         maxUsers: t.maxUsers,
         maxSalesMonthly: t.maxSalesMonthly,
         maxDatabaseBytes: t.maxDatabaseBytes,
         maxFileStorageBytes: t.maxFileStorageBytes,
         features: t.features,
-      }))
+      })),
+      {
+        headers: {
+          // Pricing tiers change rarely — cache for 5 minutes in browser,
+          // serve stale for 1 hour while revalidating in background
+          'Cache-Control': 'private, max-age=300, stale-while-revalidate=3600',
+        },
+      }
     )
   } catch (error) {
     logError('api/account/pricing-tiers', error)

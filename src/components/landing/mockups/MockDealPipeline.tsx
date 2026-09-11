@@ -29,10 +29,10 @@ const stages: Stage[] = [
     bgColor: 'bg-gray-50',
     borderColor: 'border-gray-300',
     count: 6,
-    total: '$186K',
+    total: 'KSh 18.6M',
     deals: [
-      { customer: 'Alex Morgan', vehicle: '2024 Audi Q5', value: '$48,900', daysOpen: 1, rep: 'Mike T.', repInitials: 'MT', repColor: 'bg-blue-500' },
-      { customer: 'Kim Lee', vehicle: '2024 BMW 330i', value: '$43,500', daysOpen: 2, rep: 'Lisa R.', repInitials: 'LR', repColor: 'bg-purple-500' },
+      { customer: 'Alex Morgan', vehicle: '2024 Audi Q5', value: 'KSh 4.89M', daysOpen: 1, rep: 'Mike T.', repInitials: 'MT', repColor: 'bg-blue-500' },
+      { customer: 'Kim Lee', vehicle: '2024 BMW 330i', value: 'KSh 4.35M', daysOpen: 2, rep: 'Lisa R.', repInitials: 'LR', repColor: 'bg-purple-500' },
     ],
   },
   {
@@ -41,10 +41,10 @@ const stages: Stage[] = [
     bgColor: 'bg-cyan-50',
     borderColor: 'border-cyan-300',
     count: 4,
-    total: '$158K',
+    total: 'KSh 15.8M',
     deals: [
-      { customer: 'James Wilson', vehicle: '2024 BMW X3', value: '$49,800', daysOpen: 3, rep: 'Mike T.', repInitials: 'MT', repColor: 'bg-blue-500' },
-      { customer: 'Sarah Chen', vehicle: '2024 Mercedes C300', value: '$47,200', daysOpen: 5, rep: 'Lisa R.', repInitials: 'LR', repColor: 'bg-purple-500' },
+      { customer: 'James Wilson', vehicle: '2024 BMW X3', value: 'KSh 4.98M', daysOpen: 3, rep: 'Mike T.', repInitials: 'MT', repColor: 'bg-blue-500' },
+      { customer: 'Sarah Chen', vehicle: '2024 Mercedes C300', value: 'KSh 4.72M', daysOpen: 5, rep: 'Lisa R.', repInitials: 'LR', repColor: 'bg-purple-500' },
     ],
   },
   {
@@ -53,10 +53,10 @@ const stages: Stage[] = [
     bgColor: 'bg-amber-50',
     borderColor: 'border-amber-300',
     count: 3,
-    total: '$124K',
+    total: 'KSh 12.4M',
     deals: [
-      { customer: 'Emily Park', vehicle: '2023 Honda CR-V', value: '$36,450', daysOpen: 7, rep: 'David K.', repInitials: 'DK', repColor: 'bg-teal-500' },
-      { customer: 'Robert Davis', vehicle: '2024 Toyota Camry', value: '$34,990', daysOpen: 4, rep: 'Mike T.', repInitials: 'MT', repColor: 'bg-blue-500' },
+      { customer: 'Emily Park', vehicle: '2023 Honda CR-V', value: 'KSh 3.65M', daysOpen: 7, rep: 'David K.', repInitials: 'DK', repColor: 'bg-teal-500' },
+      { customer: 'Robert Davis', vehicle: '2024 Toyota Camry', value: 'KSh 3.50M', daysOpen: 4, rep: 'Mike T.', repInitials: 'MT', repColor: 'bg-blue-500' },
     ],
   },
   {
@@ -65,10 +65,10 @@ const stages: Stage[] = [
     bgColor: 'bg-green-50',
     borderColor: 'border-green-300',
     count: 8,
-    total: '$342K',
+    total: 'KSh 34.2M',
     deals: [
-      { customer: 'Mark Thompson', vehicle: '2022 Ford F-150', value: '$42,500', daysOpen: 12, rep: 'Lisa R.', repInitials: 'LR', repColor: 'bg-purple-500' },
-      { customer: 'Linda Garcia', vehicle: '2024 Hyundai Tucson', value: '$32,800', daysOpen: 9, rep: 'David K.', repInitials: 'DK', repColor: 'bg-teal-500' },
+      { customer: 'Mark Thompson', vehicle: '2022 Ford F-150', value: 'KSh 4.25M', daysOpen: 12, rep: 'Lisa R.', repInitials: 'LR', repColor: 'bg-purple-500' },
+      { customer: 'Linda Garcia', vehicle: '2024 Hyundai Tucson', value: 'KSh 3.28M', daysOpen: 9, rep: 'David K.', repInitials: 'DK', repColor: 'bg-teal-500' },
     ],
   },
 ]

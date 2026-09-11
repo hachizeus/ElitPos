@@ -54,9 +54,12 @@ ALTER TABLE files ADD CONSTRAINT chk_file_has_metadata
 
 ALTER TABLE files ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY tenant_isolation_policy ON files
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON files
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Grant access to app_user role
 DO $$

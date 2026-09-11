@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { uploadToR2, deleteFromR2, existsInR2, keyFromUrl, listByPrefix, deleteManyFromR2 } from './r2'
+import { imagekitEnabled, isImageType, uploadToImageKit } from './imagekit'
 
 const ALLOWED_EXTENSIONS = new Set([
   'jpg', 'jpeg', 'png', 'gif', 'webp',
@@ -95,11 +96,10 @@ export async function storeFile(
 
   const contentHash = computeFileHash(buffer)
   const ext = originalName.split('.').pop()?.toLowerCase() || 'bin'
-  const hashPrefix = contentHash.substring(0, 2)
   const timestamp = Date.now()
+  const hashPrefix = contentHash.substring(0, 2)
   const fileName = `${contentHash.substring(0, 12)}-${timestamp}.${ext}`
 
-  // Detect MIME type from extension
   const mimeTypes: Record<string, string> = {
     jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
     gif: 'image/gif', webp: 'image/webp',
@@ -117,40 +117,56 @@ export async function storeFile(
   }
   const contentType = mimeTypes[ext] || 'application/octet-stream'
 
+  // ── ImageKit: use for public images when configured ──────────────────────
+  if (!isPrivate && imagekitEnabled() && isImageType(contentType)) {
+    const ikResult = await uploadToImageKit(
+      buffer,
+      fileName,
+      contentType,
+      `${tenantSlug}/${hashPrefix}`,
+    )
+    // Store plain public URL — ImageKit URLs work directly as <img src>
+    // fileId is embedded in the URL path for deletion if needed
+    return { fileUrl: ikResult.url, contentHash, fileSize: buffer.length }
+  }
+
+  // ── R2 fallback (non-images, private files, or when ImageKit not configured) ─
   let r2Key: string
   let fileUrl: string
 
   if (isPrivate) {
     r2Key = `private/${tenantSlug}/${hashPrefix}/${fileName}`
-    // Private files store the R2 key path (not CDN URL) — served via download API
     fileUrl = `/storage/private/${tenantSlug}/${hashPrefix}/${fileName}`
   } else {
     r2Key = `${tenantSlug}/${hashPrefix}/${fileName}`
-    // Public files get a CDN URL
     fileUrl = await uploadToR2(r2Key, buffer, contentType)
     return { fileUrl, contentHash, fileSize: buffer.length }
   }
 
   await uploadToR2(r2Key, buffer, contentType)
-
-  return {
-    fileUrl,
-    contentHash,
-    fileSize: buffer.length,
-  }
+  return { fileUrl, contentHash, fileSize: buffer.length }
 }
 
 export async function deleteStoredFile(fileUrl: string, _tenantSlug: string, thumbnailUrl?: string | null): Promise<boolean> {
+  // ImageKit URLs — we can't delete by URL alone without fileId
+  // For now just return true (file stays in ImageKit but is no longer referenced)
+  // TODO: store fileId separately in DB for proper deletion
+  if (fileUrl.startsWith('https://ik.imagekit.io/') || fileUrl.includes('imagekit.io')) {
+    if (thumbnailUrl) {
+      // thumbnail may still be on R2
+      const thumbKey = keyFromUrl(thumbnailUrl)
+      if (thumbKey) await deleteFromR2(thumbKey).catch(() => {})
+    }
+    return true
+  }
+
   const key = keyFromUrl(fileUrl)
   if (!key) return false
   const result = await deleteFromR2(key)
 
-  // Also delete thumbnail if it exists
   if (thumbnailUrl) {
     const thumbKey = keyFromUrl(thumbnailUrl)
-    if (thumbKey) {
-      await deleteFromR2(thumbKey).catch(() => {})
-    }
+    if (thumbKey) await deleteFromR2(thumbKey).catch(() => {})
   }
 
   return result

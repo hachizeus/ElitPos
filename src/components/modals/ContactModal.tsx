@@ -31,7 +31,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
     const body = encodeURIComponent(
       `Name: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\n\n${form.message}`
     )
-    window.open(`mailto:hello@retailsmarterp.com?subject=${subject}&body=${body}`, '_blank')
+    window.open(`mailto:info@elitjohnsdigital.co.ke?subject=${subject}&body=${body}`, '_blank')
 
     setSending(false)
     setSent(true)
@@ -71,7 +71,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white">Call Us</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">077 840 7616</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">0759001048</p>
             </div>
           </a>
 

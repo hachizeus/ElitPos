@@ -42,9 +42,12 @@ CREATE INDEX IF NOT EXISTS idx_refunds_created_at ON refunds(created_at);
 
 -- Enable RLS on refunds
 ALTER TABLE refunds ENABLE ROW LEVEL SECURITY;
-CREATE POLICY tenant_isolation_policy ON refunds
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON refunds
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Grant access to app_user
 GRANT ALL ON refunds TO app_user;

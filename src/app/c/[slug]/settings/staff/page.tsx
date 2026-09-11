@@ -236,7 +236,11 @@ export default function StaffPage() {
             toast.success('Staff member added successfully')
             fetchUsers()
           } else if (data.mode === 'invited') {
-            toast.success(`Invitation sent to ${formData.email}`)
+            if (data.emailSent === false && data.warning) {
+              toast.warning(data.warning)
+            } else {
+              toast.success(`Invitation sent to ${formData.email}`)
+            }
             fetchInvites()
           }
           closeModal()

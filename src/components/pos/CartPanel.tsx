@@ -158,8 +158,8 @@ export function CartPanel({
 
           {config.showVehicleSelector && (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-purple-100 rounded flex items-center justify-center">
-                <Car size={16} className="text-purple-600" />
+              <div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center">
+                <Car size={16} className="text-green-600" />
               </div>
               <div className="flex-1">
                 <CreatableSelect
@@ -199,13 +199,13 @@ export function CartPanel({
 
         {/* Loyalty Points Badge */}
         {selectedCustomer && loyaltyProgram && (selectedCustomer.loyaltyPoints || 0) > 0 && !isReturnMode && (
-          <div className="flex items-center gap-2 mt-2 px-2 py-1.5 bg-purple-50 border border-purple-200 rounded">
-            <Star size={14} className="text-purple-600" />
-            <span className="text-sm font-medium text-purple-700">
+          <div className="flex items-center gap-2 mt-2 px-2 py-1.5 bg-green-50 border border-green-200 rounded">
+            <Star size={14} className="text-green-600" />
+            <span className="text-sm font-medium text-green-700">
               {selectedCustomer.loyaltyPoints} points
             </span>
             {selectedCustomer.loyaltyTier && (
-              <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-600 rounded-full capitalize">
+              <span className="text-xs px-2 py-0.5 bg-green-100 text-green-600 rounded-full capitalize">
                 {selectedCustomer.loyaltyTier}
               </span>
             )}
@@ -251,7 +251,7 @@ export function CartPanel({
                       </p>
                     )}
                     {item.coreCharge && item.coreCharge > 0 && (
-                      <p className="text-xs text-purple-600 mt-0.5">
+                      <p className="text-xs text-green-600 mt-0.5">
                         Core charge: {currencyCode} {(item.coreCharge * Math.abs(item.quantity)).toFixed(2)}
                       </p>
                     )}
@@ -403,7 +403,7 @@ export function CartPanel({
           )}
           {/* Loyalty Redemption Row */}
           {loyaltyRedeemValue > 0 && !isReturnMode && (
-            <div className="flex justify-between text-purple-600">
+            <div className="flex justify-between text-green-600">
               <span className="flex items-center gap-1">
                 <Star size={14} />
                 Points ({loyaltyRedeemPoints} pts)

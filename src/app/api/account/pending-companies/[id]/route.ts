@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { accountAuth as auth } from '@/lib/auth/account-auth'
+import { NextResponse } from 'next/server'
+import { accountAuth } from '@/lib/auth/account-auth'
 import { db } from '@/lib/db'
 import { pendingCompanies, pricingTiers } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
@@ -7,13 +7,16 @@ import { logError } from '@/lib/ai/error-logger'
 import { validateParams } from '@/lib/validation/helpers'
 import { idParamSchema } from '@/lib/validation/schemas/common'
 
-// GET /api/account/pending-companies/[id] - Get single pending company
+/**
+ * GET /api/account/pending-companies/[id]
+ * Returns a single pending company with its tier details.
+ */
 export async function GET(
-  request: NextRequest,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth()
+    const session = await accountAuth()
     if (!session?.user?.accountId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -22,7 +25,7 @@ export async function GET(
     if (!paramsParsed.success) return paramsParsed.response
     const { id } = paramsParsed.data
 
-    const pending = await db
+    const [row] = await db
       .select({
         pendingCompany: pendingCompanies,
         tier: pricingTiers,
@@ -37,36 +40,27 @@ export async function GET(
       )
       .limit(1)
 
-    if (pending.length === 0) {
+    if (!row) {
       return NextResponse.json({ error: 'Pending company not found' }, { status: 404 })
     }
 
-    const p = pending[0]
-
+    const { pendingCompany: pc, tier } = row
     return NextResponse.json({
-      id: p.pendingCompany.id,
-      name: p.pendingCompany.name,
-      slug: p.pendingCompany.slug,
-      email: p.pendingCompany.email,
-      phone: p.pendingCompany.phone,
-      address: p.pendingCompany.address,
-      businessType: p.pendingCompany.businessType,
-      country: p.pendingCompany.country,
-      dateFormat: p.pendingCompany.dateFormat,
-      timeFormat: p.pendingCompany.timeFormat,
-      status: p.pendingCompany.status,
-      expiresAt: p.pendingCompany.expiresAt,
-      rejectionReason: p.pendingCompany.rejectionReason,
-      createdAt: p.pendingCompany.createdAt,
+      id:           pc.id,
+      name:         pc.name,
+      slug:         pc.slug,
+      businessType: pc.businessType,
+      status:       pc.status,
+      expiresAt:    pc.expiresAt,
+      billingCycle: pc.billingCycle,
       tier: {
-        id: p.tier.id,
-        name: p.tier.name,
-        displayName: p.tier.displayName,
-        priceMonthly: Number(p.tier.priceMonthly),
-        priceYearly: Number(p.tier.priceYearly),
-        currency: p.tier.currency || 'LKR',
+        id:           tier.id,
+        name:         tier.name,
+        displayName:  tier.displayName,
+        priceMonthly: Number(tier.priceMonthly),
+        priceYearly:  Number(tier.priceYearly || 0),
+        currency:     tier.currency,
       },
-      billingCycle: p.pendingCompany.billingCycle,
     })
   } catch (error) {
     logError('api/account/pending-companies/[id]', error)

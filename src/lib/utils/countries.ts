@@ -91,14 +91,14 @@ export function getCountryName(code: string): string {
 
 export function getCurrencyByCountry(countryCode: string): string {
   const country = getCountryByCode(countryCode)
-  return country?.currency || 'LKR'
+  return country?.currency || 'KES'
 }
 
 export function getCountryDefaults(countryCode: string) {
   const country = getCountryByCode(countryCode)
   return {
-    currency: country?.currency || 'LKR',
-    currencySymbol: country?.currencySymbol || 'Rs',
+    currency: country?.currency || 'KES',
+    currencySymbol: country?.currencySymbol || 'KSh',
     dateFormat: country?.dateFormat || 'DD/MM/YYYY',
     timeFormat: country?.timeFormat || '12h',
   }

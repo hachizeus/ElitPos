@@ -105,6 +105,7 @@ export function broadcastChange(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Connection': 'close', // Prevent socket reuse — avoids pipelined body concatenation
       'X-Internal-Broadcast': 'true',
       'X-Broadcast-Secret': process.env.NEXTAUTH_SECRET || '',
     },
@@ -204,6 +205,7 @@ export function broadcastAccountChange(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Connection': 'close', // Prevent socket reuse — avoids pipelined body concatenation
       'X-Internal-Broadcast': 'account',
       'X-Broadcast-Secret': process.env.NEXTAUTH_SECRET || '',
     },

@@ -123,17 +123,26 @@ ALTER TABLE restaurant_orders ADD COLUMN IF NOT EXISTS server_id uuid REFERENCES
 -- modifier_group_items RLS
 ALTER TABLE modifier_group_items ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS modifier_group_items_tenant_isolation ON modifier_group_items;
-CREATE POLICY modifier_group_items_tenant_isolation ON modifier_group_items
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY modifier_group_items_tenant_isolation ON modifier_group_items
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- table_groups RLS
 ALTER TABLE table_groups ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS table_groups_tenant_isolation ON table_groups;
-CREATE POLICY table_groups_tenant_isolation ON table_groups
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY table_groups_tenant_isolation ON table_groups
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- table_group_members RLS
 ALTER TABLE table_group_members ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS table_group_members_tenant_isolation ON table_group_members;
-CREATE POLICY table_group_members_tenant_isolation ON table_group_members
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY table_group_members_tenant_isolation ON table_group_members
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

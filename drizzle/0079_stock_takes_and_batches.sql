@@ -1,10 +1,16 @@
 -- Stock Takes (Physical Inventory Counts) and Item Batches (Lot Tracking)
 
 -- Create stock take status enum
-CREATE TYPE "public"."stock_take_status" AS ENUM('draft', 'in_progress', 'pending_review', 'completed', 'cancelled');
+DO $$ BEGIN
+  CREATE TYPE "public"."stock_take_status" AS ENUM('draft', 'in_progress', 'pending_review', 'completed', 'cancelled');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Create batch status enum
-CREATE TYPE "public"."batch_status" AS ENUM('active', 'quarantine', 'expired', 'consumed');
+DO $$ BEGIN
+  CREATE TYPE "public"."batch_status" AS ENUM('active', 'quarantine', 'expired', 'consumed');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Add track_batches column to items table
 ALTER TABLE "items" ADD COLUMN IF NOT EXISTS "track_batches" boolean DEFAULT false NOT NULL;
@@ -93,14 +99,23 @@ ALTER TABLE "stock_take_items" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "item_batches" ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies
-CREATE POLICY "tenant_isolation_policy" ON "stock_takes"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation_policy" ON "stock_takes"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "tenant_isolation_policy" ON "stock_take_items"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation_policy" ON "stock_take_items"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "tenant_isolation_policy" ON "item_batches"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation_policy" ON "item_batches"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Grant permissions to app_user role
 GRANT SELECT, INSERT, UPDATE, DELETE ON "stock_takes" TO app_user;

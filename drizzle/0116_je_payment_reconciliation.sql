@@ -1,6 +1,6 @@
 -- Allow payment_entry_references to track JE-based payments (not just payment_entries)
 ALTER TABLE payment_entry_references ALTER COLUMN payment_entry_id DROP NOT NULL;
-ALTER TABLE payment_entry_references ADD COLUMN source_je_item_id UUID REFERENCES journal_entry_items(id);
+ALTER TABLE payment_entry_references ADD COLUMN IF NOT EXISTS source_je_item_id UUID REFERENCES journal_entry_items(id);
 
 -- Grant column access to app_user role for RLS
 DO $$

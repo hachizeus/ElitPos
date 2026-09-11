@@ -57,7 +57,7 @@ export function generateCheckoutParams(options: {
   cancelUrl: string
   notifyUrl: string
 }): PayhereCheckoutParams {
-  const currency = options.currency || 'LKR'
+  const currency = options.currency || 'KES'
   const hash = generateCheckoutHash(options.orderId, options.amount, currency)
 
   // Split name into first/last

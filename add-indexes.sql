@@ -1,4 +1,4 @@
--- Performance Indexes for Retail Smart POS
+-- Performance Indexes for ElitPOS
 -- Run this file to dramatically improve query performance
 -- Execute with: psql -d your_database -f add-indexes.sql
 -- Or run each command in Drizzle Studio SQL tab

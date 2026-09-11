@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { resolveFileUrl } from '@/lib/files/client'
 import { StepRail } from './StepRail'
 import { StepBusinessProfile } from './StepBusinessProfile'
 import { StepBusinessConfig } from './StepBusinessConfig'
@@ -205,7 +206,7 @@ export function SetupWizard({ companySlug }: SetupWizardProps) {
         return (
           <StepBusinessProfile
             data={wizardData}
-            currency={companyInfo?.currency || 'LKR'}
+            currency={companyInfo?.currency || 'KES'}
             country={companyInfo?.country || ''}
             countryName={companyInfo?.countryName || ''}
             businessType={companyInfo?.businessType || 'retail'}
@@ -222,7 +223,7 @@ export function SetupWizard({ companySlug }: SetupWizardProps) {
             companySlug={companySlug}
             country={companyInfo?.country || ''}
             countryName={companyInfo?.countryName || ''}
-            currency={companyInfo?.currency || 'LKR'}
+            currency={companyInfo?.currency || 'KES'}
             aiEnabled={companyInfo?.aiEnabled}
             onChange={updateWizardData}
           />
@@ -235,7 +236,7 @@ export function SetupWizard({ companySlug }: SetupWizardProps) {
             businessType={companyInfo?.businessType || 'retail'}
             country={companyInfo?.country || ''}
             countryName={companyInfo?.countryName || ''}
-            currency={companyInfo?.currency || 'LKR'}
+            currency={companyInfo?.currency || 'KES'}
             companyName={companyInfo?.name || 'Your Company'}
             aiEnabled={companyInfo?.aiEnabled}
             onChange={updateWizardData}
@@ -249,7 +250,7 @@ export function SetupWizard({ companySlug }: SetupWizardProps) {
             businessType={companyInfo?.businessType || 'retail'}
             country={companyInfo?.country || ''}
             countryName={companyInfo?.countryName || ''}
-            currency={companyInfo?.currency || 'LKR'}
+            currency={companyInfo?.currency || 'KES'}
             companyName={companyInfo?.name || 'Your Company'}
             aiEnabled={companyInfo?.aiEnabled}
             onChange={updateWizardData}
@@ -263,7 +264,7 @@ export function SetupWizard({ companySlug }: SetupWizardProps) {
             businessType={companyInfo?.businessType || 'retail'}
             country={companyInfo?.country || ''}
             countryName={companyInfo?.countryName || ''}
-            currency={companyInfo?.currency || 'LKR'}
+            currency={companyInfo?.currency || 'KES'}
             aiEnabled={companyInfo?.aiEnabled}
             onChange={updateWizardData}
           />
@@ -292,7 +293,7 @@ export function SetupWizard({ companySlug }: SetupWizardProps) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
         <div className="text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-blue-600 mx-auto mb-4" />
+          <Loader2 className="h-10 w-10 animate-spin text-[#00cc6e] mx-auto mb-4" />
           <p className="text-gray-600 dark:text-gray-400">Loading setup wizard...</p>
         </div>
       </div>
@@ -333,15 +334,15 @@ export function SetupWizard({ companySlug }: SetupWizardProps) {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 via-slate-50 to-blue-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 overflow-hidden">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 via-slate-50 to-green-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 overflow-hidden">
       {/* Header */}
       <header className="h-16 flex-shrink-0 border-b border-gray-200/60 dark:border-gray-700/50 bg-white/70 dark:bg-slate-800/70 backdrop-blur-md px-4 lg:px-8 flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           {companyInfo?.logoUrl ? (
             /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={companyInfo.logoUrl} alt="" className="h-9 w-9 rounded-lg object-contain flex-shrink-0 ring-1 ring-gray-200 dark:ring-gray-700" />
+            <img src={resolveFileUrl(companyInfo.logoUrl) ?? ''} alt="" className="h-9 w-9 rounded-lg object-contain flex-shrink-0 ring-1 ring-gray-200 dark:ring-gray-700" />
           ) : (
-            <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+            <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-[#00FF88] to-[#00e67a] flex items-center justify-center flex-shrink-0">
               <span className="text-white text-sm font-bold">{(companyInfo?.name || 'C')[0]}</span>
             </div>
           )}
@@ -360,8 +361,8 @@ export function SetupWizard({ companySlug }: SetupWizardProps) {
               onClick={() => setShowAI(!showAI)}
               className={`p-2 rounded-lg transition-all duration-200 ${
                 showAI
-                  ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 shadow-sm'
-                  : 'text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-slate-700'
+                  ? 'text-[#00cc6e] dark:text-green-400 bg-green-50 dark:bg-green-900/30 shadow-sm'
+                  : 'text-gray-400 hover:text-[#00cc6e] dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-slate-700'
               }`}
               title={showAI ? 'Close AI Assistant' : 'AI Assistant'}
             >
@@ -468,7 +469,7 @@ export function SetupWizard({ companySlug }: SetupWizardProps) {
           <button
             onClick={handleNext}
             disabled={isCompleting}
-            className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-semibold text-sm shadow-sm shadow-blue-500/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none"
+            className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#00e67a] to-[#00cc6e] text-white rounded-lg hover:from-[#00cc6e] hover:to-[#00b35e] transition-all duration-200 font-semibold text-sm shadow-sm shadow-green-500/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none"
           >
             Continue
             <ArrowRight size={15} />

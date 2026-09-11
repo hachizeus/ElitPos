@@ -70,7 +70,7 @@ export function StepInviteTeam({ data, businessType, companySlug, onChange, onNe
     <div>
       <div className="mb-6">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <Users size={24} className="text-blue-600" />
+          <Users size={24} className="text-[#00cc6e]" />
           Invite Your Team
         </h2>
         <p className="text-gray-500 dark:text-gray-400 mt-1">
@@ -89,12 +89,12 @@ export function StepInviteTeam({ data, businessType, companySlug, onChange, onNe
               value={invite.email}
               onChange={(e) => updateInvite(index, 'email', e.target.value)}
               placeholder="team@example.com"
-              className="flex-1 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="flex-1 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent"
             />
             <select
               value={invite.role}
               onChange={(e) => updateInvite(index, 'role', e.target.value)}
-              className="px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent"
             >
               {roles.map((role) => (
                 <option key={role.value} value={role.value}>
@@ -114,7 +114,7 @@ export function StepInviteTeam({ data, businessType, companySlug, onChange, onNe
         {invites.length < 5 && (
           <button
             onClick={addInvite}
-            className="flex items-center gap-2 px-4 py-2.5 border border-dashed border-gray-300 dark:border-gray-600 rounded text-sm text-gray-600 dark:text-gray-400 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors w-full justify-center"
+            className="flex items-center gap-2 px-4 py-2.5 border border-dashed border-gray-300 dark:border-gray-600 rounded text-sm text-gray-600 dark:text-gray-400 hover:border-green-400 hover:text-[#00cc6e] dark:hover:text-green-400 transition-colors w-full justify-center"
           >
             <Plus size={18} />
             Add team member
@@ -149,7 +149,7 @@ export function StepInviteTeam({ data, businessType, companySlug, onChange, onNe
           )}
           <button
             onClick={onNext}
-            className="px-6 py-2.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors font-medium"
+            className="px-6 py-2.5 bg-[#00e67a] text-white rounded hover:bg-[#00cc6e] transition-colors font-medium"
           >
             {hasValidInvites ? 'Complete Setup' : 'Skip & Complete'}
           </button>

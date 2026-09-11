@@ -153,9 +153,49 @@ export default function SettingsPage() {
     storageCriticalPercent: 95,
   })
 
-  // PayHere config status
-  const [payhereConfigured, setPayhereConfigured] = useState(false)
-  const [payhereSandbox, setPayhereSandbox] = useState(false)
+  // Platform payment gateway credentials (for receiving subscription payments)
+  const [platformGateways, setPlatformGateways] = useState({
+    mpesaEnabled: false,
+    mpesaEnvironment: 'sandbox' as 'sandbox' | 'production',
+    mpesaConsumerKey: '',
+    mpesaConsumerSecret: '',
+    mpesaShortcode: '',
+    mpesaPasskey: '',
+    mpesaConsumerKeyIsSet: false,
+    mpesaConsumerSecretIsSet: false,
+    mpesaPasskeyIsSet: false,
+
+    stripeEnabled: false,
+    stripePublishableKey: '',
+    stripeSecretKey: '',
+    stripeWebhookSecret: '',
+    stripeCurrency: 'KES',
+    stripeSecretKeyIsSet: false,
+    stripeWebhookSecretIsSet: false,
+
+    paystackEnabled: false,
+    paystackPublicKey: '',
+    paystackSecretKey: '',
+    paystackWebhookSecret: '',
+    paystackCurrency: 'KES',
+    paystackSecretKeyIsSet: false,
+    paystackWebhookSecretIsSet: false,
+
+    payheroEnabled: false,
+    payheroApiUsername: '',
+    payheroApiPassword: '',
+    payheroChannelId: '',
+    payheroApiPasswordIsSet: false,
+  })
+  const [pgwVisible, setPgwVisible] = useState<Record<string, boolean>>({})
+
+  // Gateway status counts (how many tenants have each gateway enabled)
+  const [gatewayStatus, setGatewayStatus] = useState([
+    { name: 'mpesa',    label: 'M-Pesa',   count: 0 },
+    { name: 'stripe',   label: 'Stripe',   count: 0 },
+    { name: 'paystack', label: 'Paystack', count: 0 },
+    { name: 'payhero',  label: 'PayHero',  count: 0 },
+  ])
 
   // Volume discounts
   const [volumeTiers, setVolumeTiers] = useState<VolumeTier[]>([
@@ -197,36 +237,62 @@ export default function SettingsPage() {
     showOnPricing: false,
   })
 
+  // SMS credentials for sending notifications
+  const [smsCredentials, setSmsCredentials] = useState({
+    provider: 'africas_talking' as 'africas_talking' | 'twilio',
+    apiKey: '',
+    username: '', // Africa's Talking
+    senderId: '',
+    accountSid: '', // Twilio
+    authToken: '', // Twilio
+    apiKeyIsSet: false,
+    usernameIsSet: false,
+    authTokenIsSet: false,
+  })
+
   const fetchSettings = useCallback(async () => {
     try {
       // Fetch bank details
       const bankRes = await fetch('/api/sys-control/settings?key=bank_details')
       if (bankRes.ok) {
         const data = await bankRes.json()
-        if (data.value) setBankDetails(data.value)
+        if (data.value) setBankDetails(prev => ({ ...prev, ...data.value }))
       }
 
       // Fetch announcement
       const annRes = await fetch('/api/sys-control/settings?key=system_announcement')
       if (annRes.ok) {
         const data = await annRes.json()
-        if (data.value) setAnnouncement(data.value)
+        if (data.value) {
+          setAnnouncement(prev => ({ ...prev, ...data.value }))
+        }
       }
 
       // Fetch billing config
       const billingRes = await fetch('/api/sys-control/settings?key=billing_config')
       if (billingRes.ok) {
         const data = await billingRes.json()
-        if (data.value) setBillingConfig(data.value)
+        if (data.value) setBillingConfig(prev => ({ ...prev, ...data.value }))
       }
 
-      // Fetch PayHere status
-      const phRes = await fetch('/api/sys-control/settings?key=payhere_status')
-      if (phRes.ok) {
-        const data = await phRes.json()
+      // Fetch platform gateway credentials
+      const pgwRes = await fetch('/api/sys-control/settings?key=platform_gateways')
+      if (pgwRes.ok) {
+        const data = await pgwRes.json()
+        if (data.value) setPlatformGateways(prev => ({ ...prev, ...data.value }))
+      }
+
+      // Fetch gateway status counts
+      const gwRes = await fetch('/api/sys-control/settings?key=gateway_status')
+      if (gwRes.ok) {
+        const data = await gwRes.json()
         if (data.value) {
-          setPayhereConfigured(data.value.configured)
-          setPayhereSandbox(data.value.sandbox)
+          setGatewayStatus([
+            { name: 'mpesa',    label: 'M-Pesa',   count: data.value.mpesa    || 0 },
+            { name: 'stripe',   label: 'Stripe',   count: data.value.stripe   || 0 },
+            { name: 'paystack', label: 'Paystack', count: data.value.paystack || 0 },
+            { name: 'payhero',  label: 'PayHero',  count: data.value.payhero  || 0 },
+          ])
         }
       }
 
@@ -241,14 +307,33 @@ export default function SettingsPage() {
       const contactRes = await fetch('/api/sys-control/settings?key=contact_info')
       if (contactRes.ok) {
         const data = await contactRes.json()
-        if (data.value) setContactInfo(data.value)
+        if (data.value) setContactInfo(prev => ({ ...prev, ...data.value }))
+      }
+
+      // Fetch SMS credentials
+      const smsRes = await fetch('/api/sys-control/settings?key=sms_credentials')
+      if (smsRes.ok) {
+        const data = await smsRes.json()
+        if (data.value) {
+          setSmsCredentials(prev => ({
+            ...prev,
+            ...data.value,
+            apiKeyIsSet: !!data.value.apiKey,
+            usernameIsSet: !!data.value.username,
+            authTokenIsSet: !!data.value.authToken,
+            // Clear actual values for security (only show if newly set)
+            apiKey: '',
+            username: data.value.provider === 'africas_talking' ? (data.value.username || '') : '',
+            authToken: '',
+          }))
+        }
       }
 
       // Fetch seasonal offer
       const seasonRes = await fetch('/api/sys-control/settings?key=seasonal_offer')
       if (seasonRes.ok) {
         const data = await seasonRes.json()
-        if (data.value) setSeasonalOffer(data.value)
+        if (data.value) setSeasonalOffer(prev => ({ ...prev, ...data.value }))
       }
     } catch (error) {
       console.error('Failed to fetch settings:', error)
@@ -623,49 +708,36 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* PayHere Configuration Status */}
+          {/* Payment Gateway Status */}
           <div className={CARD_CLASS}>
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
               <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Zap className="w-5 h-5" />
-                PayHere Payment Gateway
+                <CreditCard className="w-5 h-5" />
+                Payment Gateways
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Status of PayHere payment integration
+                Each company configures their own payment gateways in Settings → Payment Gateways.
+                Status below reflects the number of active tenants per gateway.
               </p>
             </div>
             <div className="p-6">
-              <div className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${payhereConfigured ? 'bg-green-500' : 'bg-red-500'}`} />
-                <span className="font-medium text-gray-900 dark:text-white">
-                  {payhereConfigured ? 'PayHere is configured and active' : 'PayHere is not configured'}
-                </span>
-              </div>
-              {!payhereConfigured && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
-                  Set the following environment variables to enable PayHere payments:
-                  <code className="block mt-2 bg-gray-50 dark:bg-gray-700/50 rounded p-3 text-xs font-mono">
-                    PAYHERE_MERCHANT_ID=&quot;...&quot;<br />
-                    PAYHERE_MERCHANT_SECRET=&quot;...&quot;<br />
-                    PAYHERE_SANDBOX=&quot;true&quot; (for testing)<br />
-                    NEXT_PUBLIC_APP_URL=&quot;https://your-app.com&quot;
-                  </code>
-                </p>
-              )}
-              {payhereConfigured && (
-                <div className="mt-3 grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400">Mode</p>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {payhereSandbox ? 'Sandbox (Testing)' : 'Live (Production)'}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {gatewayStatus.map((gw) => (
+                  <div key={gw.name} className="flex flex-col gap-2 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2.5 h-2.5 rounded-full ${gw.count > 0 ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-500'}`} />
+                      <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{gw.label}</span>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{gw.count}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {gw.count === 1 ? 'tenant active' : 'tenants active'}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-gray-500 dark:text-gray-400">Merchant ID</p>
-                    <p className="font-medium text-gray-900 dark:text-white font-mono">***configured***</p>
-                  </div>
-                </div>
-              )}
+                ))}
+              </div>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
+                To configure gateways for a specific company, go to that company&apos;s tenant dashboard → Settings → Payment Gateways.
+              </p>
             </div>
           </div>
 
@@ -674,7 +746,7 @@ export default function SettingsPage() {
             <button
               onClick={() => saveSetting('system_announcement', announcement, 'System-wide announcement banner')}
               disabled={saving === 'system_announcement'}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition-colors disabled:opacity-50 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
+              className="flex items-center gap-2 px-4 py-2 bg-[#00FF88] text-black rounded hover:bg-[#00e67a] transition-colors disabled:opacity-50"
             >
               {saving === 'system_announcement' ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -686,7 +758,7 @@ export default function SettingsPage() {
             <button
               onClick={() => saveSetting('bank_details', bankDetails, 'Bank details for payment deposits')}
               disabled={saving === 'bank_details'}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition-colors disabled:opacity-50 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
+              className="flex items-center gap-2 px-4 py-2 bg-[#00FF88] text-black rounded hover:bg-[#00e67a] transition-colors disabled:opacity-50"
             >
               {saving === 'bank_details' ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -777,7 +849,7 @@ export default function SettingsPage() {
                 <button
                   onClick={() => saveSetting('billing_config', billingConfig, 'Billing and lockout configuration')}
                   disabled={saving === 'billing_config'}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition-colors disabled:opacity-50 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#00FF88] text-black rounded hover:bg-[#00e67a] transition-colors disabled:opacity-50"
                 >
                   {saving === 'billing_config' ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -785,6 +857,302 @@ export default function SettingsPage() {
                     <Save className="w-4 h-4" />
                   )}
                   Save Billing Config
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Platform Payment Gateways — credentials the platform owner uses to receive subscription payments */}
+          <div className={CARD_CLASS}>
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                Platform Payment Gateways
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Your credentials for receiving subscription payments from clients.
+                Secret keys are stored encrypted and never exposed in the browser.
+              </p>
+            </div>
+            <div className="p-6 space-y-6">
+
+              {/* ── M-Pesa ── */}
+              <div className="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700/50">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">M</span>
+                    <span className="font-semibold text-gray-900 dark:text-white text-sm">M-Pesa Daraja (Safaricom)</span>
+                    {platformGateways.mpesaEnabled && <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full font-medium">Active</span>}
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked={platformGateways.mpesaEnabled} onChange={e => setPlatformGateways(p => ({ ...p, mpesaEnabled: e.target.checked }))} className="sr-only" />
+                    <div className={`w-10 h-6 rounded-full transition-colors ${platformGateways.mpesaEnabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                      <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${platformGateways.mpesaEnabled ? 'translate-x-4' : ''}`} />
+                    </div>
+                  </label>
+                </div>
+                <div className="p-4 space-y-3">
+                  <div className="flex gap-3">
+                    <label className="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="mpesaEnv" checked={platformGateways.mpesaEnvironment === 'sandbox'} onChange={() => setPlatformGateways(p => ({ ...p, mpesaEnvironment: 'sandbox' }))} className="accent-green-600" /><span className="text-gray-700 dark:text-gray-300">Sandbox</span></label>
+                    <label className="flex items-center gap-2 text-sm cursor-pointer"><input type="radio" name="mpesaEnv" checked={platformGateways.mpesaEnvironment === 'production'} onChange={() => setPlatformGateways(p => ({ ...p, mpesaEnvironment: 'production' }))} className="accent-orange-600" /><span className="text-gray-700 dark:text-gray-300">Production</span></label>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Business Shortcode</label><input type="text" value={platformGateways.mpesaShortcode} onChange={e => setPlatformGateways(p => ({ ...p, mpesaShortcode: e.target.value }))} placeholder="e.g. 174379" className={INPUT_CLASS} /></div>
+                    <div><label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consumer Key {platformGateways.mpesaConsumerKeyIsSet && !platformGateways.mpesaConsumerKey && <span className="text-green-500 ml-1">✓ set</span>}</label><input type={pgwVisible['mpesaConsumerKey'] ? 'text' : 'password'} value={platformGateways.mpesaConsumerKey} onChange={e => setPlatformGateways(p => ({ ...p, mpesaConsumerKey: e.target.value }))} placeholder={platformGateways.mpesaConsumerKeyIsSet ? '(already set — enter to replace)' : 'Consumer Key'} className={INPUT_CLASS} autoComplete="off" /></div>
+                    <div><label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Consumer Secret {platformGateways.mpesaConsumerSecretIsSet && !platformGateways.mpesaConsumerSecret && <span className="text-green-500 ml-1">✓ set</span>}</label><input type={pgwVisible['mpesaConsumerSecret'] ? 'text' : 'password'} value={platformGateways.mpesaConsumerSecret} onChange={e => setPlatformGateways(p => ({ ...p, mpesaConsumerSecret: e.target.value }))} placeholder={platformGateways.mpesaConsumerSecretIsSet ? '(already set)' : 'Consumer Secret'} className={INPUT_CLASS} autoComplete="off" /></div>
+                    <div><label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">STK Passkey {platformGateways.mpesaPasskeyIsSet && !platformGateways.mpesaPasskey && <span className="text-green-500 ml-1">✓ set</span>}</label><input type={pgwVisible['mpesaPasskey'] ? 'text' : 'password'} value={platformGateways.mpesaPasskey} onChange={e => setPlatformGateways(p => ({ ...p, mpesaPasskey: e.target.value }))} placeholder={platformGateways.mpesaPasskeyIsSet ? '(already set)' : 'Passkey'} className={INPUT_CLASS} autoComplete="off" /></div>
+                  </div>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">M-Pesa callback: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">/api/mpesa/callback</code></p>
+                </div>
+              </div>
+
+              {/* ── Stripe ── */}
+              <div className="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700/50">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">S</span>
+                    <span className="font-semibold text-gray-900 dark:text-white text-sm">Stripe</span>
+                    {platformGateways.stripeEnabled && <span className="text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 px-2 py-0.5 rounded-full font-medium">Active</span>}
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked={platformGateways.stripeEnabled} onChange={e => setPlatformGateways(p => ({ ...p, stripeEnabled: e.target.checked }))} className="sr-only" />
+                    <div className={`w-10 h-6 rounded-full transition-colors ${platformGateways.stripeEnabled ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                      <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${platformGateways.stripeEnabled ? 'translate-x-4' : ''}`} />
+                    </div>
+                  </label>
+                </div>
+                <div className="p-4 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Publishable Key</label><input type="text" value={platformGateways.stripePublishableKey} onChange={e => setPlatformGateways(p => ({ ...p, stripePublishableKey: e.target.value }))} placeholder="pk_live_… or pk_test_…" className={INPUT_CLASS} /></div>
+                    <div><label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Currency</label><select value={platformGateways.stripeCurrency} onChange={e => setPlatformGateways(p => ({ ...p, stripeCurrency: e.target.value }))} className={INPUT_CLASS}>{['KES','USD','EUR','GBP','NGN','ZAR','GHS','UGX'].map(c => <option key={c}>{c}</option>)}</select></div>
+                    <div className="sm:col-span-2"><label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Secret Key {platformGateways.stripeSecretKeyIsSet && !platformGateways.stripeSecretKey && <span className="text-green-500 ml-1">✓ set</span>}</label><input type="password" value={platformGateways.stripeSecretKey} onChange={e => setPlatformGateways(p => ({ ...p, stripeSecretKey: e.target.value }))} placeholder={platformGateways.stripeSecretKeyIsSet ? '(already set)' : 'sk_live_… or sk_test_…'} className={INPUT_CLASS} autoComplete="off" /></div>
+                    <div className="sm:col-span-2"><label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Webhook Secret {platformGateways.stripeWebhookSecretIsSet && !platformGateways.stripeWebhookSecret && <span className="text-green-500 ml-1">✓ set</span>}</label><input type="password" value={platformGateways.stripeWebhookSecret} onChange={e => setPlatformGateways(p => ({ ...p, stripeWebhookSecret: e.target.value }))} placeholder={platformGateways.stripeWebhookSecretIsSet ? '(already set)' : 'whsec_…'} className={INPUT_CLASS} autoComplete="off" /></div>
+                  </div>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Webhook endpoint: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">/api/stripe/webhook</code></p>
+                </div>
+              </div>
+
+              {/* ── Paystack ── */}
+              <div className="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700/50">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center text-white text-xs font-bold">P</span>
+                    <span className="font-semibold text-gray-900 dark:text-white text-sm">Paystack</span>
+                    {platformGateways.paystackEnabled && <span className="text-xs bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 px-2 py-0.5 rounded-full font-medium">Active</span>}
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked={platformGateways.paystackEnabled} onChange={e => setPlatformGateways(p => ({ ...p, paystackEnabled: e.target.checked }))} className="sr-only" />
+                    <div className={`w-10 h-6 rounded-full transition-colors ${platformGateways.paystackEnabled ? 'bg-teal-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                      <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${platformGateways.paystackEnabled ? 'translate-x-4' : ''}`} />
+                    </div>
+                  </label>
+                </div>
+                <div className="p-4 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Public Key</label><input type="text" value={platformGateways.paystackPublicKey} onChange={e => setPlatformGateways(p => ({ ...p, paystackPublicKey: e.target.value }))} placeholder="pk_live_… or pk_test_…" className={INPUT_CLASS} /></div>
+                    <div><label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Currency</label><select value={platformGateways.paystackCurrency} onChange={e => setPlatformGateways(p => ({ ...p, paystackCurrency: e.target.value }))} className={INPUT_CLASS}>{['KES','NGN','GHS','ZAR','USD','EGP'].map(c => <option key={c}>{c}</option>)}</select></div>
+                    <div className="sm:col-span-2"><label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Secret Key {platformGateways.paystackSecretKeyIsSet && !platformGateways.paystackSecretKey && <span className="text-green-500 ml-1">✓ set</span>}</label><input type="password" value={platformGateways.paystackSecretKey} onChange={e => setPlatformGateways(p => ({ ...p, paystackSecretKey: e.target.value }))} placeholder={platformGateways.paystackSecretKeyIsSet ? '(already set)' : 'sk_live_…'} className={INPUT_CLASS} autoComplete="off" /></div>
+                  </div>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Webhook: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">/api/paystack/webhook</code> · Callback: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">/api/paystack/callback</code></p>
+                </div>
+              </div>
+
+              {/* ── PayHero ── */}
+              <div className="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-700/50">
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center text-white text-xs font-bold">H</span>
+                    <span className="font-semibold text-gray-900 dark:text-white text-sm">PayHero</span>
+                    {platformGateways.payheroEnabled && <span className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-2 py-0.5 rounded-full font-medium">Active</span>}
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" checked={platformGateways.payheroEnabled} onChange={e => setPlatformGateways(p => ({ ...p, payheroEnabled: e.target.checked }))} className="sr-only" />
+                    <div className={`w-10 h-6 rounded-full transition-colors ${platformGateways.payheroEnabled ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                      <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${platformGateways.payheroEnabled ? 'translate-x-4' : ''}`} />
+                    </div>
+                  </label>
+                </div>
+                <div className="p-4 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">API Username</label><input type="text" value={platformGateways.payheroApiUsername} onChange={e => setPlatformGateways(p => ({ ...p, payheroApiUsername: e.target.value }))} placeholder="PayHero API username" className={INPUT_CLASS} /></div>
+                    <div><label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Channel ID</label><input type="text" value={platformGateways.payheroChannelId} onChange={e => setPlatformGateways(p => ({ ...p, payheroChannelId: e.target.value }))} placeholder="From PayHero dashboard" className={INPUT_CLASS} /></div>
+                    <div className="sm:col-span-2"><label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">API Password {platformGateways.payheroApiPasswordIsSet && !platformGateways.payheroApiPassword && <span className="text-green-500 ml-1">✓ set</span>}</label><input type="password" value={platformGateways.payheroApiPassword} onChange={e => setPlatformGateways(p => ({ ...p, payheroApiPassword: e.target.value }))} placeholder={platformGateways.payheroApiPasswordIsSet ? '(already set)' : 'API password'} className={INPUT_CLASS} autoComplete="off" /></div>
+                  </div>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Callback URL: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">/api/payhero/notify</code></p>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  onClick={async () => {
+                    // Strip masked placeholder values before saving
+                    const toSave: Record<string, unknown> = {}
+                    for (const [k, v] of Object.entries(platformGateways)) {
+                      if (typeof v === 'string' && (v === '(already set)' || v === '(already set — enter to replace)')) continue
+                      if (k.endsWith('IsSet')) continue
+                      toSave[k] = v
+                    }
+                    await saveSetting('platform_gateways', toSave, 'Platform payment gateway credentials')
+                  }}
+                  disabled={saving === 'platform_gateways'}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#00FF88] text-black rounded hover:bg-[#00e67a] transition-colors disabled:opacity-50"
+                >
+                  {saving === 'platform_gateways' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Save Gateway Credentials
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* SMS Notification Credentials */}
+          <div className={CARD_CLASS}>
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Phone className="w-5 h-5" />
+                SMS Notification Credentials
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Configure SMS provider for sending notification messages to users
+              </p>
+            </div>
+            <div className="p-6 space-y-6">
+              {/* Provider Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  SMS Provider
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      checked={smsCredentials.provider === 'africas_talking'}
+                      onChange={() => setSmsCredentials(p => ({ ...p, provider: 'africas_talking' }))}
+                      className="accent-green-600"
+                    />
+                    <span className="text-gray-700 dark:text-gray-300">Africa's Talking</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      checked={smsCredentials.provider === 'twilio'}
+                      onChange={() => setSmsCredentials(p => ({ ...p, provider: 'twilio' }))}
+                      className="accent-blue-600"
+                    />
+                    <span className="text-gray-700 dark:text-gray-300">Twilio</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Africa's Talking Credentials */}
+              {smsCredentials.provider === 'africas_talking' && (
+                <div className="space-y-3 p-4 bg-green-50 dark:bg-green-900/10 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                        Username {smsCredentials.usernameIsSet && !smsCredentials.username && <span className="text-green-500 ml-1">✓ set</span>}
+                      </label>
+                      <input
+                        type="text"
+                        value={smsCredentials.username}
+                        onChange={e => setSmsCredentials(p => ({ ...p, username: e.target.value }))}
+                        placeholder="sandbox or your username"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                        API Key {smsCredentials.apiKeyIsSet && !smsCredentials.apiKey && <span className="text-green-500 ml-1">✓ set</span>}
+                      </label>
+                      <input
+                        type="password"
+                        value={smsCredentials.apiKey}
+                        onChange={e => setSmsCredentials(p => ({ ...p, apiKey: e.target.value }))}
+                        placeholder="Enter API key"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                        Sender ID (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={smsCredentials.senderId}
+                        onChange={e => setSmsCredentials(p => ({ ...p, senderId: e.target.value }))}
+                        placeholder="e.g. ELITPOS"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Get your API credentials from <a href="https://account.africastalking.com/" target="_blank" rel="noopener noreferrer" className="text-green-600 hover:underline">Africa's Talking Dashboard</a>
+                  </p>
+                </div>
+              )}
+
+              {/* Twilio Credentials */}
+              {smsCredentials.provider === 'twilio' && (
+                <div className="space-y-3 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                        Account SID
+                      </label>
+                      <input
+                        type="text"
+                        value={smsCredentials.accountSid}
+                        onChange={e => setSmsCredentials(p => ({ ...p, accountSid: e.target.value }))}
+                        placeholder="ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                        Auth Token {smsCredentials.authTokenIsSet && !smsCredentials.authToken && <span className="text-green-500 ml-1">✓ set</span>}
+                      </label>
+                      <input
+                        type="password"
+                        value={smsCredentials.authToken}
+                        onChange={e => setSmsCredentials(p => ({ ...p, authToken: e.target.value }))}
+                        placeholder="Enter auth token"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                        Phone Number / Sender ID
+                      </label>
+                      <input
+                        type="text"
+                        value={smsCredentials.senderId}
+                        onChange={e => setSmsCredentials(p => ({ ...p, senderId: e.target.value }))}
+                        placeholder="+1234567890"
+                        className={INPUT_CLASS}
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Get your API credentials from <a href="https://console.twilio.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Twilio Console</a>
+                  </p>
+                </div>
+              )}
+
+              {/* Save Button */}
+              <div className="flex justify-end pt-4">
+                <button
+                  onClick={async () => {
+                    const toSave: Record<string, unknown> = {}
+                    for (const [k, v] of Object.entries(smsCredentials)) {
+                      if (k.endsWith('IsSet')) continue
+                      toSave[k] = v
+                    }
+                    await saveSetting('sms_credentials', toSave, 'SMS notification credentials')
+                  }}
+                  disabled={saving === 'sms_credentials'}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#00FF88] text-black rounded hover:bg-[#00e67a] transition-colors disabled:opacity-50"
+                >
+                  {saving === 'sms_credentials' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Save SMS Credentials
                 </button>
               </div>
             </div>
@@ -871,7 +1239,7 @@ export default function SettingsPage() {
                 <button
                   onClick={() => saveSetting('volume_discounts', { tiers: volumeTiers }, 'Volume discount tiers')}
                   disabled={saving === 'volume_discounts'}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition-colors disabled:opacity-50 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#00FF88] text-black rounded hover:bg-[#00e67a] transition-colors disabled:opacity-50"
                 >
                   {saving === 'volume_discounts' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Save Volume Discounts
@@ -1104,7 +1472,7 @@ export default function SettingsPage() {
                           <td className="py-3 px-2 text-gray-900 dark:text-white font-medium">
                             {coupon.discountType === 'percentage'
                               ? `${coupon.discountValue}%`
-                              : `$${coupon.discountValue}`
+                              : `KSh ${coupon.discountValue}`
                             }
                           </td>
                           <td className="py-3 px-2 text-gray-700 dark:text-gray-300">
@@ -1198,7 +1566,7 @@ export default function SettingsPage() {
                     type="text"
                     value={contactInfo.companyName}
                     onChange={(e) => setContactInfo({ ...contactInfo, companyName: e.target.value })}
-                    placeholder="Retail Smart ERP"
+                    placeholder="ElitPOS"
                     className={INPUT_CLASS}
                   />
                 </div>
@@ -1208,7 +1576,7 @@ export default function SettingsPage() {
                     type="email"
                     value={contactInfo.email}
                     onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
-                    placeholder="support@retailsmarterp.com"
+                    placeholder="info@elitjohnsdigital.co.ke"
                     className={INPUT_CLASS}
                   />
                 </div>
@@ -1257,7 +1625,7 @@ export default function SettingsPage() {
                 <button
                   onClick={() => saveSetting('contact_info', contactInfo, 'Public contact information')}
                   disabled={saving === 'contact_info'}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition-colors disabled:opacity-50 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#00FF88] text-black rounded hover:bg-[#00e67a] transition-colors disabled:opacity-50"
                 >
                   {saving === 'contact_info' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Save Contact Info
@@ -1374,7 +1742,7 @@ export default function SettingsPage() {
                 <button
                   onClick={() => saveSetting('seasonal_offer', seasonalOffer, 'Seasonal promotional offer')}
                   disabled={saving === 'seasonal_offer'}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition-colors disabled:opacity-50 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#00FF88] text-black rounded hover:bg-[#00e67a] transition-colors disabled:opacity-50"
                 >
                   {saving === 'seasonal_offer' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   Save Seasonal Offer

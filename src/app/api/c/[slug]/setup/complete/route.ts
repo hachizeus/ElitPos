@@ -58,14 +58,28 @@ export async function POST(
         sql`SELECT set_config('app.tenant_id', ${tenant.id}, true)`
       )
 
-      // Verify the user is an owner of this tenant
-      const ownerUser = await tx.query.users.findFirst({
+      // Verify the user is an owner of this tenant.
+      // Try by session.user.id first, then fall back to accountId — this handles
+      // the case where a user is transferred from another company and session.user.id
+      // points to their user record in the OTHER company's users table.
+      let ownerUser = await tx.query.users.findFirst({
         where: and(
           eq(users.id, session.user.id),
           eq(users.tenantId, tenant.id),
           eq(users.isActive, true)
         ),
       })
+
+      if (!ownerUser && session.user.accountId) {
+        // Fallback: find by accountId within this tenant
+        ownerUser = await tx.query.users.findFirst({
+          where: and(
+            eq(users.accountId, session.user.accountId),
+            eq(users.tenantId, tenant.id),
+            eq(users.isActive, true)
+          ),
+        })
+      }
 
       if (!ownerUser || ownerUser.role !== 'owner') {
         throw new Error('FORBIDDEN')

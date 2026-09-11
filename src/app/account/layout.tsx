@@ -33,7 +33,7 @@ export default async function AccountLayout({
   }
 
   return (
-    <SessionProvider basePath="/api/account-auth" session={session} refetchInterval={840}>
+    <SessionProvider basePath="/api/account-auth" session={session} refetchInterval={3600}>
       <SessionValidator
         validateUrl="/api/account-auth/validate"
         scope="account"

@@ -247,7 +247,7 @@ export default async function DashboardPage() {
   const isAutoService = session?.user?.businessType === 'auto_service'
 
   // Get tenant currency
-  let currencyCode = 'LKR'
+  let currencyCode = 'KES'
   if (session?.user?.tenantId) {
     const [tenant] = await db.select({ currency: tenants.currency }).from(tenants).where(eq(tenants.id, session.user.tenantId))
     if (tenant) currencyCode = tenant.currency

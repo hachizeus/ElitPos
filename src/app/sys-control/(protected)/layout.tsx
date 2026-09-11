@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
+import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { AdminSessionTimer } from '@/components/admin/AdminSessionTimer'
+import { AdminRefreshButton } from '@/components/admin/AdminRefreshButton'
+import { AdminNotificationBell } from '@/components/admin/AdminNotificationBell'
 import { validateAdminSession, getAdminFromSession } from '@/lib/admin'
 
 export default async function AdminProtectedLayout({
@@ -8,116 +10,71 @@ export default async function AdminProtectedLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Validate admin session from super_admins table
   const session = await validateAdminSession()
+  if (!session) redirect('/sys-control/login')
 
-  // Redirect to admin login if not authenticated
-  if (!session) {
-    redirect('/sys-control/login')
-  }
-
-  // Get admin details
   const admin = await getAdminFromSession()
+  const initial = admin?.email?.[0]?.toUpperCase() ?? 'A'
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Admin Header */}
-      <header className="bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-8">
-              <Link href="/sys-control" className="font-bold text-lg">
-                Admin Panel
-              </Link>
-              <nav className="flex gap-6">
-                <Link
-                  href="/sys-control"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/sys-control/users"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Users
-                </Link>
-                <Link
-                  href="/sys-control/payments"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Payments
-                </Link>
-                <Link
-                  href="/sys-control/subscriptions"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Subscriptions
-                </Link>
-                <Link
-                  href="/sys-control/audit-logs"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Audit Logs
-                </Link>
-                <Link
-                  href="/sys-control/error-logs"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Error Logs
-                </Link>
-                <Link
-                  href="/sys-control/pricing"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Pricing
-                </Link>
-                <Link
-                  href="/sys-control/messages"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Messages
-                </Link>
-                <Link
-                  href="/sys-control/notifications"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Notifications
-                </Link>
-                <Link
-                  href="/sys-control/settings"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Settings
-                </Link>
-                <Link
-                  href="/sys-control/send-email"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Send Email
-                </Link>
-              </nav>
-            </div>
-            <div className="flex items-center gap-4">
-              <AdminSessionTimer />
-              <span className="text-sm text-gray-400">{admin?.email}</span>
-              <form action="/api/sys-control/auth/logout" method="POST" className="inline">
-                <button
-                  type="submit"
-                  className="text-sm text-gray-400 hover:text-white"
-                >
-                  Logout
-                </button>
-              </form>
+    /*
+      CSS Grid shell — two columns: [sidebar] [content]
+      - The sidebar column is sized by the sidebar component itself (w-56 or w-[68px]).
+      - The content column takes all remaining space (minmax(0,1fr)).
+      - The whole grid is exactly the viewport height (h-screen) and doesn't scroll.
+      - Only the content area scrolls (overflow-y-auto).
+      - The sidebar is sticky top-0 h-screen inside its column → never scrolls.
+    */
+    <div className="flex h-screen overflow-hidden bg-gray-950">
+
+      {/* ── Sidebar — sticky, never scrolls ── */}
+      <AdminSidebar adminEmail={admin?.email ?? undefined} />
+
+      {/* ── Right column: topbar + scrollable content ── */}
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+
+        {/* Topbar — sticks to top of the right column */}
+        <header className="flex-shrink-0 flex items-center justify-between
+          h-14 px-4 lg:px-6
+          bg-gray-900/95 backdrop-blur-md
+          border-b border-[#00FF88]/10 z-20">
+
+          {/* Left: spacer for mobile hamburger + breadcrumb */}
+          <div className="flex items-center gap-2">
+            {/* Gap so mobile hamburger (fixed, top-left) doesn't overlap text */}
+            <div className="w-10 lg:hidden" />
+            <span className="text-xs font-semibold tracking-widest text-[#00FF88] uppercase select-none">
+              ElitPOS
+            </span>
+            <span className="text-gray-700 select-none">/</span>
+            <span className="text-xs text-gray-400">Admin</span>
+          </div>
+
+          {/* Right: session controls */}
+          <div className="flex items-center gap-3">
+            <AdminRefreshButton />
+            <AdminNotificationBell />
+            <AdminSessionTimer />
+            {admin?.email && (
+              <span className="hidden sm:block text-xs text-gray-500 max-w-[160px] truncate">
+                {admin.email}
+              </span>
+            )}
+            <div className="w-7 h-7 rounded-full bg-[#00FF88]/15 border border-[#00FF88]/30
+              flex items-center justify-center flex-shrink-0">
+              <span className="text-[10px] font-bold text-[#00FF88]">{initial}</span>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
+        {/* Scrollable page content */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-5 lg:p-8">
+            {children}
+          </div>
+        </main>
+
+      </div>
     </div>
   )
 }

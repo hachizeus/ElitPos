@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { PageSkeleton } from '@/components/ui/skeleton'
 import { toast } from '@/components/ui/toast'
 import { useUnsavedChangesWarning } from '@/hooks'
+import { resolveFileUrl } from '@/lib/files/client'
 import {
   User,
   Lock,
@@ -316,7 +317,7 @@ export default function ProfilePage() {
               {profile?.avatarUrl ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
-                  src={profile.avatarUrl}
+                  src={resolveFileUrl(profile.avatarUrl) ?? ''}
                   alt={profile.fullName}
                   className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
                 />
@@ -344,7 +345,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => avatarInputRef.current?.click()}
                 disabled={uploadingAvatar}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded hover:bg-gray-800 dark:hover:bg-gray-300 transition-colors text-sm font-medium disabled:opacity-50 w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors text-sm font-medium disabled:opacity-50 w-full sm:w-auto"
               >
                 <Camera className="w-4 h-4" />
                 {profile?.avatarUrl ? 'Change Photo' : 'Upload Photo'}
@@ -368,8 +369,8 @@ export default function ProfilePage() {
       {/* Profile Information */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-md flex items-center justify-center">
-            <User className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-md flex items-center justify-center">
+            <User className="w-5 h-5 text-green-600 dark:text-green-400" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Profile Information</h2>
@@ -433,7 +434,7 @@ export default function ProfilePage() {
             <button
               onClick={handleSaveProfile}
               disabled={saving}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-md hover:bg-gray-800 dark:hover:bg-gray-300 transition-colors font-medium disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium disabled:opacity-50"
             >
               {saving ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -561,7 +562,7 @@ export default function ProfilePage() {
                 !passwordData.newPassword ||
                 !passwordData.confirmPassword
               }
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-md hover:bg-gray-800 dark:hover:bg-gray-300 transition-colors font-medium disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium disabled:opacity-50"
             >
               {savingPassword ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

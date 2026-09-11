@@ -185,11 +185,11 @@ export default function ConversationPage() {
               <div className="flex items-center gap-2 mb-1">
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                   msg.senderType === 'account'
-                    ? 'bg-blue-100 dark:bg-blue-900/30'
+                    ? 'bg-green-100 dark:bg-green-900/30'
                     : 'bg-purple-100 dark:bg-purple-900/30'
                 }`}>
                   {msg.senderType === 'account'
-                    ? <User className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                    ? <User className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
                     : <Headphones className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
                   }
                 </div>
@@ -202,7 +202,7 @@ export default function ConversationPage() {
               </div>
               <div className={`rounded-md px-4 py-2.5 ${
                 msg.senderType === 'account'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-green-500 text-white'
                   : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700'
               }`}>
                 <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
@@ -228,12 +228,12 @@ export default function ConversationPage() {
               }}
               placeholder="Type your message..."
               rows={1}
-              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-400 focus:border-transparent resize-none"
             />
             <button
               type="submit"
               disabled={sending || !newMessage.trim()}
-              className="p-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="p-2.5 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:opacity-50 transition-colors"
             >
               {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
             </button>

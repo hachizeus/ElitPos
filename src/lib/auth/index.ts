@@ -7,6 +7,7 @@ import { db, withTenant } from '@/lib/db'
 import { users, tenants, accounts, accountTenants } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { checkRateLimit, recordRateLimitAttempt, clearRateLimit, LOGIN_RATE_LIMIT } from '@/lib/auth/rate-limit'
+import { getCachedValidation, setCachedValidation } from '@/lib/auth/jwt-validation-cache'
 
 // ---------------------------------------------------------------------------
 // Brute-force rate limiter (database-backed)
@@ -40,7 +41,7 @@ async function clearLoginRateLimit(email: string): Promise<void> {
 // Determine cookie domain based on environment
 const getCookieDomain = () => {
   if (process.env.NODE_ENV === 'production') {
-    return '.retailsmarterp.com' // Share cookies across all subdomains
+    return '.elitjohnsdigital.co.ke' // Share cookies across all subdomains
   }
   return undefined // Local development: no domain restriction
 }
@@ -76,35 +77,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           || 'unknown'
         const reqUserAgent = request?.headers?.get?.('user-agent') || 'unknown'
 
-        // --- Brute-force protection: check rate limit before any DB work ---
-        if (await isRateLimited(email)) {
+        // --- Run rate-limit check and tenant lookup in parallel ---
+        const [rateLimited, tenant] = await Promise.all([
+          isRateLimited(email),
+          db.query.tenants.findFirst({
+            where: eq(tenants.slug, tenantSlug),
+          }),
+        ])
+
+        if (rateLimited) {
           console.warn('[Auth] Rate limited login attempt:', { email, tenantSlug })
           throw new Error('Too many failed login attempts. Please try again later.')
         }
 
         try {
-          // Users-first flow: authenticate directly via users table
-          // 1. Find tenant by slug
-          const tenant = await db.query.tenants.findFirst({
-            where: eq(tenants.slug, tenantSlug),
-          })
-
           if (!tenant) {
             await recordFailedAttempt(email)
             throw new Error('Invalid credentials')
           }
 
-          if (tenant.status !== 'active') {
+          if (tenant.status !== 'active' && tenant.status !== 'locked') {
             await recordFailedAttempt(email)
             throw new Error('Invalid credentials')
           }
 
-          if (tenant.planExpiresAt && new Date(tenant.planExpiresAt) < new Date()) {
-            await recordFailedAttempt(email)
-            throw new Error('Invalid credentials')
-          }
+          // Note: planExpiresAt is intentionally NOT checked here.
+          // An expired plan should still allow login — the user will see
+          // the locked/expired screen after auth. Blocking login here
+          // makes it impossible to even reach billing to renew.
 
-          // 2. Find user in users table by email + tenantId
+          // Find user in users table by email + tenantId
           const user = await withTenant(tenant.id, async (tdb) => {
             return tdb.query.users.findFirst({
               where: and(
@@ -124,33 +126,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             throw new Error('Invalid credentials')
           }
 
-          // 3. Validate password against users.passwordHash
+          // Validate password
           const isValidPassword = await bcrypt.compare(password, user.passwordHash)
           if (!isValidPassword) {
             await recordFailedAttempt(email)
             throw new Error('Invalid credentials')
           }
 
-          // Authentication successful -- clear any prior failed attempts
-          await clearLoginRateLimit(email)
-
+          // Authentication successful — clear rate limit and update last login
+          // both fire-and-forget (don't block the response)
           const now = new Date()
-
-          // Update user last login and activity
-          try {
-            await withTenant(tenant.id, async (tdb) => {
-              return tdb.update(users)
-                .set({ lastLoginAt: now, lastActiveAt: now })
-                .where(eq(users.id, user.id))
-            })
-          } catch {
+          clearLoginRateLimit(email).catch(() => {})
+          withTenant(tenant.id, async (tdb) => {
+            return tdb.update(users)
+              .set({ lastLoginAt: now, lastActiveAt: now })
+              .where(eq(users.id, user.id))
+          }).catch(() => {
             // Fallback: lastActiveAt column may not exist yet (pre-migration)
-            await withTenant(tenant.id, async (tdb) => {
+            withTenant(tenant.id, async (tdb) => {
               return tdb.update(users)
                 .set({ lastLoginAt: now })
                 .where(eq(users.id, user.id))
-            })
-          }
+            }).catch(() => {})
+          })
 
           return {
             id: user.id,
@@ -379,6 +377,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.mode = 'company'
         token.invalid = false
 
+        // Clear any stale invalid cache entry for this user so the very next
+        // JWT validation (layout.tsx auth() call after redirect) succeeds
+        if (user.tenantId && user.id) {
+          setCachedValidation(user.tenantId, user.id, {
+            valid: true,
+            aiEnabled: user.aiEnabled ?? false,
+          })
+        }
+
         // Store session token for JWT tracking
         if (user.sessionToken) {
           token.sessionToken = user.sessionToken
@@ -403,26 +410,50 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       // Validate user and tenant on every request (users-first)
       if (!user && token.tenantId && token.id) {
+        const tenantId = token.tenantId as string
+        const userId = token.id as string
+        const tokenIat = token.iat as number | undefined
+
         try {
+          // --- Check in-process cache first (60s TTL) ---
+          const cached = getCachedValidation(tenantId, userId)
+          if (cached) {
+            if (!cached.valid) {
+              token.invalid = true
+              return token
+            }
+            // Recheck password change against cached value
+            if (cached.passwordChangedAtSec && tokenIat && cached.passwordChangedAtSec >= tokenIat) {
+              token.invalid = true
+              return token
+            }
+            token.logoUrl = cached.logoUrl
+            token.aiEnabled = cached.aiEnabled
+            if (token.invalid) token.invalid = false
+            return token
+          }
+
+          // --- Cache miss: query DB ---
           // 1. Validate tenant is still active
           const tenant = await db.query.tenants.findFirst({
             where: and(
-              eq(tenants.id, token.tenantId as string),
+              eq(tenants.id, tenantId),
               eq(tenants.status, 'active')
             ),
             columns: { id: true, logoUrl: true, aiEnabled: true },
           })
 
           if (!tenant) {
+            setCachedValidation(tenantId, userId, { valid: false, aiEnabled: false })
             token.invalid = true
             return token
           }
 
           // 2. Validate user is still active in users table
-          const userRecord = await withTenant(token.tenantId as string, async (tdb) => {
+          const userRecord = await withTenant(tenantId, async (tdb) => {
             return tdb.query.users.findFirst({
               where: and(
-                eq(users.id, token.id as string),
+                eq(users.id, userId),
                 eq(users.isActive, true)
               ),
               columns: { id: true, passwordChangedAt: true },
@@ -430,18 +461,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           })
 
           if (!userRecord) {
+            setCachedValidation(tenantId, userId, { valid: false, aiEnabled: false })
             token.invalid = true
             return token
           }
 
           // 3. Invalidate session if password was changed after token was issued
-          if (userRecord.passwordChangedAt && token.iat) {
-            const pwChangedSec = Math.floor(userRecord.passwordChangedAt.getTime() / 1000)
-            if (pwChangedSec >= token.iat) {
-              token.invalid = true
-              return token
-            }
+          const passwordChangedAtSec = userRecord.passwordChangedAt
+            ? Math.floor(userRecord.passwordChangedAt.getTime() / 1000)
+            : undefined
+
+          if (passwordChangedAtSec && tokenIat && passwordChangedAtSec >= tokenIat) {
+            setCachedValidation(tenantId, userId, { valid: false, aiEnabled: false })
+            token.invalid = true
+            return token
           }
+
+          // Cache the successful validation
+          setCachedValidation(tenantId, userId, {
+            valid: true,
+            logoUrl: tenant.logoUrl || undefined,
+            aiEnabled: tenant.aiEnabled,
+            passwordChangedAtSec,
+          })
 
           token.logoUrl = tenant.logoUrl || undefined
           token.aiEnabled = tenant.aiEnabled
@@ -511,7 +553,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   session: {
     strategy: 'jwt',
-    maxAge: 15 * 60, // 15 minutes — auto-refreshed by SessionProvider refetchInterval
+    maxAge: 24 * 60 * 60, // 24 hours
   },
 })
 
@@ -612,8 +654,8 @@ export async function authWithCompany(): Promise<CompanySession | null> {
   // Warm permission cache for tenant-specific overrides (non-blocking on error).
   // Also registers cache lookup functions with roles.ts (breaks static import chain to pg).
   try {
-    const cache = await import('./permission-cache')
-    const { registerPermissionOverrides } = await import('./roles')
+    const cache = await getPermissionCacheModule()
+    const { registerPermissionOverrides } = await getRolesModule()
     registerPermissionOverrides({
       getPermissionOverride: cache.getPermissionOverride,
       getCustomRolePermission: cache.getCustomRolePermission,
@@ -628,3 +670,24 @@ export async function authWithCompany(): Promise<CompanySession | null> {
 
 // Re-export user ID resolution utilities
 export { resolveUserId, resolveUserIdRequired } from './resolve-user'
+
+// ---------------------------------------------------------------------------
+// Module-level singletons — cached once per process so authWithCompany() never
+// pays the cost of a dynamic import() on the hot path.
+// ---------------------------------------------------------------------------
+let _permissionCacheModule: typeof import('./permission-cache') | null = null
+let _rolesModule: typeof import('./roles') | null = null
+
+async function getPermissionCacheModule() {
+  if (!_permissionCacheModule) {
+    _permissionCacheModule = await import('./permission-cache')
+  }
+  return _permissionCacheModule
+}
+
+async function getRolesModule() {
+  if (!_rolesModule) {
+    _rolesModule = await import('./roles')
+  }
+  return _rolesModule
+}

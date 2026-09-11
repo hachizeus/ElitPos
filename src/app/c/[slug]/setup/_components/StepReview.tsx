@@ -79,7 +79,7 @@ export function StepReview({ data, companyInfo }: StepReviewProps) {
               <div className="text-gray-500 mb-2">Selected Categories:</div>
               <div className="flex flex-wrap gap-1.5">
                 {data.selectedCategories.map((cat) => (
-                  <span key={cat} className="px-2 py-1 bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 text-xs rounded border border-blue-200 dark:border-blue-800">
+                  <span key={cat} className="px-2 py-1 bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300 text-xs rounded border border-green-200 dark:border-green-800">
                     {cat}
                   </span>
                 ))}
@@ -163,7 +163,7 @@ export function StepReview({ data, companyInfo }: StepReviewProps) {
       details: data.warehouses && data.warehouses.length > 0 ? (
         <div className="space-y-3">
           {data.warehouses.map((warehouse, index) => (
-            <div key={index} className={`p-3 rounded border ${warehouse.isDefault ? 'border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800' : 'border-gray-200 dark:border-gray-700'}`}>
+            <div key={index} className={`p-3 rounded border ${warehouse.isDefault ? 'border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800' : 'border-gray-200 dark:border-gray-700'}`}>
               <div className="flex justify-between items-start">
                 <div>
                   <div className="font-medium">{warehouse.name}</div>
@@ -171,7 +171,7 @@ export function StepReview({ data, companyInfo }: StepReviewProps) {
                   {warehouse.address && <div className="text-sm text-gray-500 mt-1">{warehouse.address}</div>}
                 </div>
                 {warehouse.isDefault && (
-                  <span className="px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-xs rounded-full">
+                  <span className="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 text-xs rounded-full">
                     Default
                   </span>
                 )}
@@ -194,11 +194,11 @@ export function StepReview({ data, companyInfo }: StepReviewProps) {
       details: costCenters.length > 0 ? (
         <div className="space-y-1.5">
           {costCenters.filter(Boolean).map((cc) => (
-            <div key={cc} className={`px-3 py-2 rounded border text-sm ${cc === defaultCostCenter ? 'border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800' : 'border-gray-200 dark:border-gray-700'}`}>
+            <div key={cc} className={`px-3 py-2 rounded border text-sm ${cc === defaultCostCenter ? 'border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800' : 'border-gray-200 dark:border-gray-700'}`}>
               <div className="flex justify-between items-center">
                 <span className="font-medium">{cc}</span>
                 {cc === defaultCostCenter && (
-                  <span className="px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-xs rounded-full">
+                  <span className="px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 text-xs rounded-full">
                     Default
                   </span>
                 )}
@@ -221,7 +221,7 @@ export function StepReview({ data, companyInfo }: StepReviewProps) {
       details: data.bankAccounts && data.bankAccounts.length > 0 ? (
         <div className="space-y-3">
           {data.bankAccounts.map((account, index) => (
-            <div key={index} className={`p-3 rounded border ${account.isDefault ? 'border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800' : 'border-gray-200 dark:border-gray-700'}`}>
+            <div key={index} className={`p-3 rounded border ${account.isDefault ? 'border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800' : 'border-gray-200 dark:border-gray-700'}`}>
               <div className="flex justify-between items-start">
                 <div>
                   <div className="font-medium">{account.accountName}</div>
@@ -230,7 +230,7 @@ export function StepReview({ data, companyInfo }: StepReviewProps) {
                   {account.branchCode && <div className="text-sm text-gray-500">Branch: {account.branchCode}</div>}
                 </div>
                 {account.isDefault && (
-                  <span className="px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-xs rounded-full">
+                  <span className="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 text-xs rounded-full">
                     Default
                   </span>
                 )}
@@ -299,9 +299,9 @@ export function StepReview({ data, companyInfo }: StepReviewProps) {
               {(data.paymentMethods || ['cash']).map(m => m.charAt(0).toUpperCase() + m.slice(1)).join(', ')}
             </div>
           </div>
-          <div className="mt-2 p-2.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded flex items-start gap-2">
-            <Info size={14} className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-            <span className="text-xs text-blue-700 dark:text-blue-300">
+          <div className="mt-2 p-2.5 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded flex items-start gap-2">
+            <Info size={14} className="text-[#00cc6e] dark:text-green-400 flex-shrink-0 mt-0.5" />
+            <span className="text-xs text-green-700 dark:text-green-300">
               4 standard modes of payment (Cash, Bank Transfer, Credit Card, Cheque) will be created automatically, linked to your Chart of Accounts.
             </span>
           </div>
@@ -338,7 +338,7 @@ export function StepReview({ data, companyInfo }: StepReviewProps) {
               className="w-full px-4 py-3.5 text-left hover:bg-gray-50/50 dark:hover:bg-slate-800/60 transition-colors flex items-center justify-between group"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-gray-100/80 dark:bg-gray-800/60 flex items-center justify-center flex-shrink-0 text-gray-500 dark:text-gray-400 group-hover:text-blue-500 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-gray-100/80 dark:bg-gray-800/60 flex items-center justify-center flex-shrink-0 text-gray-500 dark:text-gray-400 group-hover:text-[#00FF88] transition-colors">
                   {section.icon}
                 </div>
                 <div className="min-w-0">

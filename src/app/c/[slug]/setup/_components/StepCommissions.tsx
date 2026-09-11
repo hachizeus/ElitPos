@@ -80,7 +80,7 @@ export function StepCommissions({
               type="checkbox"
               checked={enabled}
               onChange={(e) => handleEnabledChange(e.target.checked)}
-              className="h-4 w-4 text-blue-600"
+              className="h-4 w-4 text-[#00cc6e]"
             />
             <div>
               <div className="font-medium">Enable sales commissions</div>
@@ -97,7 +97,7 @@ export function StepCommissions({
               <div className="space-y-4">
                 <div className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded border">
                   <div className="flex items-center gap-3 mb-3">
-                    <Percent className="h-5 w-5 text-blue-600" />
+                    <Percent className="h-5 w-5 text-[#00cc6e]" />
                     <h3 className="font-semibold text-gray-900 dark:text-white">Commission Structure</h3>
                   </div>
                   <div className="space-y-3">
@@ -109,7 +109,7 @@ export function StepCommissions({
                         checked={structure === 'percentage'}
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onChange={(e) => setStructure(e.target.value as any)}
-                        className="h-4 w-4 text-blue-600"
+                        className="h-4 w-4 text-[#00cc6e]"
                       />
                       <div>
                         <div className="font-medium">Percentage Based</div>
@@ -126,7 +126,7 @@ export function StepCommissions({
                         checked={structure === 'fixed'}
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onChange={(e) => setStructure(e.target.value as any)}
-                        className="h-4 w-4 text-blue-600"
+                        className="h-4 w-4 text-[#00cc6e]"
                       />
                       <div>
                         <div className="font-medium">Fixed Amount</div>
@@ -143,7 +143,7 @@ export function StepCommissions({
                         checked={structure === 'tiered'}
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         onChange={(e) => setStructure(e.target.value as any)}
-                        className="h-4 w-4 text-blue-600"
+                        className="h-4 w-4 text-[#00cc6e]"
                       />
                       <div>
                         <div className="font-medium">Tiered Structure</div>
@@ -241,7 +241,7 @@ export function StepCommissions({
         <button
           type="button"
           onClick={handleNext}
-          className="px-6 py-2.5 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="px-6 py-2.5 bg-[#00e67a] text-white rounded hover:bg-[#00cc6e]"
         >
           {['retail', 'restaurant', 'supermarket', 'dealership'].includes(businessType)
             ? 'Next: Loyalty Program'

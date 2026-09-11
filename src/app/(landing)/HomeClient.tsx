@@ -56,80 +56,85 @@ function formatBytesShort(bytes: number | null): string {
 
 const fallbackPricingTiers = [
   { name: 'Free', price: 'Free', period: 'forever', features: ['All Features', 'Unlimited Users', '80 MB Database', '100 MB Files'] },
-  { name: 'Starter', price: 'Rs 1,990', period: 'month', features: ['All Features', 'Unlimited Users', '500 MB Database', '500 MB Files'] },
-  { name: 'Professional', price: 'Rs 4,990', period: 'month', features: ['All Features', 'Unlimited Users', '3 GB Database', '2 GB Files'], popular: true },
+  { name: 'Starter', price: 'KSh 1,990', period: 'month', features: ['All Features', 'Unlimited Users', '500 MB Database', '500 MB Files'] },
+  { name: 'Professional', price: 'KSh 4,990', period: 'month', features: ['All Features', 'Unlimited Users', '3 GB Database', '2 GB Files'], popular: true },
 ]
 
 export default function HomeClient() {
   const [pricingTiers, setPricingTiers] = useState(fallbackPricingTiers)
-  const { currency, symbol, loading: currencyLoading, convertFromLKR } = useCurrencyDisplay('geoip')
+  const { currency, symbol, loading: currencyLoading, convertFromKES } = useCurrencyDisplay('geoip')
 
+  // Fetch raw tier data eagerly on mount — no need to wait for currency detection.
+  // Currency conversion is applied in a separate effect once both are ready.
+  const [rawTiers, setRawTiers] = useState<ApiTier[] | null>(null)
+
+  // Effect 1: fetch tiers immediately, independent of currency
   useEffect(() => {
-    if (currencyLoading) return
     let cancelled = false
-
-    async function loadPricing() {
-      try {
-        const res = await fetch('/api/public/pricing-tiers')
-        if (!res.ok || cancelled) return
-        const data: ApiTier[] = await res.json()
-        if (!Array.isArray(data) || data.length === 0 || cancelled) return
-
-        const isConverted = currency !== 'LKR'
-        const preview = data.slice(0, 3).map((tier) => {
-          const isCustom = tier.priceMonthly == null
-          if (isCustom) {
-            return {
-              name: tier.displayName,
-              price: 'Custom',
-              period: 'custom',
-              features: [
-                'All Features',
-                'Unlimited Users',
-                tier.maxDatabaseBytes ? `${formatBytesShort(tier.maxDatabaseBytes)} Database` : 'Custom Storage',
-              ],
-              popular: tier.name === 'professional',
-              isCustom: true,
-            }
-          }
-          const priceLKR = Number(tier.priceMonthly)
-          const isFree = priceLKR === 0
-          let priceDisplay: string
-          if (isFree) {
-            priceDisplay = 'Free'
-          } else if (isConverted) {
-            const converted = convertFromLKR(priceLKR)
-            priceDisplay = `~${symbol}${converted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-          } else {
-            priceDisplay = `Rs ${priceLKR.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-          }
-          const features: string[] = ['All Features', 'Unlimited Users']
-          if (tier.maxDatabaseBytes) features.push(`${formatBytesShort(tier.maxDatabaseBytes)} Database`)
-          if (tier.maxFileStorageBytes) features.push(`${formatBytesShort(tier.maxFileStorageBytes)} Files`)
-          return {
-            name: tier.displayName,
-            price: priceDisplay,
-            period: isFree ? 'forever' : 'month',
-            features,
-            popular: tier.name === 'professional',
-            isCustom: false,
-          }
-        })
-        if (!cancelled) setPricingTiers(preview)
-      } catch {
-        /* Keep fallback */
-      }
-    }
-    loadPricing()
+    fetch('/api/public/pricing-tiers')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: ApiTier[] | null) => {
+        if (!cancelled && Array.isArray(data) && data.length > 0) {
+          setRawTiers(data)
+        }
+      })
+      .catch(() => { /* keep fallback */ })
     return () => { cancelled = true }
-  }, [currency, symbol, currencyLoading, convertFromLKR])
+  }, []) // runs once on mount
+
+  // Effect 2: format tiers whenever raw data or currency changes
+  useEffect(() => {
+    if (!rawTiers || currencyLoading) return
+
+    const isConverted = currency !== 'KES'
+    const preview = rawTiers.slice(0, 3).map((tier) => {
+      const isCustom = tier.priceMonthly == null
+      if (isCustom) {
+        return {
+          name: tier.displayName,
+          price: 'Custom',
+          period: 'custom',
+          features: [
+            'All Features',
+            'Unlimited Users',
+            tier.maxDatabaseBytes ? `${formatBytesShort(tier.maxDatabaseBytes)} Database` : 'Custom Storage',
+          ],
+          popular: tier.name === 'professional',
+          isCustom: true,
+        }
+      }
+      const priceKES = Number(tier.priceMonthly)
+      const isFree = priceKES === 0
+      let priceDisplay: string
+      if (isFree) {
+        priceDisplay = 'Free'
+      } else if (isConverted) {
+        const converted = convertFromKES(priceKES)
+        priceDisplay = `~${symbol}${converted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+      } else {
+        priceDisplay = `KSh ${priceKES.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+      }
+      const features: string[] = ['All Features', 'Unlimited Users']
+      if (tier.maxDatabaseBytes) features.push(`${formatBytesShort(tier.maxDatabaseBytes)} Database`)
+      if (tier.maxFileStorageBytes) features.push(`${formatBytesShort(tier.maxFileStorageBytes)} Files`)
+      return {
+        name: tier.displayName,
+        price: priceDisplay,
+        period: isFree ? 'forever' : 'month',
+        features,
+        popular: tier.name === 'professional',
+        isCustom: false,
+      }
+    })
+    setPricingTiers(preview)
+  }, [rawTiers, currency, symbol, currencyLoading, convertFromKES])
 
   /* ── Feature tab data with mockups ── */
   const featureTabs = [
     { key: 'pos', label: 'Point of Sale', icon: ShoppingCart, gradient: 'from-emerald-500 to-teal-500', mockup: <MockPOS />, description: 'Fast, intuitive checkout with barcode scanning, multiple payment methods, and real-time inventory updates.', features: ['Barcode & SKU scanning', 'Multiple payment methods', 'Held sales & layaway', 'Returns and exchanges', 'Receipt printing & email', 'Gift card support'] },
     { key: 'inventory', label: 'Inventory', icon: Package, gradient: 'from-amber-500 to-orange-500', mockup: <MockInventory />, description: 'Multi-warehouse tracking with reorder alerts, stock transfers, and complete movement history.', features: ['Multi-warehouse support', 'Smart reorder alerts', 'Stock transfers', 'Batch & serial tracking', 'Min/max stock levels', 'Movement history'] },
     { key: 'accounting', label: 'Accounting', icon: Calculator, gradient: 'from-sky-500 to-blue-500', mockup: <MockAccounting />, description: 'Complete double-entry accounting with chart of accounts, journal entries, bank reconciliation, and financial insights.', features: ['Chart of accounts', 'Journal entries', 'Bank reconciliation', 'Financial statements', 'Tax management', 'Budget tracking'] },
-    { key: 'hr', label: 'HR & Payroll', icon: Users, gradient: 'from-violet-500 to-purple-500', mockup: <MockDashboard />, description: 'Employee management, salary structures, payroll runs, advances, attendance tracking, and leave management.', features: ['Employee profiles', 'Salary structures', 'Payroll processing', 'Employee advances', 'Attendance tracking', 'Leave management'] },
+    { key: 'hr', label: 'HR & Payroll', icon: Users, gradient: 'from-violet-500 to-green-400', mockup: <MockDashboard />, description: 'Employee management, salary structures, payroll runs, advances, attendance tracking, and leave management.', features: ['Employee profiles', 'Salary structures', 'Payroll processing', 'Employee advances', 'Attendance tracking', 'Leave management'] },
     { key: 'kitchen', label: 'Restaurant Kitchen', icon: Utensils, gradient: 'from-orange-500 to-red-500', mockup: <MockKitchenDisplay />, description: 'Real-time kitchen display system with order queues, status tracking, and automatic notifications.', features: ['Order queue management', 'Status tracking', 'Priority ordering', 'Cook time tracking', 'Auto-notifications', 'Multi-station support'] },
     { key: 'tables', label: 'Tables', icon: Monitor, gradient: 'from-rose-500 to-pink-500', mockup: <MockTables />, description: 'Visual table management with floor plan designer, real-time status updates, and reservation integration.', features: ['Floor plan designer', 'Real-time table status', 'Table merging & splitting', 'Reservation linking', 'Capacity management', 'Waiter assignment'] },
     { key: 'workorders', label: 'Auto Service', icon: Wrench, gradient: 'from-indigo-500 to-violet-500', mockup: <MockWorkOrders />, description: 'Complete work order management with vehicle tracking, inspections, and insurance estimate integration.', features: ['Work order management', 'Vehicle tracking', 'Multi-point inspections', 'Insurance estimates', 'Parts management', 'Labor guides'] },
@@ -144,7 +149,7 @@ export default function HomeClient() {
       <section className="relative min-h-screen flex items-center overflow-hidden">
         {/* Background image */}
         <Image
-          src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920"
+          src="/icons/loginimage.png"
           alt=""
           fill
           priority
@@ -220,7 +225,7 @@ export default function HomeClient() {
             {/* Right column — Dashboard mockup */}
             <FadeIn className="hidden lg:block" delay={0.3}>
               <FloatingMockup>
-                <MockBrowserFrame url="app.retailsmarterp.com/dashboard">
+                <MockBrowserFrame url="app.elitpos.elitjohnsdigital.co.ke/dashboard">
                   <MockDashboard />
                 </MockBrowserFrame>
               </FloatingMockup>
@@ -276,7 +281,7 @@ export default function HomeClient() {
             badge="Live Preview"
             title="Explore by category"
             highlight="category"
-            subtitle="Click any tab to see exactly how RetailSmart works for your business."
+            subtitle="Click any tab to see exactly how ElitPOS works for your business."
           />
           <FeatureTabSwitcher tabs={featureTabs} />
         </div>
@@ -681,7 +686,7 @@ export default function HomeClient() {
          ══════════════════════════════════════════════ */}
       <CTASection
         title="Ready to transform your business?"
-        subtitle="Start managing your business with RetailSmart ERP. All features included, unlimited users, free forever."
+        subtitle="Start managing your business with ElitPOS. All features included, unlimited users, free forever."
       />
     </PageWrapper>
   )

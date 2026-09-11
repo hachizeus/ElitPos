@@ -65,8 +65,8 @@ function CoATreeNode({ account, numbered, depth = 0 }: { account: AccountTemplat
           : <ChevronRight size={12} className="text-gray-400 flex-shrink-0" />
         }
         {expanded
-          ? <FolderOpen size={12} className="text-blue-500 flex-shrink-0" />
-          : <Folder size={12} className="text-blue-500 flex-shrink-0" />
+          ? <FolderOpen size={12} className="text-[#00FF88] flex-shrink-0" />
+          : <Folder size={12} className="text-[#00FF88] flex-shrink-0" />
         }
         <span className="text-xs font-medium text-gray-900 dark:text-white truncate">{label}</span>
       </button>
@@ -273,8 +273,8 @@ export function StepBusinessProfile({
       {/* Accounting Settings Section */}
       <div className="rounded-xl border border-gray-200/60 dark:border-gray-700/50 bg-white dark:bg-slate-800/40 p-5">
         <div className="flex items-center gap-3 mb-4">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30">
-            <DollarSign size={16} className="text-blue-600 dark:text-blue-400" />
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/30">
+            <DollarSign size={16} className="text-[#00cc6e] dark:text-green-400" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Accounting Settings</h3>
@@ -285,7 +285,7 @@ export function StepBusinessProfile({
           <FormField label="Currency" hint="Set during company creation">
             <FormInput
               type="text"
-              value={currency || 'LKR'}
+              value={currency || 'KES'}
               disabled
               leftIcon={<DollarSign size={16} />}
             />

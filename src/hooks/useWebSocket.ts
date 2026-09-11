@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useCallback, useState } from 'react'
-import { useSession } from 'next-auth/react'
+import { useEffect, useRef, useCallback, useState, useContext } from 'react'
+import { SessionContext } from 'next-auth/react'
 import {
   WebSocketClient,
   ConnectionStatus,
@@ -84,11 +84,31 @@ async function ensureConnected(): Promise<void> {
 }
 
 /**
+ * Safe wrapper around next-auth session that never throws when called outside a
+ * <SessionProvider>. next-auth's useSession() throws unconditionally when
+ * SessionContext is undefined. We read the context directly via useContext
+ * (which never throws) and return a safe fallback when no provider is present.
+ *
+ * This guards against layout transition races where WebSocketProvider is still
+ * mounted but the authenticated provider tree has already been torn down.
+ */
+function useSafeSession() {
+  // useContext never throws — returns undefined when there is no matching Provider.
+  // SessionContext is typed as React.Context<... | undefined> by next-auth itself.
+  const ctx = useContext(SessionContext)
+  if (ctx === undefined) {
+    // No SessionProvider in the tree — return a safe no-op value.
+    return { data: null, status: 'unauthenticated' as const }
+  }
+  return ctx
+}
+
+/**
  * Hook to access the WebSocket connection
  * Returns connection status and control methods
  */
 export function useWebSocket() {
-  const { data: sessionData, status: sessionStatus } = useSession()
+  const { data: sessionData, status: sessionStatus } = useSafeSession()
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected')
   const clientRef = useRef<WebSocketClient | null>(null)
   const lastTenantIdRef = useRef<string | undefined>(undefined)

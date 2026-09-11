@@ -122,7 +122,7 @@ export function DealershipConfig({ data, onChange, currency, suggestions, sugges
               key={name}
               className={`flex items-center gap-2 px-3 py-2.5 rounded border cursor-pointer transition-colors ${
                 data.selectedCategories.includes(name)
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300'
+                  ? 'border-[#00FF88] bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300'
                   : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
               }`}
             >
@@ -130,7 +130,7 @@ export function DealershipConfig({ data, onChange, currency, suggestions, sugges
                 type="checkbox"
                 checked={data.selectedCategories.includes(name)}
                 onChange={() => toggleCategory(name)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-[#00cc6e] focus:ring-[#00FF88]"
               />
               <span className="text-sm">{name}</span>
             </label>
@@ -159,9 +159,9 @@ export function DealershipConfig({ data, onChange, currency, suggestions, sugges
             {data.selectedCategories
               .filter(c => !dealershipCategories.find(r => r.name === c))
               .map(name => (
-                <span key={name} className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs">
+                <span key={name} className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs">
                   {name}
-                  <button onClick={() => toggleCategory(name)} className="hover:text-blue-900 dark:hover:text-blue-100">
+                  <button onClick={() => toggleCategory(name)} className="hover:text-green-900 dark:hover:text-green-100">
                     <X size={14} />
                   </button>
                 </span>
@@ -216,7 +216,7 @@ export function DealershipConfig({ data, onChange, currency, suggestions, sugges
                     <div
                       className={`flex items-center justify-between px-3 py-2.5 cursor-pointer transition-colors ${
                         isGroupSelected(group.name)
-                          ? 'bg-blue-50 dark:bg-blue-950/30'
+                          ? 'bg-green-50 dark:bg-green-950/30'
                           : 'bg-white dark:bg-slate-700'
                       }`}
                       onClick={() => setExpandedGroup(expandedGroup === group.name ? null : group.name)}
@@ -226,7 +226,7 @@ export function DealershipConfig({ data, onChange, currency, suggestions, sugges
                           type="checkbox"
                           checked={isGroupSelected(group.name)}
                           onChange={() => toggleGroup(group)}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-gray-300 text-[#00cc6e] focus:ring-[#00FF88]"
                         />
                         <div>
                           <span className="text-sm font-medium text-gray-900 dark:text-white">{group.name}</span>

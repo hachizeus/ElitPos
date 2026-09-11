@@ -31,6 +31,7 @@ export async function GET() {
       theme: account.theme,
       notifications: {
         email: account.notifyEmail,
+        sms: account.notifySms,
         billing: account.notifyBilling,
         security: account.notifySecurity,
         marketing: account.notifyMarketing,
@@ -66,6 +67,7 @@ export async function PUT(request: Request) {
 
     if (notifications) {
       if (notifications.email !== undefined) updateData.notifyEmail = notifications.email
+      if (notifications.sms !== undefined) updateData.notifySms = notifications.sms
       if (notifications.billing !== undefined) updateData.notifyBilling = notifications.billing
       if (notifications.security !== undefined) updateData.notifySecurity = notifications.security
       if (notifications.marketing !== undefined) updateData.notifyMarketing = notifications.marketing
@@ -88,6 +90,7 @@ export async function PUT(request: Request) {
       theme: updated.theme,
       notifications: {
         email: updated.notifyEmail,
+        sms: updated.notifySms,
         billing: updated.notifyBilling,
         security: updated.notifySecurity,
         marketing: updated.notifyMarketing,

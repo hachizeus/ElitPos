@@ -18,5 +18,8 @@ CREATE TABLE IF NOT EXISTS "recurring_journal_templates" (
 
 ALTER TABLE "recurring_journal_templates" ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "tenant_isolation" ON "recurring_journal_templates"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation" ON "recurring_journal_templates"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

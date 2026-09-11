@@ -188,40 +188,43 @@ export async function getDailySales(
   tenantId: string,
   filters: { fromDate: string; toDate: string }
 ) {
-  const data = await db.select({
-    date: sql<string>`TO_CHAR(${sales.createdAt}, 'YYYY-MM-DD')`,
-    totalSales: sql<string>`COALESCE(SUM(CAST(${sales.total} AS numeric)), 0)`,
-    orderCount: sql<number>`COUNT(*)::int`,
-    avgOrder: sql<string>`CASE WHEN COUNT(*) > 0 THEN SUM(CAST(${sales.total} AS numeric)) / COUNT(*) ELSE 0 END`,
-  })
-    .from(sales)
-    .where(and(
-      eq(sales.tenantId, tenantId),
-      gte(sales.createdAt, new Date(filters.fromDate)),
-      lte(sales.createdAt, new Date(filters.toDate + 'T23:59:59')),
-      sql`${sales.status} != 'void'`,
-      eq(sales.isReturn, false),
-    ))
-    .groupBy(sql`TO_CHAR(${sales.createdAt}, 'YYYY-MM-DD')`)
-    .orderBy(sql`TO_CHAR(${sales.createdAt}, 'YYYY-MM-DD')`)
+  // Run both queries in parallel — they're fully independent
+  const [data, paymentData] = await Promise.all([
+    db.select({
+      date: sql<string>`TO_CHAR(${sales.createdAt}, 'YYYY-MM-DD')`,
+      totalSales: sql<string>`COALESCE(SUM(CAST(${sales.total} AS numeric)), 0)`,
+      orderCount: sql<number>`COUNT(*)::int`,
+      avgOrder: sql<string>`CASE WHEN COUNT(*) > 0 THEN SUM(CAST(${sales.total} AS numeric)) / COUNT(*) ELSE 0 END`,
+    })
+      .from(sales)
+      .where(and(
+        eq(sales.tenantId, tenantId),
+        gte(sales.createdAt, new Date(filters.fromDate)),
+        lte(sales.createdAt, new Date(filters.toDate + 'T23:59:59')),
+        sql`${sales.status} != 'void'`,
+        eq(sales.isReturn, false),
+      ))
+      .groupBy(sql`TO_CHAR(${sales.createdAt}, 'YYYY-MM-DD')`)
+      .orderBy(sql`TO_CHAR(${sales.createdAt}, 'YYYY-MM-DD')`),
 
-  // Get payment breakdown per day
-  const paymentData = await db.select({
-    date: sql<string>`TO_CHAR(${sales.createdAt}, 'YYYY-MM-DD')`,
-    method: payments.method,
-    amount: sql<string>`COALESCE(SUM(CAST(${payments.amount} AS numeric)), 0)`,
-  })
-    .from(payments)
-    .innerJoin(sales, eq(payments.saleId, sales.id))
-    .where(and(
-      eq(payments.tenantId, tenantId),
-      gte(sales.createdAt, new Date(filters.fromDate)),
-      lte(sales.createdAt, new Date(filters.toDate + 'T23:59:59')),
-      sql`${sales.status} != 'void'`,
-      sql`${payments.voidedAt} IS NULL`,
-      eq(sales.isReturn, false),
-    ))
-    .groupBy(sql`TO_CHAR(${sales.createdAt}, 'YYYY-MM-DD')`, payments.method)
+    // Payment breakdown per day
+    db.select({
+      date: sql<string>`TO_CHAR(${sales.createdAt}, 'YYYY-MM-DD')`,
+      method: payments.method,
+      amount: sql<string>`COALESCE(SUM(CAST(${payments.amount} AS numeric)), 0)`,
+    })
+      .from(payments)
+      .innerJoin(sales, eq(payments.saleId, sales.id))
+      .where(and(
+        eq(payments.tenantId, tenantId),
+        gte(sales.createdAt, new Date(filters.fromDate)),
+        lte(sales.createdAt, new Date(filters.toDate + 'T23:59:59')),
+        sql`${sales.status} != 'void'`,
+        sql`${payments.voidedAt} IS NULL`,
+        eq(sales.isReturn, false),
+      ))
+      .groupBy(sql`TO_CHAR(${sales.createdAt}, 'YYYY-MM-DD')`, payments.method),
+  ])
 
   // Build payment map
   const paymentMap = new Map<string, Record<string, number>>()
@@ -306,40 +309,44 @@ export async function getTaxReport(
   tenantId: string,
   filters: { fromDate: string; toDate: string }
 ) {
-  // Tax collected on sales
-  const salesTax = await db.select({
-    month: sql<string>`TO_CHAR(${sales.createdAt}, 'YYYY-MM')`,
-    taxCollected: sql<string>`COALESCE(SUM(CAST(${sales.taxAmount} AS numeric)), 0)`,
-    salesTotal: sql<string>`COALESCE(SUM(CAST(${sales.total} AS numeric)), 0)`,
-  })
-    .from(sales)
-    .where(and(
-      eq(sales.tenantId, tenantId),
-      gte(sales.createdAt, new Date(filters.fromDate)),
-      lte(sales.createdAt, new Date(filters.toDate + 'T23:59:59')),
-      sql`${sales.status} != 'void'`,
-      eq(sales.isReturn, false),
-    ))
-    .groupBy(sql`TO_CHAR(${sales.createdAt}, 'YYYY-MM')`)
-    .orderBy(sql`TO_CHAR(${sales.createdAt}, 'YYYY-MM')`)
-
-  // Import purchases for tax paid
+  // Import purchases schema once
   const { purchases: purchasesTable } = await import('@/lib/db/schema')
 
-  const purchaseTax = await db.select({
-    month: sql<string>`TO_CHAR(${purchasesTable.createdAt}, 'YYYY-MM')`,
-    taxPaid: sql<string>`COALESCE(SUM(CAST(${purchasesTable.taxAmount} AS numeric)), 0)`,
-    purchaseTotal: sql<string>`COALESCE(SUM(CAST(${purchasesTable.total} AS numeric)), 0)`,
-  })
-    .from(purchasesTable)
-    .where(and(
-      eq(purchasesTable.tenantId, tenantId),
-      eq(purchasesTable.isReturn, false),
-      gte(purchasesTable.createdAt, new Date(filters.fromDate)),
-      lte(purchasesTable.createdAt, new Date(filters.toDate + 'T23:59:59')),
-      sql`${purchasesTable.status} NOT IN ('cancelled', 'draft')`,
-    ))
-    .groupBy(sql`TO_CHAR(${purchasesTable.createdAt}, 'YYYY-MM')`)
+  // Run both queries in parallel — they're fully independent
+  const [salesTax, purchaseTax] = await Promise.all([
+    // Tax collected on sales
+    db.select({
+      month: sql<string>`TO_CHAR(${sales.createdAt}, 'YYYY-MM')`,
+      taxCollected: sql<string>`COALESCE(SUM(CAST(${sales.taxAmount} AS numeric)), 0)`,
+      salesTotal: sql<string>`COALESCE(SUM(CAST(${sales.total} AS numeric)), 0)`,
+    })
+      .from(sales)
+      .where(and(
+        eq(sales.tenantId, tenantId),
+        gte(sales.createdAt, new Date(filters.fromDate)),
+        lte(sales.createdAt, new Date(filters.toDate + 'T23:59:59')),
+        sql`${sales.status} != 'void'`,
+        eq(sales.isReturn, false),
+      ))
+      .groupBy(sql`TO_CHAR(${sales.createdAt}, 'YYYY-MM')`)
+      .orderBy(sql`TO_CHAR(${sales.createdAt}, 'YYYY-MM')`),
+
+    // Tax paid on purchases
+    db.select({
+      month: sql<string>`TO_CHAR(${purchasesTable.createdAt}, 'YYYY-MM')`,
+      taxPaid: sql<string>`COALESCE(SUM(CAST(${purchasesTable.taxAmount} AS numeric)), 0)`,
+      purchaseTotal: sql<string>`COALESCE(SUM(CAST(${purchasesTable.total} AS numeric)), 0)`,
+    })
+      .from(purchasesTable)
+      .where(and(
+        eq(purchasesTable.tenantId, tenantId),
+        eq(purchasesTable.isReturn, false),
+        gte(purchasesTable.createdAt, new Date(filters.fromDate)),
+        lte(purchasesTable.createdAt, new Date(filters.toDate + 'T23:59:59')),
+        sql`${purchasesTable.status} NOT IN ('cancelled', 'draft')`,
+      ))
+      .groupBy(sql`TO_CHAR(${purchasesTable.createdAt}, 'YYYY-MM')`),
+  ])
 
   // Merge by month — collect all months from BOTH sales and purchases
   const salesMap = new Map<string, { taxCollected: number; salesTotal: number }>()

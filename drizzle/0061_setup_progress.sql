@@ -1,5 +1,5 @@
 -- Create setup_progress table for ERPNext-style setup wizard
-CREATE TABLE setup_progress (
+CREATE TABLE IF NOT EXISTS setup_progress (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     step_index INTEGER NOT NULL DEFAULT 0,
@@ -11,23 +11,26 @@ CREATE TABLE setup_progress (
 );
 
 -- Create index for faster lookups
-CREATE INDEX idx_setup_progress_tenant_id ON setup_progress(tenant_id);
-CREATE INDEX idx_setup_progress_step_index ON setup_progress(step_index);
+CREATE INDEX IF NOT EXISTS idx_setup_progress_tenant_id ON setup_progress(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_setup_progress_step_index ON setup_progress(step_index);
 
 -- Add RLS policy for setup_progress table
 ALTER TABLE setup_progress ENABLE ROW LEVEL SECURITY;
 
 -- RLS policy: users can only access setup progress for their own tenant
-CREATE POLICY tenant_access_policy ON setup_progress
-    FOR ALL
-    USING (
-        tenant_id IN (
-            SELECT tenant_id 
-            FROM account_tenants 
-            WHERE account_id = current_setting('app.account_id')::UUID
-            AND is_active = true
-        )
-    );
+DO $$ BEGIN
+  CREATE POLICY tenant_access_policy ON setup_progress
+      FOR ALL
+      USING (
+          tenant_id IN (
+              SELECT tenant_id 
+              FROM account_tenants 
+              WHERE account_id = current_setting('app.account_id')::UUID
+              AND is_active = true
+          )
+      );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Trigger to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_setup_progress_updated_at()

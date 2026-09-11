@@ -36,7 +36,7 @@ const notificationIcons: Record<string, typeof Bell> = {
 }
 
 const notificationColors: Record<string, { bg: string; icon: string }> = {
-  info: { bg: 'bg-blue-100 dark:bg-blue-900/30', icon: 'text-blue-600 dark:text-blue-400' },
+  info: { bg: 'bg-green-100 dark:bg-green-900/30', icon: 'text-green-600 dark:text-green-400' },
   warning: { bg: 'bg-amber-100 dark:bg-amber-900/30', icon: 'text-amber-600 dark:text-amber-400' },
   success: { bg: 'bg-green-100 dark:bg-green-900/30', icon: 'text-green-600 dark:text-green-400' },
   billing: { bg: 'bg-purple-100 dark:bg-purple-900/30', icon: 'text-purple-600 dark:text-purple-400' },
@@ -184,7 +184,7 @@ export function NotificationDropdown() {
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
+                  className="text-xs text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 flex items-center gap-1"
                 >
                   <CheckCheck className="w-3.5 h-3.5" />
                   Mark all read
@@ -215,7 +215,7 @@ export function NotificationDropdown() {
                       key={notification.id}
                       onClick={() => handleNotificationClick(notification)}
                       className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
-                        !notification.isRead ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''
+                        !notification.isRead ? 'bg-green-50/50 dark:bg-green-950/20' : ''
                       }`}
                     >
                       <div className={`w-8 h-8 rounded flex items-center justify-center flex-shrink-0 ${colors.bg}`}>
@@ -227,7 +227,7 @@ export function NotificationDropdown() {
                             {notification.title}
                           </p>
                           {!notification.isRead && (
-                            <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                            <span className="w-2 h-2 bg-green-400 rounded-full flex-shrink-0" />
                           )}
                         </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
@@ -254,7 +254,7 @@ export function NotificationDropdown() {
                 setIsOpen(false)
                 router.push('/account/notifications')
               }}
-              className="w-full text-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+              className="w-full text-center text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium"
             >
               View all notifications
             </button>

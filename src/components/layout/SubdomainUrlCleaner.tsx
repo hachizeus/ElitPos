@@ -3,12 +3,12 @@
 import { useLayoutEffect } from 'react'
 import { usePathname } from 'next/navigation'
 
-const BASE_DOMAIN = (process.env.NEXT_PUBLIC_BASE_DOMAIN || 'retailsmarterp.com').toLowerCase()
+const BASE_DOMAIN = (process.env.NEXT_PUBLIC_BASE_DOMAIN || 'elitpos.elitjohnsdigital.co.ke').toLowerCase()
 
 /**
  * Strips the redundant `/c/{slug}` prefix from the browser URL when on a subdomain.
  *
- * On subdomain (e.g., `tenant.retailsmarterp.com`), the middleware rewrites
+ * On subdomain (e.g., `tenant.elitpos.elitjohnsdigital.co.ke`), the middleware rewrites
  * requests internally to `/c/[slug]/...`, but client-side navigation
  * (router.push, Link href) uses explicit `/c/${slug}/...` paths.
  * This component cleans the browser URL via `history.replaceState` so

@@ -16,18 +16,44 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const payments = await db.query.paymentDeposits.findMany({
+    // Fetch payment deposits for this account
+    const rawPayments = await db.query.paymentDeposits.findMany({
       where: eq(paymentDeposits.accountId, session.user.accountId),
       with: {
-        subscription: {
-          with: {
-            tenant: true,
-            tier: true,
-          },
-        },
+        subscription: true,
       },
       orderBy: [desc(paymentDeposits.createdAt)],
     })
+
+    // Collect all IDs we need to resolve
+    const tenantIds   = [...new Set(rawPayments.flatMap(p => p.subscription?.tenantId  ? [p.subscription.tenantId]  : []))]
+    const tierIds     = [...new Set(rawPayments.flatMap(p => p.subscription?.tierId    ? [p.subscription.tierId]    : []))]
+    const pendingIds  = [...new Set(rawPayments.flatMap(p => p.pendingCompanyId        ? [p.pendingCompanyId]        : []))]
+
+    const { tenants, pricingTiers, pendingCompanies } = await import('@/lib/db/schema')
+    const { inArray } = await import('drizzle-orm')
+
+    const [tenantRows, tierRows, pendingRows] = await Promise.all([
+      tenantIds.length  > 0 ? db.select({ id: tenants.id, name: tenants.name }).from(tenants).where(inArray(tenants.id, tenantIds)) : [],
+      tierIds.length    > 0 ? db.select({ id: pricingTiers.id, name: pricingTiers.name, displayName: pricingTiers.displayName }).from(pricingTiers).where(inArray(pricingTiers.id, tierIds)) : [],
+      pendingIds.length > 0 ? db.select({ id: pendingCompanies.id, name: pendingCompanies.name }).from(pendingCompanies).where(inArray(pendingCompanies.id, pendingIds)) : [],
+    ])
+
+    const tenantMap  = new Map(tenantRows.map(t  => [t.id, t]))
+    const tierMap    = new Map(tierRows.map(t    => [t.id, t]))
+    const pendingMap = new Map(pendingRows.map(p => [p.id, p]))
+
+    // Enrich payments with tenant, tier and pending company names
+    const payments = rawPayments.map(p => ({
+      ...p,
+      subscription: p.subscription ? {
+        ...p.subscription,
+        tenant: p.subscription.tenantId ? tenantMap.get(p.subscription.tenantId) ?? null : null,
+        tier:   p.subscription.tierId   ? tierMap.get(p.subscription.tierId)     ?? null : null,
+      } : null,
+      // Attach pending company name directly on the payment for UI rendering
+      pendingCompany: p.pendingCompanyId ? pendingMap.get(p.pendingCompanyId) ?? null : null,
+    }))
 
     return NextResponse.json(payments)
   } catch (error) {
@@ -69,7 +95,7 @@ export async function POST(request: NextRequest) {
     const account = await db.query.accounts.findFirst({
       where: eq(accounts.id, session.user.accountId),
     })
-    const userCurrency = account?.currency || 'LKR'
+    const userCurrency = account?.currency || 'KES'
 
     // For subscription payments, verify subscription belongs to user
     if (!isWalletDeposit && subscriptionId) {
@@ -144,6 +170,39 @@ export async function POST(request: NextRequest) {
     }
 
     broadcastAccountChange(session.user.accountId, 'account-wallet', 'updated', payment.id)
+
+    // ── Email notifications (fire-and-forget) ──
+    const { notifyAdminNewPayment, notifyAdminPendingCompanyPayment } = await import('@/lib/email/admin-notifications')
+
+    if (pendingCompanyId) {
+      // Get pending company details for richer email
+      const pending = await db.query.pendingCompanies.findFirst({
+        where: eq(pendingCompanies.id, pendingCompanyId),
+        with: { tier: true },
+      })
+      if (pending) {
+        const tier = pending.tier as { displayName?: string; name?: string } | null
+        notifyAdminPendingCompanyPayment({
+          companyName:  pending.name,
+          businessType: pending.businessType,
+          planName:     tier?.displayName || tier?.name || 'Paid',
+          billingCycle: pending.billingCycle || 'monthly',
+          accountEmail: account?.email || session.user.accountId,
+          amount:       String(amount),
+          currency:     userCurrency,
+        }).catch(() => {})
+      }
+    } else {
+      notifyAdminNewPayment({
+        accountEmail:       account?.email || session.user.accountId,
+        accountName:        account?.fullName || account?.email || 'User',
+        amount:             String(amount),
+        currency:           userCurrency,
+        isWalletDeposit:    isWalletDeposit ?? false,
+        pendingCompanyName: null,
+        bankReference:      bankReference || null,
+      }).catch(() => {})
+    }
 
     return NextResponse.json(payment)
   } catch (error) {

@@ -17,13 +17,22 @@ export async function GET() {
     })
 
     if (cached) {
-      return NextResponse.json({
-        base: cached.baseCurrency,
-        rates: cached.rates,
-        source: cached.source,
-        fetchedAt: cached.fetchedAt,
-        cached: true,
-      })
+      return NextResponse.json(
+        {
+          base: cached.baseCurrency,
+          rates: cached.rates,
+          source: cached.source,
+          fetchedAt: cached.fetchedAt,
+          cached: true,
+        },
+        {
+          headers: {
+            // Rates are cached in the DB for 24 h; tell the browser to hold them for 1 h
+            // and serve stale content for up to 23 h while revalidating in the background.
+            'Cache-Control': 'public, max-age=3600, stale-while-revalidate=82800',
+          },
+        }
+      )
     }
 
     // Fetch fresh rates
@@ -44,13 +53,20 @@ export async function GET() {
       expiresAt,
     })
 
-    return NextResponse.json({
-      base: rates.base,
-      rates: rates.rates,
-      source: rates.source,
-      fetchedAt: now,
-      cached: false,
-    })
+    return NextResponse.json(
+      {
+        base: rates.base,
+        rates: rates.rates,
+        source: rates.source,
+        fetchedAt: now,
+        cached: false,
+      },
+      {
+        headers: {
+          'Cache-Control': 'public, max-age=3600, stale-while-revalidate=82800',
+        },
+      }
+    )
   } catch (error) {
     logError('api/exchange-rates', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

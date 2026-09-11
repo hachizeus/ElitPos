@@ -17,7 +17,7 @@ const r2 = new S3Client({
   },
 })
 
-const BUCKET = process.env.R2_BUCKET_NAME || 'retailsmart-uploads'
+const BUCKET = process.env.R2_BUCKET_NAME || 'elitpos-uploads'
 const PUBLIC_URL = (process.env.R2_PUBLIC_URL || '').replace(/\/$/, '')
 
 /**
@@ -167,9 +167,15 @@ export function cdnUrl(key: string): string {
 /**
  * Extract the R2 object key from a CDN URL or legacy /uploads/ path.
  * Returns null if the URL doesn't match either format.
+ * Also returns null for ImageKit URLs (ik://) — those use a different delete path.
  */
 export function keyFromUrl(url: string): string | null {
-  // CDN URL: https://cdn.retailsmarterp.com/tenantSlug/ab/hash-123.png
+  if (!url) return null
+
+  // ImageKit encoded URL — not an R2 key
+  if (url.startsWith('ik://')) return null
+
+  // CDN URL: https://cdn.elitjohnsdigital.co.ke/tenantSlug/ab/hash-123.png
   if (PUBLIC_URL && url.startsWith(PUBLIC_URL + '/')) {
     return url.slice(PUBLIC_URL.length + 1)
   }

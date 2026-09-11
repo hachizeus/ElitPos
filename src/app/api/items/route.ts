@@ -131,37 +131,15 @@ export async function GET(request: NextRequest) {
         offset,
       })
 
-      // Get reserved quantities from draft work orders (warehouse-aware if warehouseId provided)
+      // Pre-compute where clauses for reservation queries (warehouse-aware)
       const workOrderReservedWhere = warehouseId
-        ? and(
-            eq(workOrders.status, 'draft'),
-            eq(workOrders.warehouseId, warehouseId)
-          )
+        ? and(eq(workOrders.status, 'draft'), eq(workOrders.warehouseId, warehouseId))
         : eq(workOrders.status, 'draft')
 
-      const reservedFromWorkOrders = await db
-        .select({
-          itemId: workOrderParts.itemId,
-          reservedQty: sql<string>`COALESCE(SUM(CAST(${workOrderParts.quantity} AS DECIMAL)), 0)`,
-        })
-        .from(workOrderParts)
-        .innerJoin(workOrders, eq(workOrderParts.workOrderId, workOrders.id))
-        .where(workOrderReservedWhere)
-        .groupBy(workOrderParts.itemId)
-
-      // Get reserved quantities from non-expired held sales (cart items stored as JSONB) - warehouse-aware
       const heldSalesWhere = warehouseId
-        ? and(
-            eq(heldSales.warehouseId, warehouseId),
-            sql`${heldSales.expiresAt} > NOW()`
-          )
+        ? and(eq(heldSales.warehouseId, warehouseId), sql`${heldSales.expiresAt} > NOW()`)
         : sql`${heldSales.expiresAt} > NOW()`
 
-      const heldSalesData = await db.query.heldSales.findMany({
-        where: heldSalesWhere,
-      })
-
-      // Get reserved quantities from estimates with holdStock enabled - warehouse-aware
       const estimatesReservedWhere = warehouseId
         ? and(
             eq(insuranceEstimates.holdStock, true),
@@ -175,24 +153,82 @@ export async function GET(request: NextRequest) {
             sql`${insuranceEstimateItems.itemId} IS NOT NULL`
           )
 
-      const reservedFromEstimates = await db
-        .select({
-          itemId: insuranceEstimateItems.itemId,
-          reservedQty: sql<string>`COALESCE(SUM(CAST(${insuranceEstimateItems.quantity} AS DECIMAL)), 0)`,
-        })
-        .from(insuranceEstimateItems)
-        .innerJoin(insuranceEstimates, eq(insuranceEstimateItems.estimateId, insuranceEstimates.id))
-        .where(estimatesReservedWhere)
-        .groupBy(insuranceEstimateItems.itemId)
+      const itemIds = result.map(item => item.id)
 
-      // Create a map of itemId -> reservedQty combining all sources
+      // Run all 5 independent post-query DB calls in parallel
+      const [
+        reservedFromWorkOrders,
+        heldSalesData,
+        reservedFromEstimates,
+        warehouseStockResult,
+        stockHistoryData,
+      ] = await Promise.all([
+        // 1. Reserved from draft work orders
+        db
+          .select({
+            itemId: workOrderParts.itemId,
+            reservedQty: sql<string>`COALESCE(SUM(CAST(${workOrderParts.quantity} AS DECIMAL)), 0)`,
+          })
+          .from(workOrderParts)
+          .innerJoin(workOrders, eq(workOrderParts.workOrderId, workOrders.id))
+          .where(workOrderReservedWhere)
+          .groupBy(workOrderParts.itemId),
+
+        // 2. Non-expired held sales
+        db.query.heldSales.findMany({ where: heldSalesWhere }),
+
+        // 3. Reserved from estimates with holdStock enabled
+        db
+          .select({
+            itemId: insuranceEstimateItems.itemId,
+            reservedQty: sql<string>`COALESCE(SUM(CAST(${insuranceEstimateItems.quantity} AS DECIMAL)), 0)`,
+          })
+          .from(insuranceEstimateItems)
+          .innerJoin(insuranceEstimates, eq(insuranceEstimateItems.estimateId, insuranceEstimates.id))
+          .where(estimatesReservedWhere)
+          .groupBy(insuranceEstimateItems.itemId),
+
+        // 4. Warehouse stock (specific or aggregated) — only if we have item IDs
+        itemIds.length > 0
+          ? warehouseId
+            ? db
+                .select({
+                  itemId: warehouseStock.itemId,
+                  currentStock: warehouseStock.currentStock,
+                  reservedStock: warehouseStock.reservedStock,
+                  minStock: warehouseStock.minStock,
+                  binLocation: warehouseStock.binLocation,
+                })
+                .from(warehouseStock)
+                .where(and(eq(warehouseStock.warehouseId, warehouseId), inArray(warehouseStock.itemId, itemIds)))
+            : db
+                .select({
+                  itemId: warehouseStock.itemId,
+                  currentStock: sql<string>`COALESCE(SUM(CAST(${warehouseStock.currentStock} AS DECIMAL)), 0)`,
+                  reservedStock: sql<string>`COALESCE(SUM(CAST(${warehouseStock.reservedStock} AS DECIMAL)), 0)`,
+                  minStock: sql<string>`COALESCE(MAX(CAST(${warehouseStock.minStock} AS DECIMAL)), 0)`,
+                  binLocation: sql<null>`NULL`,
+                })
+                .from(warehouseStock)
+                .where(inArray(warehouseStock.itemId, itemIds))
+                .groupBy(warehouseStock.itemId)
+          : Promise.resolve([]),
+
+        // 5. Stock movement history (for low-stock filter badge)
+        itemIds.length > 0
+          ? db
+              .select({ itemId: stockMovements.itemId })
+              .from(stockMovements)
+              .where(inArray(stockMovements.itemId, itemIds))
+              .groupBy(stockMovements.itemId)
+          : Promise.resolve([]),
+      ])
+
+      // Build reserved map from work orders
       const reservedMap = new Map<string, number>()
-
-      // Add work order reservations
       for (const r of reservedFromWorkOrders) {
         reservedMap.set(r.itemId, (reservedMap.get(r.itemId) || 0) + parseFloat(r.reservedQty))
       }
-
       // Add held sales reservations (parse JSONB cart items)
       for (const held of heldSalesData) {
         const cartItems = held.cartItems as Array<{ itemId: string; quantity: number }>
@@ -204,80 +240,28 @@ export async function GET(request: NextRequest) {
           }
         }
       }
-
-      // Add estimate reservations (with holdStock enabled)
+      // Add estimate reservations
       for (const r of reservedFromEstimates) {
         if (r.itemId) {
           reservedMap.set(r.itemId, (reservedMap.get(r.itemId) || 0) + parseFloat(r.reservedQty))
         }
       }
 
-      // Get stock data from warehouseStock table
+      // Build warehouseStockMap from parallel result
       const warehouseStockMap = new Map<string, { currentStock: number; transferReserved: number; minStock: number; binLocation: string | null }>()
-      const itemIds = result.map(item => item.id)
-
-      if (itemIds.length > 0) {
-        if (warehouseId) {
-          // Get stock for specific warehouse
-          const warehouseStockData = await db
-            .select({
-              itemId: warehouseStock.itemId,
-              currentStock: warehouseStock.currentStock,
-              reservedStock: warehouseStock.reservedStock,
-              minStock: warehouseStock.minStock,
-              binLocation: warehouseStock.binLocation,
-            })
-            .from(warehouseStock)
-            .where(
-              and(
-                eq(warehouseStock.warehouseId, warehouseId),
-                inArray(warehouseStock.itemId, itemIds)
-              )
-            )
-
-          for (const ws of warehouseStockData) {
-            warehouseStockMap.set(ws.itemId, {
-              currentStock: parseFloat(ws.currentStock),
-              transferReserved: parseFloat(ws.reservedStock || '0'),
-              minStock: parseFloat(ws.minStock || '0'),
-              binLocation: ws.binLocation,
-            })
-          }
-        } else {
-          // Aggregate stock across ALL warehouses
-          const aggregatedStockData = await db
-            .select({
-              itemId: warehouseStock.itemId,
-              totalStock: sql<string>`COALESCE(SUM(CAST(${warehouseStock.currentStock} AS DECIMAL)), 0)`,
-              totalReserved: sql<string>`COALESCE(SUM(CAST(${warehouseStock.reservedStock} AS DECIMAL)), 0)`,
-              maxMinStock: sql<string>`COALESCE(MAX(CAST(${warehouseStock.minStock} AS DECIMAL)), 0)`,
-            })
-            .from(warehouseStock)
-            .where(inArray(warehouseStock.itemId, itemIds))
-            .groupBy(warehouseStock.itemId)
-
-          for (const ws of aggregatedStockData) {
-            warehouseStockMap.set(ws.itemId, {
-              currentStock: parseFloat(ws.totalStock),
-              transferReserved: parseFloat(ws.totalReserved || '0'),
-              minStock: parseFloat(ws.maxMinStock || '0'),
-              binLocation: null, // No single bin location when aggregating
-            })
-          }
-        }
+      for (const ws of warehouseStockResult as Array<{ itemId: string; currentStock: string; reservedStock: string; minStock: string; binLocation: string | null }>) {
+        warehouseStockMap.set(ws.itemId, {
+          currentStock: parseFloat(ws.currentStock),
+          transferReserved: parseFloat(ws.reservedStock || '0'),
+          minStock: parseFloat(ws.minStock || '0'),
+          binLocation: ws.binLocation ?? null,
+        })
       }
 
-      // Check which items have stock movement history (for low-stock filter)
+      // Build stock history set
       const stockHistorySet = new Set<string>()
-      if (itemIds.length > 0) {
-        const stockHistoryData = await db
-          .select({ itemId: stockMovements.itemId })
-          .from(stockMovements)
-          .where(inArray(stockMovements.itemId, itemIds))
-          .groupBy(stockMovements.itemId)
-        for (const row of stockHistoryData) {
-          stockHistorySet.add(row.itemId)
-        }
+      for (const row of stockHistoryData) {
+        stockHistorySet.add(row.itemId)
       }
 
       // Add reserved and available stock to each item

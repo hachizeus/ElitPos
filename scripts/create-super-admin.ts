@@ -16,19 +16,19 @@ async function createSuperAdmin() {
   console.log('Creating super admin...');
 
   try {
-    const passwordHash = await bcrypt.hash('Gaje@7616', 10);
+    const passwordHash = await bcrypt.hash('0a0b0c0D.', 10);
 
     const result = await pool.query(`
       INSERT INTO super_admins (email, password_hash, full_name, is_active)
       VALUES ($1, $2, $3, true)
       ON CONFLICT (email) DO NOTHING
       RETURNING id
-    `, ['ravindu2012@hotmail.com', passwordHash, 'Super Admin']);
+    `, ['admin@elitjohnsdigital.co.ke', passwordHash, 'Elitjohns Super Admin']);
 
     if (result.rowCount && result.rowCount > 0) {
       console.log('Super admin created successfully!');
-      console.log('Email: ravindu2012@hotmail.com');
-      console.log('Password: Gaje@7616');
+      console.log('Email: admin@elitjohnsdigital.co.ke');
+      console.log('Password: 0a0b0c0D.');
     } else {
       console.log('Super admin already exists, skipping.');
     }

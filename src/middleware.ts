@@ -3,9 +3,9 @@ import type { NextRequest } from 'next/server'
 import { edgeDb } from '@/lib/edge-db'
 
 // Domain configuration from environment
-const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'retailsmarterp.com'
-const LANDING_DOMAIN = process.env.NEXT_PUBLIC_LANDING_DOMAIN || 'www.retailsmarterp.com'
-const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || 'app.retailsmarterp.com'
+const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'elitpos.elitjohnsdigital.co.ke'
+const LANDING_DOMAIN = process.env.NEXT_PUBLIC_LANDING_DOMAIN || 'elitpos.elitjohnsdigital.co.ke'
+const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || 'app.elitpos.elitjohnsdigital.co.ke'
 
 // Sensitive parameters that should never appear in URLs
 const SENSITIVE_PARAMS = ['password', 'pwd', 'pass', 'secret', 'token', 'apikey', 'api_key']
@@ -134,7 +134,10 @@ export async function middleware(request: NextRequest) {
 
   // ==================== SUBDOMAIN ROUTING ====================
   // Use BASE_DOMAIN env var directly (don't rely solely on NODE_ENV)
-  const isRealDomain = BASE_DOMAIN && BASE_DOMAIN !== 'localhost'
+  // isRealDomain = false when running locally on localhost (with or without port)
+  const isRealDomain = BASE_DOMAIN &&
+    !BASE_DOMAIN.startsWith('localhost') &&
+    !BASE_DOMAIN.startsWith('127.0.0.1')
   const baseDomain = (isRealDomain ? BASE_DOMAIN : 'localhost').toLowerCase()
 
   // Extract subdomain from hostname
@@ -286,9 +289,22 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(`${protocol}://${APP_DOMAIN}/register?subdomain=${subdomain}`)
       }
     } catch (error) {
-      // Database/network error - fail gracefully
+      // Database/network error — check if this looks like an offline/startup failure.
+      // If the path is a known tenant workspace path (/c/slug/...) let it through:
+      // the page layout's auth() call will handle session validation, and the
+      // offline service worker will serve cached content.
+      // Only redirect to error for non-workspace paths where we truly can't route.
       console.error('Tenant lookup failed:', error)
-      return NextResponse.redirect(`${protocol}://${APP_DOMAIN}/error?code=tenant-lookup-failed`)
+      if (pathname === '/' || pathname === '/login') {
+        // Root or login — can't serve without knowing the tenant, show error
+        return NextResponse.redirect(`${protocol}://${APP_DOMAIN}/error?code=tenant-lookup-failed`)
+      }
+      // For workspace navigations, pass through — SW cache + JWT validation handles it
+      const fallbackPath = `/c/${subdomain}${pathname === '/' ? '' : pathname}`
+      const fallbackResponse = NextResponse.rewrite(new URL(fallbackPath, request.url))
+      fallbackResponse.headers.set('x-pathname', fallbackPath)
+      fallbackResponse.headers.set('x-offline-fallback', 'true')
+      return fallbackResponse
     }
   }
 
@@ -336,7 +352,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match all paths except static files, API routes, SSE endpoint, etc.
-    '/((?!api|ws|_events|_internal|_next/static|_next/image|favicon.ico|uploads|images|public|icons|sw\\.js|manifest\\.webmanifest).*)',
+    // Match all paths except static files, API routes, SSE endpoint,
+    // service worker, offline fallback page, and Capacitor/Electron assets.
+    '/((?!api|ws|_events|_internal|_next/static|_next/image|favicon.ico|uploads|images|public|icons|sw\\.js|manifest\\.webmanifest|offline).*)',
   ],
 }

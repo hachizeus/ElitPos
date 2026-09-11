@@ -5,17 +5,17 @@
 
 /**
  * Preview template with sample data (client-safe)
- * @param currencyCode - Optional currency code for formatting (defaults to 'LKR')
+ * @param currencyCode - Optional currency code for formatting (defaults to 'KES')
  */
-export function previewTemplate(template: string, currencyCode: string = 'LKR'): string {
+export function previewTemplate(template: string, currencyCode: string = 'KES'): string {
   const sampleData: Record<string, string> = {
     business_name: 'Auto Care Center',
     business_phone: '0112345678',
-    business_email: 'info@autocare.lk',
-    business_address: '123 Main St, Colombo',
+    business_email: 'info@autocare.co.ke',
+    business_address: '123 Main St, Nairobi',
     customer_name: 'John Doe',
     customer_first_name: 'John',
-    customer_phone: '0771234567',
+    customer_phone: '+254711234567',
     customer_email: 'john@example.com',
     vehicle_plate: 'ABC-1234',
     vehicle_make: 'Toyota',

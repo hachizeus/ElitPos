@@ -638,7 +638,7 @@ function StorageCard({
           <div className="relative h-4 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${
-                isCritical ? 'bg-red-500' : isWarning ? 'bg-yellow-500' : 'bg-blue-500'
+                isCritical ? 'bg-red-500' : isWarning ? 'bg-yellow-500' : 'bg-green-400'
               }`}
               style={{ width: `${percentage}%` }}
             />
@@ -657,7 +657,7 @@ function StorageCard({
           </div>
         ) : (
           <div className="h-4 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full opacity-30" style={{ width: '100%' }} />
+            <div className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full opacity-30" style={{ width: '100%' }} />
           </div>
         )}
 
@@ -816,7 +816,7 @@ export default function UsagePage({
 
       {/* Hero Section */}
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-green-500 rounded-2xl mb-4">
           <Database className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{data.tenant.name}</h1>
@@ -827,7 +827,7 @@ export default function UsagePage({
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-all">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
+            <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-500 rounded-2xl flex items-center justify-center">
               <TrendingUp className="w-7 h-7 text-white" />
             </div>
             <div>
@@ -861,7 +861,7 @@ export default function UsagePage({
           description="Space used by your business data"
           used={breakdown?.database.totalBytes ?? data.usage?.databaseBytes ?? 0}
           limit={data.limits.maxDatabaseBytes}
-          gradient="bg-gradient-to-br from-purple-500 to-purple-600"
+          gradient="bg-gradient-to-br from-purple-500 to-green-500"
           iconBg="bg-purple-400/30"
         />
 
@@ -930,10 +930,10 @@ export default function UsagePage({
       </div>
 
       {/* Info Box */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 border border-blue-200 dark:border-blue-800 rounded-2xl p-6">
+      <div className="bg-gradient-to-r from-green-50 to-green-50 dark:from-green-900/30 dark:to-green-900/30 border border-green-200 dark:border-green-800 rounded-2xl p-6">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-md flex items-center justify-center flex-shrink-0">
-            <Info className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-md flex items-center justify-center flex-shrink-0">
+            <Info className="w-6 h-6 text-green-600 dark:text-green-400" />
           </div>
           <div>
             <h3 className="font-semibold text-gray-900 dark:text-white">How storage is calculated</h3>
@@ -958,7 +958,7 @@ export default function UsagePage({
 
       {/* Upgrade CTA */}
       {data.canManage && (data.limits.maxDatabaseBytes || data.limits.maxFileStorageBytes) && (
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-br from-[#071209] to-[#0d2e18] rounded-3xl p-8 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32" />
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24" />
 

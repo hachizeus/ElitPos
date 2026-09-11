@@ -82,12 +82,12 @@ export interface ContactInfo {
 }
 
 const DEFAULT_CONTACT_INFO: ContactInfo = {
-  email: 'support@retailsmarterp.com',
-  phone: '+94 11 234 5678',
-  whatsapp: '+94 77 123 4567',
-  address: 'Colombo, Sri Lanka',
-  companyName: 'Retail Smart ERP',
-  businessHours: 'Mon-Fri 9:00 AM - 6:00 PM (IST)',
+  email: 'info@elitjohnsdigital.co.ke',
+  phone: '+254 759 001 048',
+  whatsapp: '+254 759 001 048',
+  address: 'Nairobi, Kenya',
+  companyName: 'Elitjohns Digital Agency',
+  businessHours: 'Mon-Fri 9:00 AM - 6:00 PM (EAT)',
 }
 
 export async function getContactInfo(): Promise<ContactInfo> {

@@ -1,8 +1,9 @@
 'use client'
 
-import { ReactNode, useState } from 'react'
+import { ReactNode, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { Home, ChevronRight, Plus, RefreshCw, Search, X, Filter } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useCompany } from '@/components/providers/CompanyContextProvider'
 import { useIsMobile } from '@/hooks/useResponsive'
 import { cn } from '@/lib/utils'
@@ -42,7 +43,24 @@ export function ListPageLayout({
 }: ListPageLayoutProps) {
   const { tenantSlug } = useCompany()
   const isMobile = useIsMobile()
+  const router = useRouter()
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+
+  // Wrap the caller's onRefresh with router.refresh() + page:refresh event
+  // so server-component caches are invalidated and all useRealtimeData hooks re-fetch
+  const handleRefresh = useCallback(async () => {
+    if (!onRefresh || refreshing) return
+    setRefreshing(true)
+    try {
+      router.refresh()
+      window.dispatchEvent(new CustomEvent('page:refresh', { detail: { source: 'list-layout' } }))
+      onRefresh()
+      await new Promise(r => setTimeout(r, 500))
+    } finally {
+      setRefreshing(false)
+    }
+  }, [onRefresh, router, refreshing])
   
   const resolvedModuleHref = moduleHref.startsWith('/') ? `/c/${tenantSlug}${moduleHref}` : moduleHref
 
@@ -148,13 +166,14 @@ export function ListPageLayout({
               isMobile ? "w-full" : ""
             )}>
               <button
-                onClick={onRefresh}
+                onClick={handleRefresh}
+                disabled={refreshing}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors touch-target",
+                  "flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors touch-target disabled:opacity-50",
                   isMobile ? "flex-1 justify-center py-2" : ""
                 )}
               >
-                <RefreshCw size={14} />
+                <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
                 Refresh
               </button>
             </div>

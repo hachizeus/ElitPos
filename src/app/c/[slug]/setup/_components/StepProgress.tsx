@@ -35,7 +35,7 @@ export function StepProgress({ steps, currentStep, onStepClick }: StepProgressPr
                     isCompleted
                       ? 'bg-green-500 text-white hover:bg-green-600'
                       : isCurrent
-                      ? 'bg-blue-600 text-white ring-4 ring-blue-100'
+                      ? 'bg-[#00e67a] text-white ring-4 ring-green-100'
                       : 'bg-gray-200 text-gray-500'
                   } ${isClickable ? 'cursor-pointer' : 'cursor-not-allowed'}`}
                 >
@@ -76,14 +76,14 @@ export function StepProgress({ steps, currentStep, onStepClick }: StepProgressPr
             </h3>
           </div>
           <div className="text-right">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
               {steps[currentStep]?.label}
             </span>
           </div>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
-            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+            className="bg-[#00e67a] h-2 rounded-full transition-all duration-300"
             style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
           />
         </div>

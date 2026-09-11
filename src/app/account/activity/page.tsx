@@ -37,7 +37,7 @@ const activityIcons: Record<string, typeof Activity> = {
 }
 
 const activityColors: Record<string, { bg: string; icon: string }> = {
-  login: { bg: 'bg-blue-100 dark:bg-blue-900/30', icon: 'text-blue-600 dark:text-blue-400' },
+  login: { bg: 'bg-green-100 dark:bg-green-900/30', icon: 'text-green-600 dark:text-green-400' },
   logout: { bg: 'bg-gray-100 dark:bg-gray-700', icon: 'text-gray-600 dark:text-gray-400' },
   site_created: { bg: 'bg-green-100 dark:bg-green-900/30', icon: 'text-green-600 dark:text-green-400' },
   site_updated: { bg: 'bg-amber-100 dark:bg-amber-900/30', icon: 'text-amber-600 dark:text-amber-400' },
@@ -145,7 +145,7 @@ export default function ActivityPage() {
             aria-pressed={filter === f.id}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
               filter === f.id
-                ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 shadow-lg'
+                ? 'bg-green-600 text-white shadow-lg'
                 : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
             }`}
           >

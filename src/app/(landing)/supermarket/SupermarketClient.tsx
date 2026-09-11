@@ -234,7 +234,7 @@ export default function SupermarketClient() {
             {/* Right: Hero mockup */}
             <FadeInRight className="hidden lg:block">
               <FloatingMockup>
-                <MockBrowserFrame url="app.retailsmarterp.com/inventory">
+                <MockBrowserFrame url="app.elitpos.elitjohnsdigital.co.ke/inventory">
                   <MockInventory />
                 </MockBrowserFrame>
               </FloatingMockup>
@@ -305,7 +305,7 @@ export default function SupermarketClient() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <FadeInLeft>
               <FloatingMockup>
-                <MockBrowserFrame url="app.retailsmarterp.com/pos">
+                <MockBrowserFrame url="app.elitpos.elitjohnsdigital.co.ke/pos">
                   <MockPOS />
                 </MockBrowserFrame>
               </FloatingMockup>
@@ -532,7 +532,7 @@ export default function SupermarketClient() {
             badge="Multi-Business Platform"
             title="Solutions for every business type"
             highlight="every business type"
-            subtitle="RetailSmart ERP adapts to your industry. Explore other purpose-built solutions."
+            subtitle="ElitPOS adapts to your industry. Explore other purpose-built solutions."
             gradientClass="gradient-text-supermarket"
           />
 
@@ -540,18 +540,18 @@ export default function SupermarketClient() {
             <StaggerItem>
               <Link
                 href="/retail"
-                className="group block bg-white/5 rounded-2xl border border-white/10 p-6 hover:border-blue-500/30 hover:shadow-lg transition-all"
+                className="group block bg-white/5 rounded-2xl border border-white/10 p-6 hover:border-green-400/30 hover:shadow-lg transition-all"
               >
-                <div className="w-12 h-12 rounded-md bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20">
+                <div className="w-12 h-12 rounded-md bg-gradient-to-br from-green-600 to-sky-500 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20">
                   <Store className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-white group-hover:text-blue-400 transition-colors">
+                <h3 className="text-lg font-bold text-white group-hover:text-green-400 transition-colors">
                   Retail
                 </h3>
                 <p className="mt-2 text-sm text-zinc-400">
                   Complete POS and inventory management for retail stores.
                 </p>
-                <div className="mt-4 flex items-center gap-1 text-sm font-semibold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="mt-4 flex items-center gap-1 text-sm font-semibold text-green-600 opacity-0 group-hover:opacity-100 transition-opacity">
                   Learn more <ArrowRight className="w-4 h-4" />
                 </div>
               </Link>
@@ -580,7 +580,7 @@ export default function SupermarketClient() {
                 href="/auto-service"
                 className="group block bg-white/5 rounded-2xl border border-white/10 p-6 hover:border-violet-500/30 hover:shadow-lg transition-all"
               >
-                <div className="w-12 h-12 rounded-md bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center mb-4 shadow-lg shadow-violet-500/20">
+                <div className="w-12 h-12 rounded-md bg-gradient-to-br from-violet-500 to-green-400 flex items-center justify-center mb-4 shadow-lg shadow-violet-500/20">
                   <Wrench className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-white group-hover:text-violet-400 transition-colors">

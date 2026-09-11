@@ -63,6 +63,15 @@ DECLARE
 BEGIN
   FOREACH tbl IN ARRAY tables_to_fix
   LOOP
+    -- Skip if table doesn't exist yet
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.tables
+      WHERE table_schema = 'public' AND table_name = tbl
+    ) THEN
+      RAISE NOTICE 'Skipping % (table does not exist)', tbl;
+      CONTINUE;
+    END IF;
+
     -- Enable RLS
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', tbl);
 

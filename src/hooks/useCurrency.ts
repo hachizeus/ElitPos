@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback } from 'react'
-import { useCompany } from '@/components/providers/CompanyContextProvider'
+import { useCompanyOptional } from '@/components/providers/CompanyContextProvider'
 import { formatCurrencyWithSymbol, getCurrencySymbol } from '@/lib/utils/currency'
 
 /**
@@ -10,11 +10,12 @@ import { formatCurrencyWithSymbol, getCurrencySymbol } from '@/lib/utils/currenc
  *
  * Usage:
  *   const { fCurrency, currency, currencySymbol } = useCurrency()
- *   fCurrency(1500)        // "Rs 1,500.00"
- *   fCurrency(1500, 0)     // "Rs 1,500"
+ *   fCurrency(1500)        // "KSh 1,500.00"
+ *   fCurrency(1500, 0)     // "KSh 1,500"
  */
 export function useCurrency() {
-  const { currency } = useCompany()
+  const company = useCompanyOptional()
+  const currency = company?.currency ?? 'KES'
 
   const fCurrency = useCallback(
     (amount: number | string | null | undefined, decimals?: number) => {

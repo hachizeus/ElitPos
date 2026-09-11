@@ -99,7 +99,7 @@ export function StepBankAccounts({ data, onChange, onNext, onBack }: StepBankAcc
           <button
             type="button"
             onClick={addBankAccount}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00FF88]"
           >
             <Plus size={16} className="mr-2" />
             Add Bank Account
@@ -117,7 +117,7 @@ export function StepBankAccounts({ data, onChange, onNext, onBack }: StepBankAcc
             <button
               type="button"
               onClick={addBankAccount}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#00e67a] hover:bg-[#00cc6e] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00FF88]"
             >
               <Plus size={16} className="mr-2" />
               Add Your First Account
@@ -158,7 +158,7 @@ export function StepBankAccounts({ data, onChange, onNext, onBack }: StepBankAcc
                       type="text"
                       value={account.accountName || ''}
                       onChange={(e) => updateAccount(index, 'accountName', e.target.value)}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#00FF88] focus:border-[#00FF88]"
                       placeholder="Main Business Account"
                       required
                     />
@@ -172,7 +172,7 @@ export function StepBankAccounts({ data, onChange, onNext, onBack }: StepBankAcc
                       type="text"
                       value={account.bankName || ''}
                       onChange={(e) => updateAccount(index, 'bankName', e.target.value)}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#00FF88] focus:border-[#00FF88]"
                       placeholder="Bank of America"
                     />
                   </div>
@@ -185,7 +185,7 @@ export function StepBankAccounts({ data, onChange, onNext, onBack }: StepBankAcc
                       type="text"
                       value={account.accountNumber || ''}
                       onChange={(e) => updateAccount(index, 'accountNumber', e.target.value)}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#00FF88] focus:border-[#00FF88]"
                       placeholder="1234567890"
                     />
                   </div>
@@ -198,7 +198,7 @@ export function StepBankAccounts({ data, onChange, onNext, onBack }: StepBankAcc
                       type="text"
                       value={account.branchCode || ''}
                       onChange={(e) => updateAccount(index, 'branchCode', e.target.value)}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#00FF88] focus:border-[#00FF88]"
                       placeholder="1234"
                     />
                   </div>
@@ -210,7 +210,7 @@ export function StepBankAccounts({ data, onChange, onNext, onBack }: StepBankAcc
                     id={`default-${index}`}
                     checked={account.isDefault || false}
                     onChange={(e) => updateAccount(index, 'isDefault', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-[#00cc6e] focus:ring-[#00FF88] border-gray-300 rounded"
                   />
                   <label htmlFor={`default-${index}`} className="ml-2 block text-sm text-gray-700">
                     Set as default account for payments and receipts
@@ -222,9 +222,9 @@ export function StepBankAccounts({ data, onChange, onNext, onBack }: StepBankAcc
         )}
 
         {/* Information box */}
-        <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-          <h3 className="text-sm font-medium text-blue-800 mb-2">Bank Account Information</h3>
-          <p className="text-sm text-blue-700">
+        <div className="bg-green-50 border border-green-200 rounded-md p-4">
+          <h3 className="text-sm font-medium text-green-800 mb-2">Bank Account Information</h3>
+          <p className="text-sm text-green-700">
             You can add multiple bank accounts. The default account will be used as the primary account
             for all payments and receipts. You can change this later in the accounting settings.
           </p>
@@ -235,13 +235,13 @@ export function StepBankAccounts({ data, onChange, onNext, onBack }: StepBankAcc
           <button
             type="button"
             onClick={onBack}
-            className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00FF88]"
           >
             Back
           </button>
           <button
             type="submit"
-            className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-6 py-2.5 bg-[#00e67a] text-white font-medium rounded-md hover:bg-[#00cc6e] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00FF88]"
           >
             Save & Continue
           </button>

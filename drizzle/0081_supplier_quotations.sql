@@ -2,10 +2,13 @@
 -- Request and compare quotes from suppliers
 
 -- Enum for supplier quotation status
-CREATE TYPE "public"."supplier_quotation_status" AS ENUM('draft', 'submitted', 'received', 'awarded', 'rejected', 'expired', 'cancelled');
+DO $$ BEGIN
+  CREATE TYPE "public"."supplier_quotation_status" AS ENUM('draft', 'submitted', 'received', 'awarded', 'rejected', 'expired', 'cancelled');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Supplier quotations table
-CREATE TABLE "supplier_quotations" (
+CREATE TABLE IF NOT EXISTS "supplier_quotations" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   "tenant_id" uuid NOT NULL REFERENCES "tenants"("id"),
   "quotation_no" varchar(50) NOT NULL,
@@ -29,7 +32,7 @@ CREATE TABLE "supplier_quotations" (
 );
 
 -- Supplier quotation items table
-CREATE TABLE "supplier_quotation_items" (
+CREATE TABLE IF NOT EXISTS "supplier_quotation_items" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   "tenant_id" uuid NOT NULL REFERENCES "tenants"("id"),
   "quotation_id" uuid NOT NULL REFERENCES "supplier_quotations"("id") ON DELETE CASCADE,
@@ -44,21 +47,27 @@ CREATE TABLE "supplier_quotation_items" (
 );
 
 -- Indexes
-CREATE INDEX "idx_supplier_quotations_tenant" ON "supplier_quotations" ("tenant_id");
-CREATE INDEX "idx_supplier_quotations_status" ON "supplier_quotations" ("tenant_id", "status");
-CREATE INDEX "idx_supplier_quotations_supplier" ON "supplier_quotations" ("supplier_id");
-CREATE INDEX "idx_supplier_quotation_items_quotation" ON "supplier_quotation_items" ("quotation_id");
+CREATE INDEX IF NOT EXISTS "idx_supplier_quotations_tenant" ON "supplier_quotations" ("tenant_id");
+CREATE INDEX IF NOT EXISTS "idx_supplier_quotations_status" ON "supplier_quotations" ("tenant_id", "status");
+CREATE INDEX IF NOT EXISTS "idx_supplier_quotations_supplier" ON "supplier_quotations" ("supplier_id");
+CREATE INDEX IF NOT EXISTS "idx_supplier_quotation_items_quotation" ON "supplier_quotation_items" ("quotation_id");
 
 -- Enable RLS
 ALTER TABLE "supplier_quotations" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "supplier_quotation_items" ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
-CREATE POLICY "tenant_isolation_policy" ON "supplier_quotations"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation_policy" ON "supplier_quotations"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "tenant_isolation_policy" ON "supplier_quotation_items"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation_policy" ON "supplier_quotation_items"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Grant permissions to app_user role
 GRANT SELECT, INSERT, UPDATE, DELETE ON "supplier_quotations" TO app_user;

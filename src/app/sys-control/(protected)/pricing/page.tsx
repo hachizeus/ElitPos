@@ -91,7 +91,7 @@ export default function PricingPage() {
           ...formData,
           priceMonthly: formData.priceMonthly ? parseFloat(formData.priceMonthly) : null,
           priceYearly: formData.priceYearly ? parseFloat(formData.priceYearly) : (formData.priceMonthly ? parseFloat(formData.priceMonthly) * 10 : null),
-          currency: 'LKR',
+          currency: 'KES',
           maxUsers: null,
           maxSalesMonthly: null,
           maxDatabaseBytes: gbToBytes(formData.maxDatabaseGB),
@@ -151,7 +151,7 @@ export default function PricingPage() {
           displayName: editData.displayName,
           priceMonthly: editData.priceMonthly ? parseFloat(String(editData.priceMonthly)) : null,
           priceYearly: editData.priceYearly ? parseFloat(String(editData.priceYearly)) : null,
-          currency: 'LKR',
+          currency: 'KES',
           maxDatabaseBytes: editData.maxDatabaseGB ? gbToBytes(String(editData.maxDatabaseGB)) : null,
           maxFileStorageBytes: editData.maxFileStorageGB ? gbToBytes(String(editData.maxFileStorageGB)) : null,
           sortOrder: editData.sortOrder,
@@ -212,11 +212,11 @@ export default function PricingPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             Pricing Tiers
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Manage subscription plans and storage limits (all prices in LKR)</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Manage subscription plans and storage limits (all prices in KES)</p>
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#00FF88] text-black rounded hover:bg-[#00e67a] transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add Tier
@@ -266,7 +266,7 @@ export default function PricingPage() {
             <div />
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Monthly Price (LKR)
+                Monthly Price (KES)
               </label>
               <input
                 type="number"
@@ -279,7 +279,7 @@ export default function PricingPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Yearly Price (LKR)
+                Yearly Price (KES)
               </label>
               <input
                 type="number"
@@ -321,7 +321,7 @@ export default function PricingPage() {
             <button
               onClick={handleCreate}
               disabled={saving}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-[#00FF88] text-black rounded hover:bg-[#00e67a] disabled:opacity-50"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               Create Tier
@@ -345,10 +345,10 @@ export default function PricingPage() {
                 Plan
               </th>
               <th className="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider px-6 py-3">
-                Monthly (LKR)
+                Monthly (KES)
               </th>
               <th className="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider px-6 py-3">
-                Yearly (LKR)
+                Yearly (KES)
               </th>
               <th className="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider px-6 py-3">
                 DB Storage

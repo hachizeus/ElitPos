@@ -1,7 +1,16 @@
-CREATE TYPE "public"."estimate_item_status" AS ENUM('pending', 'approved', 'price_adjusted', 'rejected');--> statement-breakpoint
-CREATE TYPE "public"."estimate_item_type" AS ENUM('service', 'part');--> statement-breakpoint
-CREATE TYPE "public"."insurance_estimate_status" AS ENUM('draft', 'submitted', 'under_review', 'approved', 'partially_approved', 'rejected', 'work_order_created', 'cancelled');--> statement-breakpoint
-CREATE TABLE "insurance_companies" (
+DO $$ BEGIN
+  CREATE TYPE "public"."estimate_item_status" AS ENUM('pending', 'approved', 'price_adjusted', 'rejected');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."estimate_item_type" AS ENUM('service', 'part');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."insurance_estimate_status" AS ENUM('draft', 'submitted', 'under_review', 'approved', 'partially_approved', 'rejected', 'work_order_created', 'cancelled');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "insurance_companies" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -16,7 +25,7 @@ CREATE TABLE "insurance_companies" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "insurance_estimate_items" (
+CREATE TABLE IF NOT EXISTS "insurance_estimate_items" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid NOT NULL,
 	"estimate_id" uuid NOT NULL,
@@ -38,7 +47,7 @@ CREATE TABLE "insurance_estimate_items" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "insurance_estimate_revisions" (
+CREATE TABLE IF NOT EXISTS "insurance_estimate_revisions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid NOT NULL,
 	"estimate_id" uuid NOT NULL,
@@ -50,7 +59,7 @@ CREATE TABLE "insurance_estimate_revisions" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "insurance_estimates" (
+CREATE TABLE IF NOT EXISTS "insurance_estimates" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid NOT NULL,
 	"estimate_no" varchar(50) NOT NULL,
@@ -84,7 +93,7 @@ CREATE TABLE "insurance_estimates" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "item_bundle_components" (
+CREATE TABLE IF NOT EXISTS "item_bundle_components" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid NOT NULL,
 	"bundle_item_id" uuid NOT NULL,
@@ -92,7 +101,7 @@ CREATE TABLE "item_bundle_components" (
 	"quantity" numeric(12, 3) DEFAULT '1' NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "service_type_bundle_components" (
+CREATE TABLE IF NOT EXISTS "service_type_bundle_components" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid NOT NULL,
 	"bundle_service_type_id" uuid NOT NULL,
@@ -101,7 +110,7 @@ CREATE TABLE "service_type_bundle_components" (
 	"rate" numeric(12, 2)
 );
 --> statement-breakpoint
-CREATE TABLE "service_type_groups" (
+CREATE TABLE IF NOT EXISTS "service_type_groups" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -110,35 +119,104 @@ CREATE TABLE "service_type_groups" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "appointments" ADD COLUMN "cancellation_reason" text;--> statement-breakpoint
-ALTER TABLE "appointments" ADD COLUMN "cancelled_at" timestamp;--> statement-breakpoint
-ALTER TABLE "items" ADD COLUMN "is_bundle" boolean DEFAULT false NOT NULL;--> statement-breakpoint
-ALTER TABLE "sales" ADD COLUMN "void_reason" text;--> statement-breakpoint
-ALTER TABLE "sales" ADD COLUMN "voided_at" timestamp;--> statement-breakpoint
-ALTER TABLE "service_types" ADD COLUMN "group_id" uuid;--> statement-breakpoint
-ALTER TABLE "service_types" ADD COLUMN "is_bundle" boolean DEFAULT false NOT NULL;--> statement-breakpoint
-ALTER TABLE "work_orders" ADD COLUMN "cancellation_reason" text;--> statement-breakpoint
-ALTER TABLE "work_orders" ADD COLUMN "cancelled_at" timestamp;--> statement-breakpoint
-ALTER TABLE "insurance_companies" ADD CONSTRAINT "insurance_companies_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimate_items" ADD CONSTRAINT "insurance_estimate_items_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimate_items" ADD CONSTRAINT "insurance_estimate_items_estimate_id_insurance_estimates_id_fk" FOREIGN KEY ("estimate_id") REFERENCES "public"."insurance_estimates"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimate_items" ADD CONSTRAINT "insurance_estimate_items_service_type_id_service_types_id_fk" FOREIGN KEY ("service_type_id") REFERENCES "public"."service_types"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimate_items" ADD CONSTRAINT "insurance_estimate_items_item_id_items_id_fk" FOREIGN KEY ("item_id") REFERENCES "public"."items"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimate_revisions" ADD CONSTRAINT "insurance_estimate_revisions_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimate_revisions" ADD CONSTRAINT "insurance_estimate_revisions_estimate_id_insurance_estimates_id_fk" FOREIGN KEY ("estimate_id") REFERENCES "public"."insurance_estimates"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimate_revisions" ADD CONSTRAINT "insurance_estimate_revisions_changed_by_users_id_fk" FOREIGN KEY ("changed_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimates" ADD CONSTRAINT "insurance_estimates_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimates" ADD CONSTRAINT "insurance_estimates_customer_id_customers_id_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."customers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimates" ADD CONSTRAINT "insurance_estimates_vehicle_id_vehicles_id_fk" FOREIGN KEY ("vehicle_id") REFERENCES "public"."vehicles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimates" ADD CONSTRAINT "insurance_estimates_insurance_company_id_insurance_companies_id_fk" FOREIGN KEY ("insurance_company_id") REFERENCES "public"."insurance_companies"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimates" ADD CONSTRAINT "insurance_estimates_work_order_id_work_orders_id_fk" FOREIGN KEY ("work_order_id") REFERENCES "public"."work_orders"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimates" ADD CONSTRAINT "insurance_estimates_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimates" ADD CONSTRAINT "insurance_estimates_submitted_by_users_id_fk" FOREIGN KEY ("submitted_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "item_bundle_components" ADD CONSTRAINT "item_bundle_components_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "item_bundle_components" ADD CONSTRAINT "item_bundle_components_bundle_item_id_items_id_fk" FOREIGN KEY ("bundle_item_id") REFERENCES "public"."items"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "item_bundle_components" ADD CONSTRAINT "item_bundle_components_component_item_id_items_id_fk" FOREIGN KEY ("component_item_id") REFERENCES "public"."items"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "service_type_bundle_components" ADD CONSTRAINT "service_type_bundle_components_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "service_type_bundle_components" ADD CONSTRAINT "service_type_bundle_components_bundle_service_type_id_service_types_id_fk" FOREIGN KEY ("bundle_service_type_id") REFERENCES "public"."service_types"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "service_type_bundle_components" ADD CONSTRAINT "service_type_bundle_components_component_service_type_id_service_types_id_fk" FOREIGN KEY ("component_service_type_id") REFERENCES "public"."service_types"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "service_type_groups" ADD CONSTRAINT "service_type_groups_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "service_types" ADD CONSTRAINT "service_types_group_id_service_type_groups_id_fk" FOREIGN KEY ("group_id") REFERENCES "public"."service_type_groups"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "appointments" ADD COLUMN IF NOT EXISTS "cancellation_reason" text;--> statement-breakpoint
+ALTER TABLE "appointments" ADD COLUMN IF NOT EXISTS "cancelled_at" timestamp;--> statement-breakpoint
+ALTER TABLE "items" ADD COLUMN IF NOT EXISTS "is_bundle" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "sales" ADD COLUMN IF NOT EXISTS "void_reason" text;--> statement-breakpoint
+ALTER TABLE "sales" ADD COLUMN IF NOT EXISTS "voided_at" timestamp;--> statement-breakpoint
+ALTER TABLE "service_types" ADD COLUMN IF NOT EXISTS "group_id" uuid;--> statement-breakpoint
+ALTER TABLE "service_types" ADD COLUMN IF NOT EXISTS "is_bundle" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "work_orders" ADD COLUMN IF NOT EXISTS "cancellation_reason" text;--> statement-breakpoint
+ALTER TABLE "work_orders" ADD COLUMN IF NOT EXISTS "cancelled_at" timestamp;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_companies" ADD CONSTRAINT "insurance_companies_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimate_items" ADD CONSTRAINT "insurance_estimate_items_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimate_items" ADD CONSTRAINT "insurance_estimate_items_estimate_id_insurance_estimates_id_fk" FOREIGN KEY ("estimate_id") REFERENCES "public"."insurance_estimates"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimate_items" ADD CONSTRAINT "insurance_estimate_items_service_type_id_service_types_id_fk" FOREIGN KEY ("service_type_id") REFERENCES "public"."service_types"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimate_items" ADD CONSTRAINT "insurance_estimate_items_item_id_items_id_fk" FOREIGN KEY ("item_id") REFERENCES "public"."items"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimate_revisions" ADD CONSTRAINT "insurance_estimate_revisions_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimate_revisions" ADD CONSTRAINT "insurance_estimate_revisions_estimate_id_insurance_estimates_id_fk" FOREIGN KEY ("estimate_id") REFERENCES "public"."insurance_estimates"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimate_revisions" ADD CONSTRAINT "insurance_estimate_revisions_changed_by_users_id_fk" FOREIGN KEY ("changed_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimates" ADD CONSTRAINT "insurance_estimates_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimates" ADD CONSTRAINT "insurance_estimates_customer_id_customers_id_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."customers"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimates" ADD CONSTRAINT "insurance_estimates_vehicle_id_vehicles_id_fk" FOREIGN KEY ("vehicle_id") REFERENCES "public"."vehicles"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimates" ADD CONSTRAINT "insurance_estimates_insurance_company_id_insurance_companies_id_fk" FOREIGN KEY ("insurance_company_id") REFERENCES "public"."insurance_companies"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimates" ADD CONSTRAINT "insurance_estimates_work_order_id_work_orders_id_fk" FOREIGN KEY ("work_order_id") REFERENCES "public"."work_orders"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimates" ADD CONSTRAINT "insurance_estimates_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimates" ADD CONSTRAINT "insurance_estimates_submitted_by_users_id_fk" FOREIGN KEY ("submitted_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "item_bundle_components" ADD CONSTRAINT "item_bundle_components_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "item_bundle_components" ADD CONSTRAINT "item_bundle_components_bundle_item_id_items_id_fk" FOREIGN KEY ("bundle_item_id") REFERENCES "public"."items"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "item_bundle_components" ADD CONSTRAINT "item_bundle_components_component_item_id_items_id_fk" FOREIGN KEY ("component_item_id") REFERENCES "public"."items"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "service_type_bundle_components" ADD CONSTRAINT "service_type_bundle_components_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "service_type_bundle_components" ADD CONSTRAINT "service_type_bundle_components_bundle_service_type_id_service_types_id_fk" FOREIGN KEY ("bundle_service_type_id") REFERENCES "public"."service_types"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "service_type_bundle_components" ADD CONSTRAINT "service_type_bundle_components_component_service_type_id_service_types_id_fk" FOREIGN KEY ("component_service_type_id") REFERENCES "public"."service_types"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "service_type_groups" ADD CONSTRAINT "service_type_groups_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "service_types" ADD CONSTRAINT "service_types_group_id_service_type_groups_id_fk" FOREIGN KEY ("group_id") REFERENCES "public"."service_type_groups"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

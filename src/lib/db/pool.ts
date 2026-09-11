@@ -12,9 +12,27 @@ export function getSharedPool(): Pool {
     }
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
+      // Optimized for Windows development
+      max: parseInt(process.env.DB_POOL_MAX || '20', 10), // Reduced from 100 - Windows can't handle that many
+      min: 2, // Keep minimum 2 connections alive
+      // Keep connections alive longer (Windows is slow to establish new ones)
+      idleTimeoutMillis: 60_000, // 60 seconds (was 20)
+      // Much longer connection timeout for Windows
+      connectionTimeoutMillis: 30_000, // 30 seconds (was 3!)
+      // Longer statement timeout for complex queries on Windows
+      options: '-c statement_timeout=60000', // 60 seconds (was 20)
+      // Keep-alive prevents idle connections from being dropped
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10_000,
+    })
+
+    pool.on('error', (err) => {
+      console.error('[Pool] Unexpected error on idle client:', err.message)
+    })
+
+    // Monitor pool health
+    pool.on('connect', () => {
+      console.log('[Pool] Client connected. Total:', pool.totalCount, 'Idle:', pool.idleCount, 'Waiting:', pool.waitingCount)
     })
   }
   return pool

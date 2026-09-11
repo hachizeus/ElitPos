@@ -1,0 +1,220 @@
+================================================================================
+  ELITPOS DEPLOYMENT CHECKLIST - HostAfrica
+  Domain: elitpos.elitjohnsdigital.co.ke
+================================================================================
+
+FILES TO UPLOAD TO SERVER
+================================================================================
+
+REQUIRED FOLDERS:
+  ✓ src/                    All application source code
+  ✓ public/                 Static assets (images, icons, etc.)
+  ✓ drizzle/                Database migration files
+  ✓ scripts/                Build and utility scripts
+
+REQUIRED FILES:
+  ✓ package.json            Project dependencies list
+  ✓ package-lock.json       Dependency lock file
+  ✓ next.config.ts          Next.js configuration
+  ✓ tsconfig.json           TypeScript configuration
+  ✓ drizzle.config.ts       Database ORM configuration
+  ✓ server.js               Custom server (IMPORTANT!)
+  ✓ .env.production         Environment variables (rename to .env)
+  ✓ tailwind.config.ts      Tailwind CSS config
+  ✓ postcss.config.mjs      PostCSS config
+
+OPTIONAL (for reference):
+  • HOSTAFRICA_SETUP_GUIDE.md
+  • HOSTAFRICA_QUICK_START.md
+  • DEPLOYMENT_SUMMARY.md
+  • README.md
+
+DO NOT UPLOAD:
+  ✗ node_modules/           Will install on server
+  ✗ .next/                  Will build on server
+  ✗ .git/                   Not needed
+  ✗ .env                    Contains local settings
+  ✗ .env.local              Contains local settings
+  ✗ *.ps1                   Windows PowerShell scripts
+  ✗ test-*.js               Test files
+  ✗ *_GUIDE.md              Documentation (optional)
+
+================================================================================
+SERVER SETUP STEPS
+================================================================================
+
+STEP 1: CREATE DATABASE (cPanel or PostgreSQL)
+  [ ] Create database: retail_smart_erp
+  [ ] Create user: elitpos_user
+  [ ] Set strong password
+  [ ] Grant all privileges to user
+
+STEP 2: UPLOAD FILES
+  [ ] Upload all required folders/files above
+  [ ] Rename .env.production to .env
+  [ ] Update DATABASE_URL in .env with your credentials
+
+STEP 3: INSTALL DEPENDENCIES
+  [ ] SSH or cPanel Terminal
+  [ ] cd /path/to/elitpos
+  [ ] npm install (takes 5-10 minutes)
+
+STEP 4: RUN MIGRATIONS
+  [ ] npm run db:migrate
+  [ ] Wait for all 115+ migrations to complete (2-3 minutes)
+  [ ] Verify: No errors in output
+
+STEP 5: CREATE SUPER ADMIN
+  [ ] npm run db:seed-admin
+  [ ] Should see: "Super admin created" or "already exists"
+
+STEP 6: BUILD APPLICATION
+  [ ] npm run build (takes 3-5 minutes)
+  [ ] npm run build:server
+  [ ] Verify: .next/ folder created
+
+STEP 7: START APPLICATION
+  VPS with PM2:
+    [ ] pm2 start server.js --name elitpos
+    [ ] pm2 save
+    [ ] pm2 startup (follow instructions)
+  
+  cPanel:
+    [ ] Node.js App section
+    [ ] Click "Restart" button
+
+STEP 8: SETUP DOMAIN & SSL
+  VPS:
+    [ ] Configure Nginx (see HOSTAFRICA_SETUP_GUIDE.md)
+    [ ] sudo certbot --nginx -d elitpos.elitjohnsdigital.co.ke
+  
+  cPanel:
+    [ ] Domains section
+    [ ] Add subdomain: elitpos.elitjohnsdigital.co.ke
+    [ ] Enable AutoSSL
+
+================================================================================
+VERIFICATION CHECKLIST
+================================================================================
+
+AFTER DEPLOYMENT, VERIFY:
+  [ ] Site accessible at https://elitpos.elitjohnsdigital.co.ke
+  [ ] SSL certificate valid (green padlock)
+  [ ] Login page loads in 2-3 seconds
+  [ ] Can login with super admin:
+      Email: admin@elitjohnsdigital.co.ke
+      Password: 0a0b0c0D.
+  [ ] Dashboard loads successfully
+  [ ] No console errors (F12 developer tools)
+  [ ] WebSocket connected (check browser console)
+  [ ] Can create a new company/tenant
+  [ ] Can navigate between pages quickly (2-3s)
+  [ ] Database queries are fast (<1 second)
+
+================================================================================
+IMPORTANT CREDENTIALS
+================================================================================
+
+NEXTAUTH_SECRET (already in .env.production):
+  t86mcdsDCMF7Hzfjxy3hWOknwlBXIYur
+
+Super Admin Login:
+  URL: https://elitpos.elitjohnsdigital.co.ke/sys-control/login
+  Email: admin@elitjohnsdigital.co.ke
+  Password: 0a0b0c0D.
+  ⚠️ CHANGE PASSWORD AFTER FIRST LOGIN!
+
+Database Connection (update in .env):
+  DATABASE_URL=postgresql://elitpos_user:YOUR_PASSWORD@localhost:5432/retail_smart_erp
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+If site doesn't load:
+  1. Check PM2 status: pm2 status
+  2. Check logs: pm2 logs elitpos
+  3. Check Nginx: sudo systemctl status nginx
+  4. Check database: psql "postgresql://..."
+
+If build fails:
+  1. Check Node.js version: node --version (should be 18+)
+  2. Clear cache: rm -rf .next node_modules
+  3. Reinstall: npm install
+  4. Try again: npm run build
+
+If database errors:
+  1. Verify DATABASE_URL is correct
+  2. Test connection: psql "postgresql://..."
+  3. Check PostgreSQL status: sudo systemctl status postgresql
+  4. Check logs: sudo tail -f /var/log/postgresql/*.log
+
+================================================================================
+POST-DEPLOYMENT TASKS
+================================================================================
+
+SECURITY:
+  [ ] Change super admin password
+  [ ] Update CRON_SECRET in .env
+  [ ] Setup database backups (daily)
+  [ ] Setup application backups (weekly)
+  [ ] Review and restrict PostgreSQL access (pg_hba.conf)
+
+MONITORING:
+  [ ] Setup PM2 monitoring: pm2 monitor
+  [ ] Check disk space: df -h
+  [ ] Check memory usage: free -h
+  [ ] Monitor logs regularly: pm2 logs
+
+OPTIMIZATION:
+  [ ] Enable Nginx caching
+  [ ] Setup CDN for static assets (optional)
+  [ ] Monitor performance with browser dev tools
+  [ ] Setup database connection pooling (already configured)
+
+================================================================================
+SUPPORT CONTACTS
+================================================================================
+
+HostAfrica Support:
+  Website: https://hostafrica.co.ke
+  Email: support@hostafrica.co.ke
+
+Your Domain: elitjohnsdigital.co.ke
+Subdomain: elitpos.elitjohnsdigital.co.ke
+
+================================================================================
+ESTIMATED TIME
+================================================================================
+
+Total deployment time: 30-60 minutes
+  - Database setup: 5 minutes
+  - File upload: 10 minutes  
+  - Dependencies install: 10 minutes
+  - Migrations & build: 10 minutes
+  - Nginx/SSL setup: 10 minutes
+  - Testing: 5 minutes
+
+================================================================================
+SUCCESS CRITERIA
+================================================================================
+
+Deployment is successful when:
+  ✓ Site loads in 2-3 seconds (not 60-80s)
+  ✓ Login works smoothly
+  ✓ Dashboard shows without errors
+  ✓ Can create company/tenant
+  ✓ SSL is active and valid
+  ✓ No timeout errors
+  ✓ All features work as expected
+
+================================================================================
+
+FOR DETAILED INSTRUCTIONS:
+  - Quick start: HOSTAFRICA_QUICK_START.md
+  - Full guide: HOSTAFRICA_SETUP_GUIDE.md
+  - Summary: DEPLOYMENT_SUMMARY.md
+
+READY TO DEPLOY? Start with the Quick Start guide!
+
+================================================================================

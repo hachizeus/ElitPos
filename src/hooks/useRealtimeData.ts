@@ -58,6 +58,16 @@ export function useRealtimeData(
     }
   }, [refreshOnMount, enabled])
 
+  // Listen for global page:refresh event dispatched by usePageRefresh (header button)
+  useEffect(() => {
+    if (!enabled) return
+    const handlePageRefresh = () => {
+      fetchFnRef.current()
+    }
+    window.addEventListener('page:refresh', handlePageRefresh)
+    return () => window.removeEventListener('page:refresh', handlePageRefresh)
+  }, [enabled])
+
   // Update realtime status based on connection
   useEffect(() => {
     setIsRealtime(enabled && isConnected)
@@ -109,7 +119,7 @@ export function useRealtimeData(
   useEffect(() => {
     if (!enabled || isConnected) return
 
-    const interval = pollingInterval ?? 15000
+    const interval = pollingInterval ?? 60000 // Default 1 minute (was 15s - reduced to avoid aggressive polling)
     if (interval <= 0) return
 
     // Stagger initial poll to avoid thundering herd
@@ -229,7 +239,7 @@ export function useRealtimeDataMultiple(
   useEffect(() => {
     if (!enabled || isConnected) return
 
-    const interval = pollingInterval ?? 15000
+    const interval = pollingInterval ?? 60000 // Default 1 minute (was 15s - reduced to avoid aggressive polling)
     if (interval <= 0) return
 
     const initialDelay = Math.random() * 3000
@@ -348,7 +358,7 @@ export function useRealtimeDocument(
   useEffect(() => {
     if (!enabled || isConnected || !resourceId) return
 
-    const interval = pollingInterval ?? 15000
+    const interval = pollingInterval ?? 60000 // Default 1 minute (was 15s - reduced to avoid aggressive polling)
     if (interval <= 0) return
 
     const initialDelay = Math.random() * 3000

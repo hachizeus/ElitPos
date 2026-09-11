@@ -1,6 +1,6 @@
 // System-level email transport for OTP and system emails
 // Independent of tenant email settings
-// Uses Resend API (retailsmarterp.com verified domain)
+// Uses Resend API (elitjohnsdigital.co.ke verified domain)
 
 /** Escape HTML entities to prevent XSS in email templates */
 function escapeHtml(s: string): string {
@@ -29,8 +29,8 @@ export async function sendSystemEmail(options: {
     return { success: true, dev: true }
   }
 
-  const senderEmail = process.env.SYSTEM_EMAIL_FROM || 'noreply@retailsmarterp.com'
-  const senderName = process.env.NEXT_PUBLIC_APP_NAME || 'Retail Smart POS'
+  const senderEmail = process.env.SYSTEM_EMAIL_FROM || 'info@elitjohnsdigital.co.ke'
+  const senderName = process.env.NEXT_PUBLIC_APP_NAME || 'ElitPOS'
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -50,7 +50,15 @@ export async function sendSystemEmail(options: {
   const data = await res.json().catch(() => ({}))
 
   if (!res.ok || !data.id) {
-    throw new Error(`Resend API error: ${res.status} - ${data.message || res.statusText}`)
+    const errMsg = `Resend API error: ${res.status} - ${data.message || res.statusText}`
+    // Always log to console as fallback so OTPs are visible in dev even if domain isn't verified
+    console.warn(`[Email] Send failed (${options.to}): ${errMsg}`)
+    console.log('=== EMAIL FALLBACK (Resend failed) ===')
+    console.log(`To: ${options.to}`)
+    console.log(`Subject: ${options.subject}`)
+    console.log(`Body: ${options.text || '(html only)'}`)
+    console.log('======================================')
+    throw new Error(errMsg)
   }
 
   return { success: true, messageId: data.id }
@@ -63,7 +71,7 @@ export async function sendStaffInviteEmail(options: {
   role: string
   inviteUrl: string
 }) {
-  const appName = process.env.NEXT_PUBLIC_APP_NAME || 'Retail Smart POS'
+  const appName = process.env.NEXT_PUBLIC_APP_NAME || 'ElitPOS'
   const { email, inviterName, companyName, role, inviteUrl } = options
 
   // Escape user-provided values to prevent HTML injection in emails
@@ -78,8 +86,8 @@ export async function sendStaffInviteEmail(options: {
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; background: #ffffff;">
         <!-- Header -->
-        <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 32px 24px; text-align: center; border-radius: 12px 12px 0 0;">
-          <h1 style="color: #ffffff; font-size: 24px; font-weight: 700; margin: 0;">${appName}</h1>
+        <div style="background: linear-gradient(135deg, #052e16 0%, #00FF88 100%); padding: 32px 24px; text-align: center; border-radius: 12px 12px 0 0;">
+          <h1 style="color: #071209; font-size: 24px; font-weight: 700; margin: 0;">${appName}</h1>
         </div>
 
         <!-- Body -->
@@ -94,7 +102,7 @@ export async function sendStaffInviteEmail(options: {
             <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
               <tr>
                 <td style="width: 44px; vertical-align: top;">
-                  <div style="width: 40px; height: 40px; background: #dbeafe; border-radius: 8px; text-align: center; line-height: 40px; font-size: 18px; font-weight: 700; color: #1e40af;">
+                  <div style="width: 40px; height: 40px; background: #d1fae5; border-radius: 8px; text-align: center; line-height: 40px; font-size: 18px; font-weight: 700; color: #052e16;">
                     ${safeCompanyName.charAt(0).toUpperCase()}
                   </div>
                 </td>
@@ -108,7 +116,7 @@ export async function sendStaffInviteEmail(options: {
 
           <!-- CTA Button -->
           <div style="text-align: center; margin-bottom: 28px;">
-            <a href="${inviteUrl}" style="display: inline-block; background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: #ffffff; font-size: 15px; font-weight: 600; padding: 14px 36px; border-radius: 10px; text-decoration: none;">
+            <a href="${inviteUrl}" style="display: inline-block; background: linear-gradient(135deg, #052e16 0%, #00FF88 100%); color: #071209; font-size: 15px; font-weight: 600; padding: 14px 36px; border-radius: 10px; text-decoration: none;">
               Accept Invitation
             </a>
           </div>
@@ -140,7 +148,7 @@ export async function sendStaffInviteEmail(options: {
 }
 
 export async function sendOtpEmail(email: string, otp: string) {
-  const appName = process.env.NEXT_PUBLIC_APP_NAME || 'Retail Smart POS'
+  const appName = process.env.NEXT_PUBLIC_APP_NAME || 'ElitPOS'
   const digits = otp.split('')
 
   return sendSystemEmail({
@@ -150,8 +158,8 @@ export async function sendOtpEmail(email: string, otp: string) {
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; background: #ffffff;">
         <!-- Header -->
-        <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 32px 24px; text-align: center; border-radius: 12px 12px 0 0;">
-          <h1 style="color: #ffffff; font-size: 24px; font-weight: 700; margin: 0;">${appName}</h1>
+        <div style="background: linear-gradient(135deg, #052e16 0%, #00FF88 100%); padding: 32px 24px; text-align: center; border-radius: 12px 12px 0 0;">
+          <h1 style="color: #071209; font-size: 24px; font-weight: 700; margin: 0;">${appName}</h1>
         </div>
 
         <!-- Body -->
@@ -167,7 +175,7 @@ export async function sendOtpEmail(email: string, otp: string) {
               <tr>
                 ${digits.map(d => `
                   <td style="padding: 0 4px;">
-                    <div style="width: 52px; height: 64px; background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 28px; font-weight: 700; color: #1e40af; line-height: 64px; text-align: center;">
+                    <div style="width: 52px; height: 64px; background: #f0fdf4; border: 2px solid #86efac; border-radius: 10px; font-size: 28px; font-weight: 700; color: #052e16; line-height: 64px; text-align: center;">
                       ${d}
                     </div>
                   </td>

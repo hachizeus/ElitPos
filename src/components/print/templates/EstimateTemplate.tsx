@@ -72,7 +72,7 @@ export function EstimateTemplate({
   businessAddress,
   businessPhone,
   businessEmail,
-  currencyCode = 'LKR'
+  currencyCode = 'KES'
 }: EstimateTemplateProps) {
   const isInsurance = estimate.estimateType === 'insurance'
   const showApproved = ['approved', 'partially_approved', 'work_order_created'].includes(estimate.status)

@@ -64,7 +64,7 @@ const featureTabs: TabData[] = [
     key: 'hr',
     label: 'HR & Payroll',
     icon: Users,
-    gradient: 'from-violet-500 to-purple-500',
+    gradient: 'from-violet-500 to-green-400',
     mockup: <MockDashboard />,
     description: 'Employee management, salary structures, payroll runs, advances, attendance tracking, and leave management.',
     features: ['Employee profiles', 'Salary structures', 'Payroll processing', 'Employee advances', 'Attendance tracking', 'Leave management'],
@@ -183,7 +183,7 @@ export default function FeaturesClient() {
               { icon: Wifi, title: 'Real-Time Sync', description: 'Real-time live updates across all devices', gradient: 'from-sky-500 to-blue-500' },
               { icon: Shield, title: 'Advanced Security', description: 'Complete data isolation, encryption, and granular role-based access', gradient: 'from-stone-600 to-stone-700' },
               { icon: Sparkles, title: 'AI Intelligence', description: 'AI chat assistant, smart warnings, trend analysis', gradient: 'from-rose-500 to-pink-500', aiPowered: true },
-              { icon: Smartphone, title: 'Mobile Responsive', description: 'Fully responsive design for mobile, tablet, and desktop', gradient: 'from-violet-500 to-purple-500' },
+              { icon: Smartphone, title: 'Mobile Responsive', description: 'Fully responsive design for mobile, tablet, and desktop', gradient: 'from-violet-500 to-green-400' },
             ].map((card) => (
               <StaggerItem key={card.title}>
                 <FeatureCard {...card} />
@@ -198,8 +198,8 @@ export default function FeaturesClient() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
             badge="Feature Checklist"
-            title="What you get with RetailSmart"
-            highlight="RetailSmart"
+            title="What you get with ElitPOS"
+            highlight="ElitPOS"
           />
           <FadeIn>
             <div className="overflow-x-auto rounded-2xl border border-white/10 bg-white/5 shadow-sm">
@@ -207,7 +207,7 @@ export default function FeaturesClient() {
                 <thead>
                   <tr className="border-b border-white/10 bg-white/5">
                     <th className="px-6 py-4 text-left text-sm font-semibold text-white">Feature</th>
-                    <th className="px-6 py-4 text-center text-sm font-bold text-emerald-400">RetailSmart</th>
+                    <th className="px-6 py-4 text-center text-sm font-bold text-emerald-400">ElitPOS</th>
                   </tr>
                 </thead>
                 <tbody>

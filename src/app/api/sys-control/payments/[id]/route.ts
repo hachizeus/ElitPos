@@ -160,6 +160,52 @@ export async function PUT(
       pendingCompanyId: payment.pendingCompanyId,
     })
 
+    // ── Email notifications (fire-and-forget) ──
+    const { notifyUserCompanyApproved, notifyUserPaymentApproved, notifyUserCompanyRejected } =
+      await import('@/lib/email/admin-notifications')
+
+    if (status === 'approved') {
+      if (payment.pendingCompanyId) {
+        // Company activation — get the newly created tenant slug for the login link
+        const { tenants } = await import('@/lib/db/schema')
+        const { eq: eqOp } = await import('drizzle-orm')
+        const pending = await db.query.pendingCompanies.findFirst({
+          where: eqOp(pendingCompanies.id, payment.pendingCompanyId),
+          with: { tier: true },
+        })
+        if (pending) {
+          const tier = pending.tier as { displayName?: string; name?: string } | null
+          const tenant = await db.query.tenants.findFirst({
+            where: eqOp(tenants.slug, pending.slug),
+            columns: { slug: true },
+          })
+          notifyUserCompanyApproved({
+            accountId:   pending.accountId,
+            companyName: pending.name,
+            companySlug: tenant?.slug || pending.slug,
+            planName:    tier?.displayName || tier?.name || 'Paid',
+          }).catch(() => {})
+        }
+      } else {
+        notifyUserPaymentApproved({
+          accountId:    payment.accountId,
+          amount:       String(payment.amount),
+          currency:     payment.currency,
+          periodMonths: payment.periodMonths,
+        }).catch(() => {})
+      }
+    } else if (status === 'rejected') {
+      if (!payment.pendingCompanyId) {
+        // Subscription payment rejection — notify user directly
+        notifyUserCompanyRejected({
+          accountId:   payment.accountId,
+          companyName: 'your subscription',
+          reason:      reviewNotes || 'Payment could not be verified',
+        }).catch(() => {})
+      }
+      // Pending company rejection already handled above via notifyPendingCompanyRejected
+    }
+
     return NextResponse.json({ success: true })
   } catch (error) {
     logError('api/sys-control/payments/[id]', error)

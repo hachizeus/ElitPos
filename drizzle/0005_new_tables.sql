@@ -1,10 +1,13 @@
 -- Migration for new tables: revisions, activity logs, templates, attachments
 
--- Activity Action Enum
-CREATE TYPE "public"."activity_action" AS ENUM('create', 'update', 'delete', 'status_change', 'submit', 'approve', 'reject', 'cancel', 'convert', 'login', 'logout', 'print', 'export');--> statement-breakpoint
+-- Activity Action Enum (safe: skip if already exists)
+DO $$ BEGIN
+  CREATE TYPE "public"."activity_action" AS ENUM('create', 'update', 'delete', 'status_change', 'submit', 'approve', 'reject', 'cancel', 'convert', 'login', 'logout', 'print', 'export');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
 
--- Insurance Estimate Revisions
-CREATE TABLE "insurance_estimate_revisions" (
+-- Insurance Estimate Revisions (safe: skip if already exists)
+CREATE TABLE IF NOT EXISTS "insurance_estimate_revisions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid NOT NULL,
 	"estimate_id" uuid NOT NULL,
@@ -16,8 +19,8 @@ CREATE TABLE "insurance_estimate_revisions" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );--> statement-breakpoint
 
--- Activity Logs
-CREATE TABLE "activity_logs" (
+-- Activity Logs (safe: skip if already exists)
+CREATE TABLE IF NOT EXISTS "activity_logs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid NOT NULL,
 	"user_id" uuid,
@@ -32,8 +35,8 @@ CREATE TABLE "activity_logs" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );--> statement-breakpoint
 
--- Estimate Templates
-CREATE TABLE "estimate_templates" (
+-- Estimate Templates (safe: skip if already exists)
+CREATE TABLE IF NOT EXISTS "estimate_templates" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -45,8 +48,8 @@ CREATE TABLE "estimate_templates" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );--> statement-breakpoint
 
--- Insurance Estimate Attachments
-CREATE TABLE "insurance_estimate_attachments" (
+-- Insurance Estimate Attachments (safe: skip if already exists)
+CREATE TABLE IF NOT EXISTS "insurance_estimate_attachments" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid NOT NULL,
 	"estimate_id" uuid NOT NULL,
@@ -60,24 +63,54 @@ CREATE TABLE "insurance_estimate_attachments" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );--> statement-breakpoint
 
--- Foreign Keys
-ALTER TABLE "insurance_estimate_revisions" ADD CONSTRAINT "insurance_estimate_revisions_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimate_revisions" ADD CONSTRAINT "insurance_estimate_revisions_estimate_id_insurance_estimates_id_fk" FOREIGN KEY ("estimate_id") REFERENCES "public"."insurance_estimates"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimate_revisions" ADD CONSTRAINT "insurance_estimate_revisions_changed_by_users_id_fk" FOREIGN KEY ("changed_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+-- Foreign Keys (safe: skip if already exists)
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimate_revisions" ADD CONSTRAINT "insurance_estimate_revisions_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimate_revisions" ADD CONSTRAINT "insurance_estimate_revisions_estimate_id_insurance_estimates_id_fk" FOREIGN KEY ("estimate_id") REFERENCES "public"."insurance_estimates"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimate_revisions" ADD CONSTRAINT "insurance_estimate_revisions_changed_by_users_id_fk" FOREIGN KEY ("changed_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
 
-ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
 
-ALTER TABLE "estimate_templates" ADD CONSTRAINT "estimate_templates_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "estimate_templates" ADD CONSTRAINT "estimate_templates_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "estimate_templates" ADD CONSTRAINT "estimate_templates_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "estimate_templates" ADD CONSTRAINT "estimate_templates_created_by_users_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
 
-ALTER TABLE "insurance_estimate_attachments" ADD CONSTRAINT "insurance_estimate_attachments_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimate_attachments" ADD CONSTRAINT "insurance_estimate_attachments_estimate_id_insurance_estimates_id_fk" FOREIGN KEY ("estimate_id") REFERENCES "public"."insurance_estimates"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "insurance_estimate_attachments" ADD CONSTRAINT "insurance_estimate_attachments_uploaded_by_users_id_fk" FOREIGN KEY ("uploaded_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimate_attachments" ADD CONSTRAINT "insurance_estimate_attachments_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimate_attachments" ADD CONSTRAINT "insurance_estimate_attachments_estimate_id_insurance_estimates_id_fk" FOREIGN KEY ("estimate_id") REFERENCES "public"."insurance_estimates"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "insurance_estimate_attachments" ADD CONSTRAINT "insurance_estimate_attachments_uploaded_by_users_id_fk" FOREIGN KEY ("uploaded_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
 
--- Indexes for common queries
-CREATE INDEX "activity_logs_tenant_id_idx" ON "activity_logs" ("tenant_id");--> statement-breakpoint
-CREATE INDEX "activity_logs_created_at_idx" ON "activity_logs" ("created_at" DESC);--> statement-breakpoint
-CREATE INDEX "activity_logs_entity_idx" ON "activity_logs" ("entity_type", "entity_id");--> statement-breakpoint
-CREATE INDEX "insurance_estimate_attachments_estimate_id_idx" ON "insurance_estimate_attachments" ("estimate_id");--> statement-breakpoint
-CREATE INDEX "insurance_estimate_revisions_estimate_id_idx" ON "insurance_estimate_revisions" ("estimate_id");
+-- Indexes (safe: skip if already exists)
+CREATE INDEX IF NOT EXISTS "activity_logs_tenant_id_idx" ON "activity_logs" ("tenant_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "activity_logs_created_at_idx" ON "activity_logs" ("created_at" DESC);--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "activity_logs_entity_idx" ON "activity_logs" ("entity_type", "entity_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "insurance_estimate_attachments_estimate_id_idx" ON "insurance_estimate_attachments" ("estimate_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "insurance_estimate_revisions_estimate_id_idx" ON "insurance_estimate_revisions" ("estimate_id");

@@ -9,7 +9,7 @@ import { motion } from 'framer-motion'
 const metrics = [
   {
     label: "Today's Revenue",
-    value: '$12,458',
+    value: 'KSh 12,458',
     change: '+8.2%',
     iconBg: 'bg-green-100',
     iconColor: 'text-green-600',
@@ -48,7 +48,7 @@ const metrics = [
   },
   {
     label: 'Avg Order',
-    value: '$148.30',
+    value: 'KSh 1,483',
     change: '+5.1%',
     iconBg: 'bg-amber-100',
     iconColor: 'text-amber-600',
@@ -77,10 +77,10 @@ const topProducts = [
 ]
 
 const recentOrders = [
-  { id: '#1284', customer: 'Sarah M.', amount: '$234', status: 'Paid', color: 'bg-green-100 text-green-700' },
-  { id: '#1283', customer: 'James K.', amount: '$89', status: 'New', color: 'bg-blue-100 text-blue-700' },
-  { id: '#1282', customer: 'Emily R.', amount: '$413', status: 'Paid', color: 'bg-green-100 text-green-700' },
-  { id: '#1281', customer: 'David L.', amount: '$167', status: 'Pending', color: 'bg-amber-100 text-amber-700' },
+  { id: '#1284', customer: 'Sarah M.', amount: 'KSh 2,340', status: 'Paid', color: 'bg-green-100 text-green-700' },
+  { id: '#1283', customer: 'James K.', amount: 'KSh 890', status: 'New', color: 'bg-blue-100 text-blue-700' },
+  { id: '#1282', customer: 'Emily R.', amount: 'KSh 4,130', status: 'Paid', color: 'bg-green-100 text-green-700' },
+  { id: '#1281', customer: 'David L.', amount: 'KSh 1,670', status: 'Pending', color: 'bg-amber-100 text-amber-700' },
 ]
 
 /* ------------------------------------------------------------------ */

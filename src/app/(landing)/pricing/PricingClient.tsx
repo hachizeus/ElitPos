@@ -80,7 +80,7 @@ const fallbackTiers: DisplayTier[] = [
   },
   {
     name: 'Starter',
-    price: 'Rs 1,990',
+    price: 'KSh 1,990',
     period: 'month',
     features: ['All Features Included', 'Unlimited Users', 'Unlimited Locations', '500 MB Database', '500 MB File Storage', 'Email Support'],
     storage: '500 MB',
@@ -88,7 +88,7 @@ const fallbackTiers: DisplayTier[] = [
   },
   {
     name: 'Professional',
-    price: 'Rs 4,990',
+    price: 'KSh 4,990',
     period: 'month',
     features: ['All Features Included', 'Unlimited Users', 'Unlimited Locations', '3 GB Database', '2 GB File Storage', 'Email Support'],
     popular: true,
@@ -97,7 +97,7 @@ const fallbackTiers: DisplayTier[] = [
   },
   {
     name: 'Business',
-    price: 'Rs 9,990',
+    price: 'KSh 9,990',
     period: 'month',
     features: ['All Features Included', 'Unlimited Users', 'Unlimited Locations', '10 GB Database', '5 GB File Storage', 'Email Support'],
     storage: '10 GB',
@@ -105,7 +105,7 @@ const fallbackTiers: DisplayTier[] = [
   },
   {
     name: 'Enterprise',
-    price: 'Rs 24,990',
+    price: 'KSh 24,990',
     period: 'month',
     features: ['All Features Included', 'Unlimited Users', 'Unlimited Locations', '50 GB Database', '25 GB File Storage', 'Email Support'],
     storage: '50 GB',
@@ -150,19 +150,19 @@ const faqItems = [
 
 const highlights = [
   { icon: Gift, label: 'Free Forever', description: 'First company is 100% free. No trial, no expiry.', gradient: 'from-emerald-500 to-teal-500' },
-  { icon: Sparkles, label: 'AI-Powered Analytics', description: 'AI chat assistant and smart warnings built in.', gradient: 'from-violet-500 to-purple-500' },
-  { icon: Users, label: 'Unlimited Users', description: 'No per-user fees on any plan.', gradient: 'from-blue-500 to-sky-500' },
+  { icon: Sparkles, label: 'AI-Powered Analytics', description: 'AI chat assistant and smart warnings built in.', gradient: 'from-violet-500 to-green-400' },
+  { icon: Users, label: 'Unlimited Users', description: 'No per-user fees on any plan.', gradient: 'from-green-500 to-sky-500' },
   { icon: Shield, label: 'Advanced Security', description: 'Complete data isolation and encryption.', gradient: 'from-stone-600 to-stone-700' },
   { icon: Zap, label: 'Real-Time Sync', description: 'Real-time live updates.', gradient: 'from-amber-500 to-orange-500' },
   { icon: Globe, label: 'Multi-Currency', description: 'Support for all currencies worldwide.', gradient: 'from-pink-500 to-rose-500' },
-  { icon: Check, label: 'No Feature Gating', description: 'Every feature on every plan.', gradient: 'from-blue-600 to-violet-600' },
+  { icon: Check, label: 'No Feature Gating', description: 'Every feature on every plan.', gradient: 'from-green-600 to-violet-600' },
 ]
 
 export default function PricingClient() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
   const [apiTiers, setApiTiers] = useState<ApiTier[]>([])
   const [tiers, setTiers] = useState<DisplayTier[]>(fallbackTiers)
-  const { currency, symbol, loading: currencyLoading, convertFromLKR, formatPrice } = useCurrencyDisplay('geoip')
+  const { currency, symbol, loading: currencyLoading, convertFromKES, formatPrice } = useCurrencyDisplay('geoip')
 
   const fetchPricing = useCallback(async () => {
     try {
@@ -200,21 +200,21 @@ export default function PricingClient() {
         }
       }
 
-      const priceLKR = billingCycle === 'annual'
+      const priceKES = billingCycle === 'annual'
         ? Number(tier.priceYearly) / 12
         : Number(tier.priceMonthly)
 
-      const isFree = priceLKR === 0
-      const isConverted = currency !== 'LKR'
+      const isFree = priceKES === 0
+      const isConverted = currency !== 'KES'
 
       let priceDisplay: string
       if (isFree) {
         priceDisplay = 'Free'
       } else if (isConverted) {
-        const converted = convertFromLKR(priceLKR)
+        const converted = convertFromKES(priceKES)
         priceDisplay = `${symbol}${converted.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
       } else {
-        priceDisplay = `Rs ${priceLKR.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+        priceDisplay = `KSh ${priceKES.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
       }
 
       return {
@@ -231,7 +231,7 @@ export default function PricingClient() {
     })
 
     setTiers(displayTiers)
-  }, [apiTiers, billingCycle, currency, currencyLoading, convertFromLKR, formatPrice, symbol])
+  }, [apiTiers, billingCycle, currency, currencyLoading, convertFromKES, formatPrice, symbol])
 
   const comparisonHeaders = apiTiers.length > 0
     ? apiTiers.map(t => t.displayName)
@@ -292,7 +292,7 @@ export default function PricingClient() {
                 onClick={() => setBillingCycle('monthly')}
                 className={`px-5 py-2.5 text-sm font-semibold rounded transition-all ${
                   billingCycle === 'monthly'
-                    ? 'bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-lg shadow-blue-600/25'
+                    ? 'bg-gradient-to-r from-green-600 to-violet-600 text-white shadow-lg shadow-blue-600/25'
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
@@ -302,7 +302,7 @@ export default function PricingClient() {
                 onClick={() => setBillingCycle('annual')}
                 className={`px-5 py-2.5 text-sm font-semibold rounded transition-all inline-flex items-center gap-2 ${
                   billingCycle === 'annual'
-                    ? 'bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-lg shadow-blue-600/25'
+                    ? 'bg-gradient-to-r from-green-600 to-violet-600 text-white shadow-lg shadow-blue-600/25'
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
@@ -314,7 +314,7 @@ export default function PricingClient() {
             </div>
             <p className="text-xs text-zinc-500 mt-2">
               Your first company is always free
-              {currency !== 'LKR' && !currencyLoading && (
+              {currency !== 'KES' && !currencyLoading && (
                 <span> &middot; Prices shown in {currency} (approximate conversion)</span>
               )}
             </p>

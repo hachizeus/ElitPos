@@ -48,7 +48,7 @@ export default function EmailSettingsPage() {
               <h4 className="font-medium text-sm text-gray-900">From Address</h4>
             </div>
             <p className="text-xs text-gray-600">
-              Emails are sent from <strong>your-company@retailsmarterp.com</strong> using your company slug.
+              Emails are sent from <strong>your-company@elitpos.elitjohnsdigital.co.ke</strong> using your company slug.
             </p>
           </div>
 

@@ -5,6 +5,7 @@ import { useRealtimeData } from '@/hooks'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { resolveFileUrl } from '@/lib/files/client'
 import {
   Building2,
   Plus,
@@ -137,7 +138,7 @@ function StatCard({
   color: 'blue' | 'purple' | 'green' | 'orange' | 'pink'
 }) {
   const colors: Record<'blue' | 'purple' | 'green' | 'orange' | 'pink', string> = {
-    blue: 'bg-blue-50 text-blue-600',
+    blue: 'bg-green-50 text-green-600',
     purple: 'bg-purple-50 text-purple-600',
     green: 'bg-green-50 text-green-600',
     orange: 'bg-orange-50 text-orange-600',
@@ -232,7 +233,7 @@ function CompanyCard({
             <div className="w-14 h-14 bg-gradient-to-br from-gray-100 to-gray-50 rounded-2xl flex items-center justify-center text-2xl shadow-sm">
               {company.logoUrl ? (
                 <Image
-                  src={company.logoUrl}
+                  src={resolveFileUrl(company.logoUrl) ?? ''}
                   alt={company.name}
                   width={48}
                   height={48}
@@ -401,13 +402,17 @@ function CompanyCard({
             setOpening(true)
 
             const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN
-            const isDev = baseDomain === 'localhost'
+            // isDev: true when running locally (baseDomain is localhost or localhost:PORT)
+            const isDev = !baseDomain || baseDomain.startsWith('localhost') || baseDomain.includes('localhost:')
             const protocol = isDev ? 'http' : 'https'
-            const port = isDev ? ':3000' : ''
+            const port = ''  // Port is already included in baseDomain if needed
             const path = company.setupCompletedAt ? '/dashboard' : '/setup'
-            const fallbackUrl = baseDomain
-              ? `${protocol}://${company.slug}.${baseDomain}${port}${path}`
-              : `/c/${company.slug}${path}`
+            // In dev, always use path-based routing (/c/[slug]) to avoid subdomain SSL issues
+            const fallbackUrl = isDev
+              ? `/c/${company.slug}${path}`
+              : baseDomain
+                ? `${protocol}://${company.slug}.${baseDomain}${path}`
+                : `/c/${company.slug}${path}`
 
             // Open blank tab immediately to avoid popup blocker
             const newTab = window.open('about:blank', '_blank')
@@ -422,9 +427,12 @@ function CompanyCard({
 
               if (res.ok) {
                 const { transferToken } = await res.json()
-                const transferUrl = baseDomain
-                  ? `${protocol}://${company.slug}.${baseDomain}${port}/login?transfer=${transferToken}`
-                  : `/c/${company.slug}/login?transfer=${transferToken}`
+                // In dev, always use path-based routing
+                const transferUrl = isDev
+                  ? `/c/${company.slug}/login?transfer=${transferToken}`
+                  : baseDomain
+                    ? `${protocol}://${company.slug}.${baseDomain}/login?transfer=${transferToken}`
+                    : `/c/${company.slug}/login?transfer=${transferToken}`
 
                 if (newTab) {
                   newTab.location.href = transferUrl
@@ -446,8 +454,8 @@ function CompanyCard({
           }}
           className={`w-full flex items-center justify-center gap-2 px-4 py-3 ${
             company.setupCompletedAt
-              ? 'bg-gray-900 text-white hover:bg-gray-800'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
+              ? 'bg-[#071209] text-white hover:bg-[#0d2e18]'
+              : 'bg-green-500 text-white hover:bg-green-600'
           } rounded-md transition-all font-medium group-hover:shadow-md ${
             company.status !== 'active' && company.status !== 'locked' ? 'opacity-50 pointer-events-none' : ''
           } ${opening ? 'opacity-75' : ''}`}
@@ -483,11 +491,11 @@ function PricingCard({
 
   return (
     <div className={`relative bg-white dark:bg-gray-800 rounded-2xl border-2 p-6 transition-all hover:shadow-xl ${
-      isPopular ? 'border-blue-500 shadow-lg scale-105' : 'border-gray-100 dark:border-gray-700 hover:border-gray-200'
+      isPopular ? 'border-green-400 shadow-lg scale-105' : 'border-gray-100 dark:border-gray-700 hover:border-gray-200'
     }`}>
       {isPopular && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-semibold rounded-full shadow-lg">
+          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-green-600 to-green-400 text-white text-xs font-semibold rounded-full shadow-lg">
             <Star className="w-3.5 h-3.5" />
             Most Popular
           </span>
@@ -555,7 +563,7 @@ function PricingCard({
         href="/account/plans"
         className={`block w-full py-3 px-4 rounded-md font-medium text-center transition-all ${
           isPopular
-            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg'
+            ? 'bg-gradient-to-r from-green-600 to-green-400 text-black hover:from-green-700 hover:to-green-500 shadow-md hover:shadow-lg'
             : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200'
         }`}
       >
@@ -612,7 +620,7 @@ export default function AccountDashboard() {
     totalDatabaseBytes: 0,
     totalFileStorageBytes: 0,
     credits: 0,
-    currency: 'USD',
+    currency: 'KES',
   })
 
   // Update current time on mount
@@ -711,7 +719,7 @@ export default function AccountDashboard() {
         setStats((prev) => ({
           ...prev,
           credits: walletData.balance || 0,
-          currency: walletData.currency || 'USD',
+          currency: walletData.currency || 'KES',
         }))
       }
 
@@ -790,7 +798,7 @@ export default function AccountDashboard() {
             setLoading(true)
             fetchData()
           }}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
         >
           Try Again
         </button>
@@ -804,7 +812,7 @@ export default function AccountDashboard() {
       <div className="max-w-4xl mx-auto py-8">
         {/* Hero */}
         <div className="text-center mb-12">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <div className="w-20 h-20 bg-gradient-to-br from-green-600 to-green-400 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
             <Sparkles className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
@@ -823,10 +831,10 @@ export default function AccountDashboard() {
               <Link
                 key={type.value}
                 href={`/account/companies/new?type=${type.value}`}
-                className="group p-6 rounded-2xl border-2 border-gray-100 dark:border-gray-700 hover:border-blue-500 hover:shadow-lg transition-all text-center"
+                className="group p-6 rounded-2xl border-2 border-gray-100 dark:border-gray-700 hover:border-green-400 hover:shadow-lg transition-all text-center"
               >
                 <div className="text-4xl mb-3">{type.emoji}</div>
-                <p className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">{type.label}</p>
+                <p className="font-semibold text-gray-900 dark:text-white group-hover:text-green-600 transition-colors">{type.label}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{type.description}</p>
               </Link>
             ))}
@@ -834,12 +842,12 @@ export default function AccountDashboard() {
         </div>
 
         {/* Free Plan Banner */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-8 text-white text-center">
+        <div className="bg-gradient-to-r from-green-600 to-green-400 rounded-3xl p-8 text-white text-center">
           <div className="flex items-center justify-center gap-3 mb-3">
             <Zap className="w-6 h-6" />
             <h3 className="text-xl font-semibold">Free Forever</h3>
           </div>
-          <p className="text-blue-100 max-w-md mx-auto">
+          <p className="text-green-100 max-w-md mx-auto">
             Every new business gets full access to all features. No credit card required to start.
           </p>
         </div>
@@ -850,17 +858,17 @@ export default function AccountDashboard() {
   return (
     <div className="space-y-12">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl p-8 md:p-10 text-white">
+      <div className="bg-gradient-to-br from-[#071209] via-[#0d2e18] to-[#0a1f10] rounded-3xl p-8 md:p-10 text-white ring-2 ring-[#00FF88]/30">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold mb-2">
               Welcome back, {session?.user?.name?.split(' ')[0] || 'there'}
             </h1>
-            <p className="text-gray-400 text-lg">Manage your businesses and track performance</p>
+            <p className="text-[#a0f0c0] text-lg">Manage your businesses and track performance</p>
           </div>
           <Link
             href="/account/companies/new"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-medium shadow-lg"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-semibold shadow-lg"
           >
             <Plus className="w-5 h-5" />
             New Company
@@ -903,7 +911,7 @@ export default function AccountDashboard() {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Companies</h2>
           <Link
             href="/account/companies/new"
-            className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            className="text-sm font-medium text-green-600 hover:text-green-700 flex items-center gap-1"
           >
             <Plus className="w-4 h-4" />
             Add New
@@ -1017,11 +1025,11 @@ export default function AccountDashboard() {
 
         <Link
           href="/account/billing"
-          className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 hover:shadow-lg hover:border-blue-200 transition-all"
+          className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6 hover:shadow-lg hover:border-green-200 transition-all"
         >
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <CreditCard className="w-7 h-7 text-blue-600" />
+            <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+              <CreditCard className="w-7 h-7 text-green-600" />
             </div>
             <div>
               <p className="font-semibold text-gray-900 dark:text-white text-lg">Billing History</p>
@@ -1089,8 +1097,8 @@ export default function AccountDashboard() {
               </div>
 
               {deleteModal.company?.subscription && ['trial', 'active', 'past_due'].includes(deleteModal.company.subscription.status) && (
-                <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
+                  <p className="text-sm text-green-800 dark:text-green-200">
                     Your remaining {deleteModal.company.subscription.status === 'trial' ? 'free plan' : 'plan'} time will be saved and applied to your next company.
                   </p>
                 </div>

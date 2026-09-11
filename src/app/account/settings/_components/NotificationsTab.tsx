@@ -5,12 +5,13 @@ import { Bell, Loader2, Check } from 'lucide-react'
 import { toast } from '@/components/ui/toast'
 
 interface NotificationsTabProps {
-  notifications: { email: boolean; billing: boolean; security: boolean; marketing: boolean }
-  onNotificationsChange: (n: { email: boolean; billing: boolean; security: boolean; marketing: boolean }) => void
+  notifications: { email: boolean; sms: boolean; billing: boolean; security: boolean; marketing: boolean }
+  onNotificationsChange: (n: { email: boolean; sms: boolean; billing: boolean; security: boolean; marketing: boolean }) => void
 }
 
 const NOTIFICATION_ITEMS = [
   { key: 'email', label: 'Email notifications', desc: 'Receive important updates via email' },
+  { key: 'sms', label: 'SMS notifications', desc: 'Receive important updates via SMS' },
   { key: 'billing', label: 'Billing alerts', desc: 'Get notified about billing and invoices' },
   { key: 'security', label: 'Security alerts', desc: 'Important security notifications' },
   { key: 'marketing', label: 'Marketing emails', desc: 'Product updates and promotions' },
@@ -77,7 +78,7 @@ export function NotificationsTab({ notifications, onNotificationsChange }: Notif
               }
               className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
                 notifications[item.key]
-                  ? 'bg-gray-900 dark:bg-blue-600'
+                  ? 'bg-[#00FF88] dark:bg-[#00FF88]'
                   : 'bg-gray-300 dark:bg-gray-600'
               }`}
             >
@@ -92,7 +93,7 @@ export function NotificationsTab({ notifications, onNotificationsChange }: Notif
         <button
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 dark:bg-gray-700 text-white rounded-md hover:bg-gray-800 dark:hover:bg-gray-600 disabled:opacity-50 font-medium transition-colors mt-4"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 font-medium transition-colors mt-4"
         >
           {saving ? (
             <Loader2 className="w-4 h-4 animate-spin" />

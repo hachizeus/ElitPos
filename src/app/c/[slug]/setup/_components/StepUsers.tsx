@@ -116,8 +116,8 @@ export function StepUsers({ data, onChange }: StepUsersProps) {
       {/* Team Members Section */}
       <div className="rounded-xl border border-gray-200/60 dark:border-gray-700/50 bg-white dark:bg-slate-800/40 p-5">
         <div className="flex items-center gap-3 mb-4">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30">
-            <Users size={16} className="text-blue-600 dark:text-blue-400" />
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/30">
+            <Users size={16} className="text-[#00cc6e] dark:text-green-400" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Team Members</h3>
@@ -180,7 +180,7 @@ export function StepUsers({ data, onChange }: StepUsersProps) {
                       type="checkbox"
                       checked={user.sendInvite}
                       onChange={(e) => updateUser(index, 'sendInvite', e.target.checked)}
-                      className="w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="w-3.5 h-3.5 rounded border-gray-300 text-[#00cc6e] focus:ring-[#00FF88]"
                     />
                     <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Invite</span>
                   </label>
@@ -203,7 +203,7 @@ export function StepUsers({ data, onChange }: StepUsersProps) {
         {invitedUsers.length < 10 && (
           <button
             onClick={addUser}
-            className="mt-3 flex items-center gap-2 py-2.5 border-2 border-dashed border-gray-200 dark:border-gray-700/50 rounded-xl text-sm text-gray-400 dark:text-gray-500 hover:border-blue-300 hover:text-blue-600 dark:hover:border-blue-700 dark:hover:text-blue-400 transition-all w-full justify-center"
+            className="mt-3 flex items-center gap-2 py-2.5 border-2 border-dashed border-gray-200 dark:border-gray-700/50 rounded-xl text-sm text-gray-400 dark:text-gray-500 hover:border-green-300 hover:text-[#00cc6e] dark:hover:border-green-700 dark:hover:text-green-400 transition-all w-full justify-center"
           >
             <Plus size={15} />
             Add Team Member
@@ -212,9 +212,9 @@ export function StepUsers({ data, onChange }: StepUsersProps) {
       </div>
 
       {/* Note */}
-      <div className="flex items-start gap-2.5 px-4 py-3 bg-blue-50/60 dark:bg-blue-900/15 border border-blue-100 dark:border-blue-800/40 rounded-xl">
-        <Mail size={14} className="text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-blue-600 dark:text-blue-400 leading-relaxed">
+      <div className="flex items-start gap-2.5 px-4 py-3 bg-green-50/60 dark:bg-green-900/15 border border-green-100 dark:border-green-800/40 rounded-xl">
+        <Mail size={14} className="text-[#00FF88] dark:text-green-400 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-[#00cc6e] dark:text-green-400 leading-relaxed">
           Invitations are sent after setup. Existing users are added immediately.
           You can always add more users later from Settings.
         </p>

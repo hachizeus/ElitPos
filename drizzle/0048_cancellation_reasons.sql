@@ -12,16 +12,19 @@ CREATE TABLE IF NOT EXISTS cancellation_reasons (
 );
 
 -- Create index for common query pattern
-CREATE INDEX idx_cancellation_reasons_tenant_doctype
+CREATE INDEX IF NOT EXISTS idx_cancellation_reasons_tenant_doctype
   ON cancellation_reasons(tenant_id, document_type);
 
 -- Enable RLS
 ALTER TABLE cancellation_reasons ENABLE ROW LEVEL SECURITY;
 
 -- RLS policy for tenant isolation
-CREATE POLICY tenant_isolation_policy ON cancellation_reasons
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON cancellation_reasons
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Grant permissions to app_user
 GRANT SELECT, INSERT, UPDATE, DELETE ON cancellation_reasons TO app_user;

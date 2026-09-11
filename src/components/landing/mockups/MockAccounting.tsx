@@ -121,10 +121,10 @@ const modules: AccountingModule[] = [
 ]
 
 const stats = [
-  { label: 'Revenue MTD', value: '$48,250', color: 'text-gray-900' },
-  { label: 'Expenses MTD', value: '$31,180', color: 'text-gray-900' },
-  { label: 'Net Profit', value: '$17,070', color: 'text-green-600' },
-  { label: 'Receivables', value: '$12,840', color: 'text-amber-600' },
+  { label: 'Revenue MTD', value: 'KSh 482,500', color: 'text-gray-900' },
+  { label: 'Expenses MTD', value: 'KSh 311,800', color: 'text-gray-900' },
+  { label: 'Net Profit', value: 'KSh 170,700', color: 'text-green-600' },
+  { label: 'Receivables', value: 'KSh 128,400', color: 'text-amber-600' },
 ]
 
 export function MockAccounting() {

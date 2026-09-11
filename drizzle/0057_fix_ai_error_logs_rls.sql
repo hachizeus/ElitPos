@@ -10,16 +10,19 @@ DROP POLICY IF EXISTS "tenant_isolation_policy" ON ai_error_logs;
 
 -- Create proper RLS policy for ai_error_logs
 -- This table has nullable tenant_id for system-wide errors
-CREATE POLICY tenant_isolation_policy ON ai_error_logs
-  FOR ALL 
-  USING (
-    tenant_id IS NULL 
-    OR tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid
-  )
-  WITH CHECK (
-    tenant_id IS NULL 
-    OR tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid
-  );
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON ai_error_logs
+    FOR ALL 
+    USING (
+      tenant_id IS NULL 
+      OR tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid
+    )
+    WITH CHECK (
+      tenant_id IS NULL 
+      OR tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid
+    );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Force RLS on ai_error_logs
 ALTER TABLE ai_error_logs FORCE ROW LEVEL SECURITY;
@@ -33,10 +36,13 @@ ALTER TABLE ai_alerts ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "ai_alerts_tenant_isolation" ON ai_alerts;
 DROP POLICY IF EXISTS "tenant_isolation_policy" ON ai_alerts;
 
-CREATE POLICY tenant_isolation_policy ON ai_alerts
-  FOR ALL 
-  USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
-  WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON ai_alerts
+    FOR ALL 
+    USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
+    WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 ALTER TABLE ai_alerts FORCE ROW LEVEL SECURITY;
 

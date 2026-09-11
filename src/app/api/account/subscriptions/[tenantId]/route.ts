@@ -134,7 +134,6 @@ export async function PUT(
     const { cancelAtPeriodEnd, tierId } = parsed.data
 
     // Tier changes (tierId) must go through POST /upgrade endpoint for proper proration.
-    // This endpoint only handles cancellation toggling.
     if (tierId) {
       return NextResponse.json(
         { error: 'Tier changes must use the /upgrade endpoint for proper proration billing' },
@@ -157,7 +156,7 @@ export async function PUT(
 
     const [updated] = await db.update(subscriptions)
       .set({
-        cancelAtPeriodEnd,
+        ...(cancelAtPeriodEnd !== undefined ? { cancelAtPeriodEnd } : {}),
         updatedAt: new Date(),
       })
       .where(eq(subscriptions.id, subscription.id))

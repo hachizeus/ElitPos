@@ -44,7 +44,7 @@ export function StepLoyalty({ data, companyName, currency, onChange, onNext, onB
       <div className="mb-8">
         <div className="mb-6">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <Gift size={24} className="text-blue-600" />
+            <Gift size={24} className="text-[#00cc6e]" />
             Loyalty Program
           </h2>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
@@ -57,7 +57,7 @@ export function StepLoyalty({ data, companyName, currency, onChange, onNext, onB
             type="checkbox"
             checked={enabled}
             onChange={(e) => onChange({ enableLoyalty: e.target.checked })}
-            className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            className="w-5 h-5 rounded border-gray-300 text-[#00cc6e] focus:ring-[#00FF88]"
           />
           <div>
             <p className="font-medium text-gray-900 dark:text-white">Enable Loyalty Program</p>
@@ -81,7 +81,7 @@ export function StepLoyalty({ data, companyName, currency, onChange, onNext, onB
                 type="text"
                 value={programName}
                 onChange={(e) => onChange({ loyaltyProgramName: e.target.value })}
-                className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent"
                 placeholder="e.g. My Store Rewards"
               />
             </div>
@@ -98,7 +98,7 @@ export function StepLoyalty({ data, companyName, currency, onChange, onNext, onB
                   onChange={(e) => onChange({ loyaltyCollectionFactor: parseFloat(e.target.value) || 0 })}
                   min="0.01"
                   step="0.1"
-                  className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent"
                 />
                 <p className="text-xs text-gray-400 mt-1">e.g. 1 = one point per {currency}</p>
               </div>
@@ -113,7 +113,7 @@ export function StepLoyalty({ data, companyName, currency, onChange, onNext, onB
                   onChange={(e) => onChange({ loyaltyConversionFactor: parseFloat(e.target.value) || 0 })}
                   min="0.001"
                   step="0.01"
-                  className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent"
                 />
                 <p className="text-xs text-gray-400 mt-1">e.g. 0.01 = 100 pts = 1 {currency}</p>
               </div>
@@ -128,7 +128,7 @@ export function StepLoyalty({ data, companyName, currency, onChange, onNext, onB
                   onChange={(e) => onChange({ loyaltyMinRedemption: parseInt(e.target.value) || 0 })}
                   min="1"
                   step="10"
-                  className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent"
                 />
               </div>
             </div>
@@ -140,7 +140,7 @@ export function StepLoyalty({ data, companyName, currency, onChange, onNext, onB
                   type="checkbox"
                   checked={pointsExpire}
                   onChange={(e) => onChange({ loyaltyExpire: e.target.checked })}
-                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="w-4 h-4 rounded border-gray-300 text-[#00cc6e] focus:ring-[#00FF88]"
                 />
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Points expire after</span>
               </label>
@@ -152,7 +152,7 @@ export function StepLoyalty({ data, companyName, currency, onChange, onNext, onB
                     onChange={(e) => onChange({ loyaltyExpiryDays: parseInt(e.target.value) || 365 })}
                     min="30"
                     max="3650"
-                    className="w-24 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-24 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent"
                   />
                   <span className="text-sm text-gray-500 dark:text-gray-400">days</span>
                 </div>
@@ -165,9 +165,9 @@ export function StepLoyalty({ data, companyName, currency, onChange, onNext, onB
             <button
               type="button"
               onClick={() => setShowTiers(!showTiers)}
-              className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors mb-4"
+              className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#00cc6e] dark:hover:text-green-400 transition-colors mb-4"
             >
-              <Star size={18} className="text-blue-600" />
+              <Star size={18} className="text-[#00cc6e]" />
               Loyalty Tiers (Pre-configured)
               {showTiers ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
@@ -209,7 +209,7 @@ export function StepLoyalty({ data, companyName, currency, onChange, onNext, onB
         </button>
         <button
           onClick={onNext}
-          className="px-6 py-2.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors font-medium"
+          className="px-6 py-2.5 bg-[#00e67a] text-white rounded hover:bg-[#00cc6e] transition-colors font-medium"
         >
           Continue
         </button>

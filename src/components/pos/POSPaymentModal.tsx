@@ -1,11 +1,12 @@
 'use client'
 
 import { useMemo } from 'react'
-import { X, Loader2, Wallet, Gift, Banknote, CreditCard, Building2, Smartphone, Search, CheckCircle, AlertTriangle } from 'lucide-react'
+import { X, Loader2, Wallet, Gift, Banknote, CreditCard, Building2, Smartphone, Search, CheckCircle, AlertTriangle, Zap, Globe } from 'lucide-react'
 import { FormInput } from '@/components/ui/form-elements'
 import { useCurrency } from '@/hooks/useCurrency'
 import { getCurrencyNotes } from '@/lib/utils/countries'
 import type { Customer, PaymentMethodConfig, LoyaltyProgram, GiftCardInfo } from './types'
+import { POSGatewayPanel, type GatewayType } from './POSGatewayPanel'
 
 const PAYMENT_METHOD_META: Record<string, { icon: typeof Banknote; label: string }> = {
   cash: { icon: Banknote, label: 'Cash' },
@@ -14,7 +15,15 @@ const PAYMENT_METHOD_META: Record<string, { icon: typeof Banknote; label: string
   credit: { icon: Wallet, label: 'Credit' },
   gift_card: { icon: Gift, label: 'Gift Card' },
   mobile_payment: { icon: Smartphone, label: 'Mobile' },
+  // Digital payment gateways
+  mpesa: { icon: Smartphone, label: 'M-Pesa' },
+  stripe: { icon: CreditCard, label: 'Stripe Card' },
+  paystack: { icon: Zap, label: 'Paystack' },
+  payhero: { icon: Globe, label: 'PayHero' },
 }
+
+/** Payment methods that route through an external gateway panel */
+const GATEWAY_METHODS = new Set<string>(['mpesa', 'stripe', 'paystack', 'payhero'])
 
 interface POSPaymentModalProps {
   isOpen: boolean
@@ -56,6 +65,10 @@ interface POSPaymentModalProps {
   giftCardInfo: GiftCardInfo | null
   giftCardLookupLoading: boolean
   onLookupGiftCard: () => void
+
+  // Digital gateway payments (optional — only shown when gateway methods are configured)
+  pendingSaleId?: string       // pre-created sale ID to link the gateway transaction to
+  onGatewaySuccess?: (gateway: GatewayType, ref: string) => void  // cashier confirmation after gateway paid
 }
 
 export function POSPaymentModal({
@@ -92,6 +105,8 @@ export function POSPaymentModal({
   giftCardInfo,
   giftCardLookupLoading,
   onLookupGiftCard,
+  pendingSaleId,
+  onGatewaySuccess,
 }: POSPaymentModalProps) {
   const { currency: currencyCode } = useCurrency()
   const payableTotal = Math.max(0, total - loyaltyRedeemValue + (tipAmount || 0))
@@ -112,7 +127,7 @@ export function POSPaymentModal({
       { label: 'Exact', value: remainingAfterCredit }
     ]
     if (paymentMethod === 'cash' && payableTotal > 0) {
-      const notes = getCurrencyNotes(currency || 'LKR')
+      const notes = getCurrencyNotes(currency || 'KES')
       const seen = new Set<number>()
       // Find the smallest combination of notes >= payableTotal
       for (let i = notes.length - 1; i >= 0; i--) {
@@ -214,13 +229,13 @@ export function POSPaymentModal({
 
           {/* Loyalty Points Redemption */}
           {!isReturnMode && selectedCustomer && loyaltyProgram && (selectedCustomer.loyaltyPoints || 0) >= loyaltyProgram.minRedemptionPoints && (
-            <div className="bg-purple-50 border-2 border-purple-200 rounded-2xl p-4">
+            <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Gift className="text-purple-600" size={20} />
-                  <span className="font-medium text-purple-800">Loyalty Points</span>
+                  <Gift className="text-green-600" size={20} />
+                  <span className="font-medium text-green-800">Loyalty Points</span>
                 </div>
-                <span className="text-lg font-bold text-purple-700">{selectedCustomer.loyaltyPoints} pts</span>
+                <span className="text-lg font-bold text-green-700">{selectedCustomer.loyaltyPoints} pts</span>
               </div>
               {showLoyaltyRedeem ? (
                 <div className="space-y-2">
@@ -252,13 +267,13 @@ export function POSPaymentModal({
                         const newTotal = Math.max(0, total - value)
                         setAmountPaid(Math.max(0, newTotal - (parseFloat(creditAmount) || 0)).toFixed(2))
                       }}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-md font-medium hover:bg-purple-700 text-sm"
+                      className="px-4 py-2 bg-green-600 text-white rounded-md font-medium hover:bg-green-700 text-sm"
                     >
                       Apply
                     </button>
                   </div>
                   {loyaltyRedeemPoints > 0 && (
-                    <p className="text-xs text-purple-600">
+                    <p className="text-xs text-green-600">
                       = {currencyCode} {loyaltyRedeemValueCalc.toFixed(2)} discount
                     </p>
                   )}
@@ -273,7 +288,7 @@ export function POSPaymentModal({
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShowLoyaltyRedeem(true)}
-                    className="flex-1 py-2 bg-purple-600 text-white rounded-md font-medium hover:bg-purple-700"
+                    className="flex-1 py-2 bg-green-600 text-white rounded-md font-medium hover:bg-green-700"
                   >
                     Redeem Points
                   </button>
@@ -423,8 +438,25 @@ export function POSPaymentModal({
             </div>
           )}
 
+          {/* Digital Gateway Panel — M-Pesa, Stripe, Paystack, PayHero */}
+          {!isReturnMode && GATEWAY_METHODS.has(paymentMethod) && (
+            <POSGatewayPanel
+              gateway={paymentMethod as GatewayType}
+              amount={payableTotal}
+              saleId={pendingSaleId}
+              customerPhone={selectedCustomer?.phone || ''}
+              customerEmail={undefined}
+              onSuccess={(ref) => {
+                onGatewaySuccess?.(paymentMethod as GatewayType, ref)
+                onCompleteSale()
+              }}
+              onCancel={onClose}
+              disabled={processing}
+            />
+          )}
+
           {/* Amount Input — hidden for credit sales (no money received) */}
-          {!isReturnMode && paymentMethod !== 'credit' && (
+          {!isReturnMode && paymentMethod !== 'credit' && !GATEWAY_METHODS.has(paymentMethod) && (
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Amount Received
@@ -495,6 +527,8 @@ export function POSPaymentModal({
           >
             Cancel
           </button>
+          {/* Hide the manual "Complete Sale" button when a gateway panel handles payment */}
+          {!GATEWAY_METHODS.has(paymentMethod) && (
           <button
             onClick={onCompleteSale}
             disabled={processing || (isReturnMode && refundMethod === 'credit' && !selectedCustomer) || (!isReturnMode && paymentMethod === 'credit' && !selectedCustomer) || (!isReturnMode && paymentMethod === 'gift_card' && (!giftCardInfo || giftCardInfo.status !== 'active'))}
@@ -517,6 +551,7 @@ export function POSPaymentModal({
               'Complete Sale'
             )}
           </button>
+          )}
         </div>
       </div>
     </div>

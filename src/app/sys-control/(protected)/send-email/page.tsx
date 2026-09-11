@@ -11,7 +11,7 @@ const EMAIL_TEMPLATES = [
 ]
 
 function getTemplateContent(template: string): { subject: string; html: string; text: string } {
-  const appName = 'Retail Smart POS'
+  const appName = 'ElitPOS'
 
   switch (template) {
     case 'test-plain':
@@ -26,7 +26,7 @@ function getTemplateContent(template: string): { subject: string; html: string; 
         text: '',
         html: `
 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto;">
-  <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 32px 24px; text-align: center; border-radius: 12px 12px 0 0;">
+  <div style="background: linear-gradient(135deg, #052e16 0%, #00FF88 100%); padding: 32px 24px; text-align: center; border-radius: 12px 12px 0 0;">
     <h1 style="color: #ffffff; font-size: 24px; font-weight: 700; margin: 0;">${appName}</h1>
   </div>
   <div style="padding: 40px 32px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
@@ -49,7 +49,7 @@ function getTemplateContent(template: string): { subject: string; html: string; 
         text: `Your verification code is: 12345\n\nThis code expires in 10 minutes.\n\nThis is a TEST - not a real OTP.`,
         html: `
 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto;">
-  <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 32px 24px; text-align: center; border-radius: 12px 12px 0 0;">
+  <div style="background: linear-gradient(135deg, #052e16 0%, #00FF88 100%); padding: 32px 24px; text-align: center; border-radius: 12px 12px 0 0;">
     <h1 style="color: #ffffff; font-size: 24px; font-weight: 700; margin: 0;">${appName}</h1>
   </div>
   <div style="padding: 40px 32px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
@@ -77,7 +77,7 @@ function getTemplateContent(template: string): { subject: string; html: string; 
         text: `Hi there,\n\nAdmin has invited you to join Test Company as a manager on ${appName}.\n\nThis is a TEST invite email.`,
         html: `
 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto;">
-  <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 32px 24px; text-align: center; border-radius: 12px 12px 0 0;">
+  <div style="background: linear-gradient(135deg, #052e16 0%, #00FF88 100%); padding: 32px 24px; text-align: center; border-radius: 12px 12px 0 0;">
     <h1 style="color: #ffffff; font-size: 24px; font-weight: 700; margin: 0;">${appName}</h1>
   </div>
   <div style="padding: 40px 32px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 12px 12px;">
@@ -87,7 +87,7 @@ function getTemplateContent(template: string): { subject: string; html: string; 
       <table cellpadding="0" cellspacing="0" border="0" style="width: 100%;">
         <tr>
           <td style="width: 44px; vertical-align: top;">
-            <div style="width: 40px; height: 40px; background: #dbeafe; border-radius: 8px; text-align: center; line-height: 40px; font-size: 18px; font-weight: 700; color: #1e40af;">T</div>
+            <div style="width: 40px; height: 40px; background: #d1fae5; border-radius: 8px; text-align: center; line-height: 40px; font-size: 18px; font-weight: 700; color: #052e16;">T</div>
           </td>
           <td style="padding-left: 12px; vertical-align: top;">
             <div style="font-size: 15px; font-weight: 600; color: #1e293b;">Test Company</div>
@@ -183,7 +183,7 @@ export default function SendEmailPage() {
         <h1 className="text-2xl font-bold text-gray-900">Send Test Email</h1>
         <p className="text-gray-500 mt-1">
           Test system email delivery via Resend (primary) or Brevo (fallback).
-          Emails are sent from <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm">noreply@retailsmarterp.com</code>
+          Emails are sent from <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm">info@elitjohnsdigital.co.ke</code>
         </p>
       </div>
 
@@ -326,7 +326,7 @@ export default function SendEmailPage() {
             {contentMode === 'html' && html ? (
               <div className="border rounded overflow-hidden">
                 <div className="bg-gray-50 px-4 py-2 border-b">
-                  <p className="text-xs text-gray-500">From: Retail Smart POS &lt;noreply@retailsmarterp.com&gt;</p>
+                  <p className="text-xs text-gray-500">From: ElitPOS &lt;info@elitjohnsdigital.co.ke&gt;</p>
                   <p className="text-xs text-gray-500">To: {to || '(not set)'}</p>
                   <p className="text-xs font-medium text-gray-700">{subject || '(no subject)'}</p>
                 </div>
@@ -341,7 +341,7 @@ export default function SendEmailPage() {
             ) : contentMode === 'text' && text ? (
               <div className="border rounded overflow-hidden">
                 <div className="bg-gray-50 px-4 py-2 border-b">
-                  <p className="text-xs text-gray-500">From: Retail Smart POS &lt;noreply@retailsmarterp.com&gt;</p>
+                  <p className="text-xs text-gray-500">From: ElitPOS &lt;info@elitjohnsdigital.co.ke&gt;</p>
                   <p className="text-xs text-gray-500">To: {to || '(not set)'}</p>
                   <p className="text-xs font-medium text-gray-700">{subject || '(no subject)'}</p>
                 </div>

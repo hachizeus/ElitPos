@@ -30,13 +30,13 @@ interface SearchResponse {
 }
 
 const typeIcons: Record<string, React.ReactNode> = {
-  customer: <User size={16} className="text-purple-500" />,
+  customer: <User size={16} className="text-green-600" />,
   vehicle: <Car size={16} className="text-blue-500" />,
   work_order: <Wrench size={16} className="text-green-500" />,
   estimate: <FileText size={16} className="text-orange-500" />,
   sale: <ShoppingCart size={16} className="text-teal-500" />,
   item: <Package size={16} className="text-gray-500" />,
-  supplier: <Truck size={16} className="text-indigo-500" />,
+  supplier: <Truck size={16} className="text-green-600" />,
   category: <FolderOpen size={16} className="text-amber-500" />,
   purchase_order: <ClipboardList size={16} className="text-cyan-500" />,
   page: <Navigation size={16} className="text-rose-500" />,

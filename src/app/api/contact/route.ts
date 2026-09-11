@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     // If Resend API key is configured, send email
     const resendKey = process.env.RESEND_API_KEY
     if (resendKey) {
-      const emailFrom = process.env.SYSTEM_EMAIL_FROM || 'noreply@retailsmarterp.com'
+      const emailFrom = process.env.SYSTEM_EMAIL_FROM || 'info@elitjohnsdigital.co.ke'
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
         },
         body: JSON.stringify({
           from: emailFrom,
-          to: 'hello@retailsmarterp.com',
+          to: 'info@elitjohnsdigital.co.ke',
           subject: `Contact Form: ${safeName}${safeCompany ? ` (${safeCompany})` : ''}`,
           html: `
             <h2>New Contact Form Submission</h2>

@@ -1,9 +1,9 @@
 /**
- * Retail Smart ERP Logo Component
+ * ElitPOS Logo Component — Elitjohns Digital Agency
  *
  * Usage:
  *   <Logo />                        — Icon only, default 32px
- *   <Logo variant="full" />         — Icon + "Retail Smart ERP" text
+ *   <Logo variant="full" />         — Icon + "ElitPOS" text
  *   <Logo size={48} />              — Custom size
  *   <Logo onDark />                 — White text for dark backgrounds
  *   <Logo variant="full" subtitle="Point of Sale System" />
@@ -21,61 +21,22 @@ interface LogoProps {
   className?: string
 }
 
-/** The SVG icon mark — a stylized storefront with a smart pulse */
-function LogoMark({ size = 32 }: { size?: number }) {
+/** The SVG icon mark — uses the ElitPOS icon logo */
+function LogoMark({ size = 32, onDark = false }: { size?: number; onDark?: boolean }) {
   return (
-    <svg
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/icons/iconlogo.svg"
+      alt="ElitPOS"
       width={size}
       height={size}
-      viewBox="0 0 64 64"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      {/* Rounded square background */}
-      <rect width="64" height="64" rx="16" fill="url(#logo-grad)" />
-
-      {/* Storefront awning */}
-      <path
-        d="M14 28c0-2 1-4 4-4h28c3 0 4 2 4 4v1c0 3-2.5 5-5.5 5S40 32 40 29c0 3-2.5 5-5.5 5S30 31 30 29c0 3-3 5-6 5s-6-2-6-5v-1z"
-        fill="rgba(255,255,255,0.95)"
-      />
-
-      {/* Store body */}
-      <rect x="18" y="33" width="28" height="16" rx="2" fill="rgba(255,255,255,0.85)" />
-
-      {/* Door */}
-      <rect x="27" y="38" width="10" height="11" rx="1.5" fill="url(#logo-grad)" opacity="0.7" />
-
-      {/* Window left */}
-      <rect x="20.5" y="36" width="5" height="5" rx="1" fill="url(#logo-grad)" opacity="0.35" />
-
-      {/* Smart pulse / signal arcs (top-right) — represents "smart" */}
-      <path
-        d="M44 18a8 8 0 0 1 0 8"
-        stroke="rgba(255,255,255,0.9)"
-        strokeWidth="2"
-        strokeLinecap="round"
-        fill="none"
-      />
-      <path
-        d="M48 15a13 13 0 0 1 0 14"
-        stroke="rgba(255,255,255,0.55)"
-        strokeWidth="2"
-        strokeLinecap="round"
-        fill="none"
-      />
-
-      {/* Dot for signal origin */}
-      <circle cx="43" cy="22" r="2" fill="rgba(255,255,255,0.95)" />
-
-      <defs>
-        <linearGradient id="logo-grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#2563eb" />
-          <stop offset="1" stopColor="#4f46e5" />
-        </linearGradient>
-      </defs>
-    </svg>
+      style={{
+        display: 'inline-block',
+        verticalAlign: 'middle',
+        // Invert + tint to neon green when on a dark background so the icon is always visible
+        filter: onDark ? 'brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(90deg)' : undefined,
+      }}
+    />
   )
 }
 
@@ -89,28 +50,29 @@ export function Logo({
   if (variant === 'icon') {
     return (
       <span className={className}>
-        <LogoMark size={size} />
+        <LogoMark size={size} onDark={onDark} />
       </span>
     )
   }
 
-  // Full variant — icon + wordmark
-  const textSize = size >= 40 ? 'text-xl' : size >= 32 ? 'text-base' : 'text-sm'
+  // Full variant — icon + wordmark (namelogo.svg contains the full name mark)
   const subSize = size >= 40 ? 'text-sm' : 'text-xs'
 
   return (
     <span className={`inline-flex items-center gap-2.5 ${className}`}>
-      <LogoMark size={size} />
-      <span className="flex flex-col leading-tight">
-        <span className={`font-bold tracking-tight ${textSize} ${onDark ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
-          Retail Smart ERP
+      {/* Main logo — includes icon + name in one image */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/icons/mainlogo.png"
+        alt="ElitPOS"
+        height={size}
+        style={{ display: 'inline-block', height: size, width: 'auto' }}
+      />
+      {subtitle && (
+        <span className={`${subSize} ${onDark ? 'text-white/60' : 'text-slate-500 dark:text-slate-400'}`}>
+          {subtitle}
         </span>
-        {subtitle && (
-          <span className={`${subSize} ${onDark ? 'text-white/60' : 'text-slate-500 dark:text-slate-400'}`}>
-            {subtitle}
-          </span>
-        )}
-      </span>
+      )}
     </span>
   )
 }

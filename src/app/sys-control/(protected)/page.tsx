@@ -1,11 +1,11 @@
 import { db } from '@/lib/db'
-import { accounts, tenants, subscriptions, paymentDeposits, pricingTiers, tenantUsage, payhereTransactions, systemSettings } from '@/lib/db/schema'
+import { accounts, tenants, subscriptions, paymentDeposits, pricingTiers, tenantUsage, gatewayTransactions, systemSettings } from '@/lib/db/schema'
 import { count, eq, sql, and, gte, gt } from 'drizzle-orm'
 import Link from 'next/link'
 import {
   Users, Building2, CreditCard, Clock, CheckCircle,
-  Database, HardDrive, TrendingUp, AlertTriangle, Lock, Zap,
-  Bell, Settings, Ticket, Sparkles, ArrowRight,
+  Database, HardDrive, TrendingUp, AlertTriangle, Lock,
+  Bell, Settings, Ticket, Sparkles, ArrowRight, Smartphone, Zap, Globe,
 } from 'lucide-react'
 import { formatCurrencyWithSymbol } from '@/lib/utils/currency'
 
@@ -35,7 +35,7 @@ export default async function AdminDashboard() {
     lockedSubscriptions,
     pastDueSubscriptions,
     pendingPayments,
-    successfulPayhere,
+    successfulGateway,
     allCoupons,
     seasonalOfferSetting,
   ] = await Promise.all([
@@ -46,7 +46,7 @@ export default async function AdminDashboard() {
     safeQuery(() => db.select({ count: count() }).from(subscriptions).where(eq(subscriptions.status, 'locked')), emptyCount),
     safeQuery(() => db.select({ count: count() }).from(subscriptions).where(eq(subscriptions.status, 'past_due')), emptyCount),
     safeQuery(() => db.select({ count: count() }).from(paymentDeposits).where(eq(paymentDeposits.status, 'pending')), emptyCount),
-    safeQuery(() => db.select({ count: count() }).from(payhereTransactions).where(eq(payhereTransactions.status, 'success')), emptyCount),
+    safeQuery(() => db.select({ count: count() }).from(gatewayTransactions).where(eq(gatewayTransactions.status, 'success')), emptyCount),
     safeQuery(() => db.query.couponCodes.findMany(), []),
     safeQuery(() => db.query.systemSettings.findFirst({
       where: eq(systemSettings.key, 'seasonal_offer'),
@@ -93,22 +93,22 @@ export default async function AdminDashboard() {
     [{ total: 0 }]
   )
 
-  // Revenue this month from PayHere successful transactions
-  const monthlyPayhereRevenueResult = await safeQuery(() => db
+  // Revenue this month from gateway successful transactions (M-Pesa, Stripe, Paystack, PayHero)
+  const monthlyGatewayRevenueResult = await safeQuery(() => db
     .select({
-      total: sql<number>`COALESCE(SUM(CAST(${payhereTransactions.amount} AS NUMERIC)), 0)`,
+      total: sql<number>`COALESCE(SUM(CAST(${gatewayTransactions.amount} AS NUMERIC)), 0)`,
     })
-    .from(payhereTransactions)
+    .from(gatewayTransactions)
     .where(
       and(
-        eq(payhereTransactions.status, 'success'),
-        gte(payhereTransactions.createdAt, startOfMonth)
+        eq(gatewayTransactions.status, 'success'),
+        gte(gatewayTransactions.createdAt, startOfMonth)
       )
     ),
     [{ total: 0 }]
   )
 
-  const revenueThisMonth = Number(monthlyBankRevenueResult[0]?.total || 0) + Number(monthlyPayhereRevenueResult[0]?.total || 0)
+  const revenueThisMonth = Number(monthlyBankRevenueResult[0]?.total || 0) + Number(monthlyGatewayRevenueResult[0]?.total || 0)
 
   // Pending payments total
   const pendingTotalResult = await safeQuery(() => db
@@ -242,14 +242,14 @@ export default async function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-emerald-100">Monthly Recurring Revenue</p>
-              <p className="text-3xl font-bold mt-1">{formatCurrencyWithSymbol(mrr, 'USD')}</p>
+              <p className="text-3xl font-bold mt-1">{formatCurrencyWithSymbol(mrr, 'KES')}</p>
             </div>
             <div className="w-12 h-12 bg-white/20 rounded-md flex items-center justify-center">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
           </div>
           <p className="text-sm text-emerald-100 mt-2">
-            ARR: {formatCurrencyWithSymbol(arr, 'USD')}
+            ARR: {formatCurrencyWithSymbol(arr, 'KES')}
           </p>
         </div>
 
@@ -257,14 +257,14 @@ export default async function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-blue-100">Revenue This Month</p>
-              <p className="text-3xl font-bold mt-1">{formatCurrencyWithSymbol(revenueThisMonth, 'USD')}</p>
+              <p className="text-3xl font-bold mt-1">{formatCurrencyWithSymbol(revenueThisMonth, 'KES')}</p>
             </div>
             <div className="w-12 h-12 bg-white/20 rounded-md flex items-center justify-center">
               <CreditCard className="w-6 h-6 text-white" />
             </div>
           </div>
           <p className="text-sm text-blue-100 mt-2">
-            PayHere + bank deposits since {startOfMonth.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            Gateways + bank deposits since {startOfMonth.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           </p>
         </div>
 
@@ -272,7 +272,7 @@ export default async function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-orange-100">Pending Payments</p>
-              <p className="text-3xl font-bold mt-1">{formatCurrencyWithSymbol(pendingTotal, 'USD')}</p>
+              <p className="text-3xl font-bold mt-1">{formatCurrencyWithSymbol(pendingTotal, 'KES')}</p>
             </div>
             <div className="w-12 h-12 bg-white/20 rounded-md flex items-center justify-center">
               <Clock className="w-6 h-6 text-white" />
@@ -289,18 +289,24 @@ export default async function AdminDashboard() {
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-md p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-purple-100">PayHere Transactions</p>
-              <p className="text-3xl font-bold mt-1">{successfulPayhere[0]?.count || 0}</p>
+              <p className="text-sm font-medium text-purple-100">Gateway Transactions</p>
+              <p className="text-3xl font-bold mt-1">{successfulGateway[0]?.count || 0}</p>
             </div>
             <div className="w-12 h-12 bg-white/20 rounded-md flex items-center justify-center">
-              <Zap className="w-6 h-6 text-white" />
+              <CreditCard className="w-6 h-6 text-white" />
             </div>
+          </div>
+          <div className="flex items-center gap-2 mt-2 text-purple-100 text-xs">
+            <Smartphone className="w-3 h-3" />
+            <Zap className="w-3 h-3" />
+            <Globe className="w-3 h-3" />
+            <span>M-Pesa · Stripe · Paystack · PayHero</span>
           </div>
           <Link
             href="/sys-control/payments"
-            className="text-sm text-purple-100 hover:text-white mt-2 inline-block"
+            className="text-sm text-purple-100 hover:text-white mt-1 inline-block"
           >
-            Successful payments →
+            View all →
           </Link>
         </div>
       </div>
@@ -555,7 +561,7 @@ export default async function AdminDashboard() {
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-gray-900 dark:text-white">
-                          {formatCurrencyWithSymbol(Number(payment.amount), 'USD')}
+                          {formatCurrencyWithSymbol(Number(payment.amount), 'KES')}
                         </p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                           {new Date(payment.createdAt).toLocaleDateString()}

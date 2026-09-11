@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { authWithCompany } from '@/lib/auth'
 import { withTenant } from '@/lib/db'
-import { customers, vehicles, workOrders, insuranceEstimates, sales, items, tenants, suppliers, categories, purchaseOrders } from '@/lib/db/schema'
+import { customers, vehicles, workOrders, insuranceEstimates, sales, items, suppliers, categories, purchaseOrders } from '@/lib/db/schema'
 import { eq, or, ilike, sql } from 'drizzle-orm'
 import { escapeLikePattern } from '@/lib/utils/sql'
 import { formatCurrencyWithSymbol } from '@/lib/utils/currency'
@@ -26,180 +26,175 @@ export async function GET(request: NextRequest) {
     const searchPattern = `%${escapeLikePattern(query)}%`
     const isAutoService = session.user.businessType === 'auto_service' || session.user.businessType === 'dealership'
     const slug = session.user.tenantSlug
+    // Currency is already in the session — no need for an extra DB round-trip
+    const tenantCurrency = (session as unknown as Record<string, unknown> & { user: { currency?: string } }).user.currency || 'KES'
 
     // Execute with RLS tenant context
     return await withTenant(session.user.tenantId, async (db) => {
-      // Get tenant's currency for proper formatting
-      const tenant = await db.query.tenants.findFirst({
-        where: eq(tenants.id, session.user.tenantId),
-      })
-      const tenantCurrency = tenant?.currency || 'LKR'
-
-      // Search customers (RLS scopes)
-      const customerResults = await db
-        .select({
-          id: customers.id,
-          name: customers.name,
-          phone: customers.phone,
-        })
-        .from(customers)
-        .where(
-          or(
-            ilike(customers.name, searchPattern),
-            ilike(sql`COALESCE(${customers.phone}, '')`, searchPattern),
-            ilike(sql`COALESCE(${customers.email}, '')`, searchPattern)
-          )
-        )
-        .limit(limit)
-
-      // Search vehicles (for auto_service) - RLS scopes
-      let vehicleResults: Array<{ id: string; make: string; model: string; licensePlate: string | null; customerName: string | null }> = []
-      if (isAutoService) {
-        vehicleResults = await db
-          .select({
-            id: vehicles.id,
-            make: vehicles.make,
-            model: vehicles.model,
-            licensePlate: vehicles.licensePlate,
-            customerName: customers.name,
-          })
-          .from(vehicles)
-          .leftJoin(customers, eq(vehicles.customerId, customers.id))
+      // Run all independent queries in parallel — zero sequential DB round-trips
+      const [
+        customerResults,
+        vehicleResults,
+        workOrderResults,
+        estimateResults,
+        salesResults,
+        itemResults,
+        supplierResults,
+        categoryResults,
+        purchaseOrderResults,
+      ] = await Promise.all([
+        // 1. Customers
+        db
+          .select({ id: customers.id, name: customers.name, phone: customers.phone })
+          .from(customers)
           .where(
             or(
-              ilike(vehicles.make, searchPattern),
-              ilike(vehicles.model, searchPattern),
-              ilike(sql`COALESCE(${vehicles.licensePlate}, '')`, searchPattern),
-              ilike(sql`COALESCE(${vehicles.vin}, '')`, searchPattern)
+              ilike(customers.name, searchPattern),
+              ilike(sql`COALESCE(${customers.phone}, '')`, searchPattern),
+              ilike(sql`COALESCE(${customers.email}, '')`, searchPattern)
             )
           )
-          .limit(limit)
-      }
+          .limit(limit),
 
-      // Search work orders (for auto_service) - RLS scopes
-      let workOrderResults: Array<{ id: string; orderNo: string; status: string; customerName: string | null }> = []
-      if (isAutoService) {
-        workOrderResults = await db
+        // 2. Vehicles (auto_service only)
+        isAutoService
+          ? db
+              .select({
+                id: vehicles.id,
+                make: vehicles.make,
+                model: vehicles.model,
+                licensePlate: vehicles.licensePlate,
+                customerName: customers.name,
+              })
+              .from(vehicles)
+              .leftJoin(customers, eq(vehicles.customerId, customers.id))
+              .where(
+                or(
+                  ilike(vehicles.make, searchPattern),
+                  ilike(vehicles.model, searchPattern),
+                  ilike(sql`COALESCE(${vehicles.licensePlate}, '')`, searchPattern),
+                  ilike(sql`COALESCE(${vehicles.vin}, '')`, searchPattern)
+                )
+              )
+              .limit(limit)
+          : Promise.resolve([] as Array<{ id: string; make: string; model: string; licensePlate: string | null; customerName: string | null }>),
+
+        // 3. Work orders (auto_service only)
+        isAutoService
+          ? db
+              .select({
+                id: workOrders.id,
+                orderNo: workOrders.orderNo,
+                status: workOrders.status,
+                customerName: customers.name,
+              })
+              .from(workOrders)
+              .leftJoin(customers, eq(workOrders.customerId, customers.id))
+              .where(
+                or(
+                  ilike(workOrders.orderNo, searchPattern),
+                  ilike(sql`COALESCE(${workOrders.customerComplaint}, '')`, searchPattern),
+                  ilike(sql`COALESCE(${customers.name}, '')`, searchPattern)
+                )
+              )
+              .limit(limit)
+          : Promise.resolve([] as Array<{ id: string; orderNo: string; status: string; customerName: string | null }>),
+
+        // 4. Insurance estimates (auto_service only)
+        isAutoService
+          ? db
+              .select({
+                id: insuranceEstimates.id,
+                estimateNo: insuranceEstimates.estimateNo,
+                status: insuranceEstimates.status,
+                customerName: customers.name,
+              })
+              .from(insuranceEstimates)
+              .leftJoin(customers, eq(insuranceEstimates.customerId, customers.id))
+              .where(
+                or(
+                  ilike(insuranceEstimates.estimateNo, searchPattern),
+                  ilike(sql`COALESCE(${insuranceEstimates.claimNumber}, '')`, searchPattern),
+                  ilike(sql`COALESCE(${customers.name}, '')`, searchPattern)
+                )
+              )
+              .limit(limit)
+          : Promise.resolve([] as Array<{ id: string; estimateNo: string; status: string; customerName: string | null }>),
+
+        // 5. Sales
+        db
           .select({
-            id: workOrders.id,
-            orderNo: workOrders.orderNo,
-            status: workOrders.status,
+            id: sales.id,
+            invoiceNo: sales.invoiceNo,
+            total: sales.total,
             customerName: customers.name,
           })
-          .from(workOrders)
-          .leftJoin(customers, eq(workOrders.customerId, customers.id))
+          .from(sales)
+          .leftJoin(customers, eq(sales.customerId, customers.id))
           .where(
             or(
-              ilike(workOrders.orderNo, searchPattern),
-              ilike(sql`COALESCE(${workOrders.customerComplaint}, '')`, searchPattern),
+              ilike(sales.invoiceNo, searchPattern),
               ilike(sql`COALESCE(${customers.name}, '')`, searchPattern)
             )
           )
-          .limit(limit)
-      }
+          .limit(limit),
 
-      // Search estimates (for auto_service) - RLS scopes
-      let estimateResults: Array<{ id: string; estimateNo: string; status: string; customerName: string | null }> = []
-      if (isAutoService) {
-        estimateResults = await db
+        // 6. Items
+        db
           .select({
-            id: insuranceEstimates.id,
-            estimateNo: insuranceEstimates.estimateNo,
-            status: insuranceEstimates.status,
-            customerName: customers.name,
+            id: items.id,
+            name: items.name,
+            sku: items.sku,
+            sellingPrice: items.sellingPrice,
           })
-          .from(insuranceEstimates)
-          .leftJoin(customers, eq(insuranceEstimates.customerId, customers.id))
+          .from(items)
           .where(
             or(
-              ilike(insuranceEstimates.estimateNo, searchPattern),
-              ilike(sql`COALESCE(${insuranceEstimates.claimNumber}, '')`, searchPattern),
-              ilike(sql`COALESCE(${customers.name}, '')`, searchPattern)
+              ilike(items.name, searchPattern),
+              ilike(sql`COALESCE(${items.sku}, '')`, searchPattern),
+              ilike(sql`COALESCE(${items.barcode}, '')`, searchPattern)
             )
           )
-          .limit(limit)
-      }
+          .limit(limit),
 
-      // Search sales/invoices (RLS scopes)
-      const salesResults = await db
-        .select({
-          id: sales.id,
-          invoiceNo: sales.invoiceNo,
-          total: sales.total,
-          customerName: customers.name,
-        })
-        .from(sales)
-        .leftJoin(customers, eq(sales.customerId, customers.id))
-        .where(
-          or(
-            ilike(sales.invoiceNo, searchPattern),
-            ilike(sql`COALESCE(${customers.name}, '')`, searchPattern)
+        // 7. Suppliers
+        db
+          .select({ id: suppliers.id, name: suppliers.name, phone: suppliers.phone })
+          .from(suppliers)
+          .where(
+            or(
+              ilike(suppliers.name, searchPattern),
+              ilike(sql`COALESCE(${suppliers.phone}, '')`, searchPattern),
+              ilike(sql`COALESCE(${suppliers.email}, '')`, searchPattern)
+            )
           )
-        )
-        .limit(limit)
+          .limit(limit),
 
-      // Search items/products (RLS scopes)
-      const itemResults = await db
-        .select({
-          id: items.id,
-          name: items.name,
-          sku: items.sku,
-          sellingPrice: items.sellingPrice,
-        })
-        .from(items)
-        .where(
-          or(
-            ilike(items.name, searchPattern),
-            ilike(sql`COALESCE(${items.sku}, '')`, searchPattern),
-            ilike(sql`COALESCE(${items.barcode}, '')`, searchPattern)
+        // 8. Categories
+        db
+          .select({ id: categories.id, name: categories.name })
+          .from(categories)
+          .where(ilike(categories.name, searchPattern))
+          .limit(limit),
+
+        // 9. Purchase orders
+        db
+          .select({
+            id: purchaseOrders.id,
+            orderNo: purchaseOrders.orderNo,
+            status: purchaseOrders.status,
+            supplierName: suppliers.name,
+          })
+          .from(purchaseOrders)
+          .leftJoin(suppliers, eq(purchaseOrders.supplierId, suppliers.id))
+          .where(
+            or(
+              ilike(purchaseOrders.orderNo, searchPattern),
+              ilike(sql`COALESCE(${suppliers.name}, '')`, searchPattern)
+            )
           )
-        )
-        .limit(limit)
-
-      // Search suppliers (RLS scopes)
-      const supplierResults = await db
-        .select({
-          id: suppliers.id,
-          name: suppliers.name,
-          phone: suppliers.phone,
-        })
-        .from(suppliers)
-        .where(
-          or(
-            ilike(suppliers.name, searchPattern),
-            ilike(sql`COALESCE(${suppliers.phone}, '')`, searchPattern),
-            ilike(sql`COALESCE(${suppliers.email}, '')`, searchPattern)
-          )
-        )
-        .limit(limit)
-
-      // Search categories (RLS scopes)
-      const categoryResults = await db
-        .select({
-          id: categories.id,
-          name: categories.name,
-        })
-        .from(categories)
-        .where(ilike(categories.name, searchPattern))
-        .limit(limit)
-
-      // Search purchase orders (RLS scopes)
-      const purchaseOrderResults = await db
-        .select({
-          id: purchaseOrders.id,
-          orderNo: purchaseOrders.orderNo,
-          status: purchaseOrders.status,
-          supplierName: suppliers.name,
-        })
-        .from(purchaseOrders)
-        .leftJoin(suppliers, eq(purchaseOrders.supplierId, suppliers.id))
-        .where(
-          or(
-            ilike(purchaseOrders.orderNo, searchPattern),
-            ilike(sql`COALESCE(${suppliers.name}, '')`, searchPattern)
-          )
-        )
-        .limit(limit)
+          .limit(limit),
+      ])
 
       // Search navigation pages (static, no DB query)
       const navigationPages = getNavigationPages(slug, session.user.businessType || '')

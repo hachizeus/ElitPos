@@ -137,7 +137,7 @@ export default function RetailClient() {
                 <div className="mt-8 flex flex-wrap gap-4">
                   <Link
                     href="/register"
-                    className="inline-flex items-center gap-2 px-8 py-4 text-base font-semibold text-white bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 rounded-md transition-all shadow-lg shadow-sky-600/30 hover:shadow-sky-600/50 hover:-translate-y-0.5"
+                    className="inline-flex items-center gap-2 px-8 py-4 text-base font-semibold text-white bg-gradient-to-r from-sky-500 to-green-500 hover:from-sky-600 hover:to-blue-700 rounded-md transition-all shadow-lg shadow-sky-600/30 hover:shadow-sky-600/50 hover:-translate-y-0.5"
                   >
                     Get Started Free
                     <ArrowRight className="w-5 h-5" />
@@ -171,7 +171,7 @@ export default function RetailClient() {
             {/* Right: Hero mockup */}
             <FadeInRight className="hidden lg:block">
               <FloatingMockup>
-                <MockBrowserFrame url="app.retailsmarterp.com/pos">
+                <MockBrowserFrame url="app.elitpos.elitjohnsdigital.co.ke/pos">
                   <MockPOS />
                 </MockBrowserFrame>
               </FloatingMockup>
@@ -186,7 +186,7 @@ export default function RetailClient() {
           <StaggerContainer staggerDelay={0.12} className="grid sm:grid-cols-3 gap-6">
             <StaggerItem>
               <div className="text-center p-8 rounded-2xl border border-white/[0.06] bg-white/5 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-sky-500/20">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-green-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-sky-500/20">
                   <Zap className="w-7 h-7 text-white" />
                 </div>
                 <div className="text-4xl sm:text-5xl font-extrabold text-white">
@@ -198,7 +198,7 @@ export default function RetailClient() {
             </StaggerItem>
             <StaggerItem>
               <div className="text-center p-8 rounded-2xl border border-white/[0.06] bg-white/5 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-sky-500/20">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-green-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-sky-500/20">
                   <Warehouse className="w-7 h-7 text-white" />
                 </div>
                 <div className="text-4xl sm:text-5xl font-extrabold text-white">
@@ -210,7 +210,7 @@ export default function RetailClient() {
             </StaggerItem>
             <StaggerItem>
               <div className="text-center p-8 rounded-2xl border border-white/[0.06] bg-white/5 shadow-sm hover:shadow-md transition-shadow">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-sky-500/20">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500 to-green-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-sky-500/20">
                   <BarChart3 className="w-7 h-7 text-white" />
                 </div>
                 <div className="text-4xl sm:text-5xl font-extrabold text-white">
@@ -229,7 +229,7 @@ export default function RetailClient() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <FadeInLeft>
-              <MockBrowserFrame url="app.retailsmarterp.com/pos">
+              <MockBrowserFrame url="app.elitpos.elitjohnsdigital.co.ke/pos">
                 <MockPOS />
               </MockBrowserFrame>
             </FadeInLeft>
@@ -252,7 +252,7 @@ export default function RetailClient() {
                   'Gift card support',
                 ].map((feature) => (
                   <li key={feature} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-500 to-green-500 flex items-center justify-center flex-shrink-0">
                       <Check className="w-3 h-3 text-white" />
                     </div>
                     <span className="text-sm font-medium text-zinc-300">{feature}</span>
@@ -287,7 +287,7 @@ export default function RetailClient() {
                   'Movement history',
                 ].map((feature) => (
                   <li key={feature} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-500 to-green-500 flex items-center justify-center flex-shrink-0">
                       <Check className="w-3 h-3 text-white" />
                     </div>
                     <span className="text-sm font-medium text-zinc-300">{feature}</span>
@@ -346,7 +346,7 @@ export default function RetailClient() {
                   'Real-time dashboards',
                 ].map((feature) => (
                   <li key={feature} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                    <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-500 to-green-500 flex items-center justify-center flex-shrink-0">
                       <Check className="w-3 h-3 text-white" />
                     </div>
                     <span className="text-sm font-medium text-zinc-300">{feature}</span>
@@ -374,7 +374,7 @@ export default function RetailClient() {
               <FadeIn key={category.category}>
                 <div>
                   <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-sky-500 to-blue-600" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-sky-500 to-green-500" />
                     <category.icon className="w-5 h-5 text-sky-600" />
                     {category.category}
                   </h3>
@@ -382,7 +382,7 @@ export default function RetailClient() {
                     {category.items.map((item) => (
                       <StaggerItem key={item}>
                         <div className="flex items-center gap-3 p-3 rounded-md bg-white/5 border border-white/[0.06] hover:border-sky-500/30 hover:bg-sky-500/10 transition-colors shadow-sm">
-                          <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                          <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-500 to-green-500 flex items-center justify-center flex-shrink-0">
                             <Check className="w-3 h-3 text-white" />
                           </div>
                           <span className="text-sm font-medium text-zinc-300">{item}</span>
@@ -417,7 +417,7 @@ export default function RetailClient() {
           <StaggerContainer staggerDelay={0.1} className="grid sm:grid-cols-3 gap-6">
             <StaggerItem>
               <div className="relative p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-sky-500/30 transition-colors group">
-                <div className="w-12 h-12 rounded-md bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center mb-4 shadow-lg shadow-sky-500/20">
+                <div className="w-12 h-12 rounded-md bg-gradient-to-br from-sky-500 to-green-500 flex items-center justify-center mb-4 shadow-lg shadow-sky-500/20">
                   <Package className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">Smart Reorder Alerts</h3>
@@ -432,7 +432,7 @@ export default function RetailClient() {
             </StaggerItem>
             <StaggerItem>
               <div className="relative p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-sky-500/30 transition-colors group">
-                <div className="w-12 h-12 rounded-md bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center mb-4 shadow-lg shadow-sky-500/20">
+                <div className="w-12 h-12 rounded-md bg-gradient-to-br from-sky-500 to-green-500 flex items-center justify-center mb-4 shadow-lg shadow-sky-500/20">
                   <TrendingUp className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">Sales Trend Analysis</h3>
@@ -447,7 +447,7 @@ export default function RetailClient() {
             </StaggerItem>
             <StaggerItem>
               <div className="relative p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-sky-500/30 transition-colors group">
-                <div className="w-12 h-12 rounded-md bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center mb-4 shadow-lg shadow-sky-500/20">
+                <div className="w-12 h-12 rounded-md bg-gradient-to-br from-sky-500 to-green-500 flex items-center justify-center mb-4 shadow-lg shadow-sky-500/20">
                   <Sparkles className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">Customer Behavior Insights</h3>
@@ -471,7 +471,7 @@ export default function RetailClient() {
             badge="Multi-Business Platform"
             title="Also built for other industries"
             highlight="other industries"
-            subtitle="RetailSmart ERP adapts to your business type with specialized modules and features."
+            subtitle="ElitPOS adapts to your business type with specialized modules and features."
             gradientClass="gradient-text-retail"
           />
 

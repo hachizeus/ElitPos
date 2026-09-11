@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS "sales_order_items" (
 
 -- Add sales_order_id column to sales table
 DO $$ BEGIN
-  ALTER TABLE "sales" ADD COLUMN "sales_order_id" uuid;
+  ALTER TABLE "sales" ADD COLUMN IF NOT EXISTS "sales_order_id" uuid;
 EXCEPTION WHEN duplicate_column THEN NULL;
 END $$;
 

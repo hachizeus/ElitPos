@@ -38,7 +38,7 @@ export function StepChartOfAccounts({ data, onChange, onNext, onBack }: StepChar
               key={template.id}
               className={`relative flex cursor-pointer rounded border p-4 focus:outline-none ${
                 data.coaTemplate === template.id
-                  ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500'
+                  ? 'border-[#00FF88] bg-green-50 ring-2 ring-[#00FF88]'
                   : 'border-gray-300 bg-white hover:bg-gray-50'
               }`}
             >
@@ -56,7 +56,7 @@ export function StepChartOfAccounts({ data, onChange, onNext, onBack }: StepChar
                     type="radio"
                     checked={data.coaTemplate === template.id}
                     onChange={() => {}}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    className="h-4 w-4 text-[#00cc6e] focus:ring-[#00FF88] border-gray-300"
                   />
                 </div>
                 <div className="ml-3 text-sm">
@@ -72,13 +72,13 @@ export function StepChartOfAccounts({ data, onChange, onNext, onBack }: StepChar
           <button
             type="button"
             onClick={onBack}
-            className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00FF88]"
           >
             Back
           </button>
           <button
             type="submit"
-            className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-6 py-2.5 bg-[#00e67a] text-white font-medium rounded-md hover:bg-[#00cc6e] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00FF88]"
           >
             Save & Continue
           </button>

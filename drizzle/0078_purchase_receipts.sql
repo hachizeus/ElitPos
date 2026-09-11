@@ -2,7 +2,10 @@
 -- Tracks individual receiving events against purchase orders
 
 -- Create purchase receipt status enum
-CREATE TYPE "public"."purchase_receipt_status" AS ENUM('draft', 'completed', 'cancelled');
+DO $$ BEGIN
+  CREATE TYPE "public"."purchase_receipt_status" AS ENUM('draft', 'completed', 'cancelled');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Create purchase_receipts table
 CREATE TABLE IF NOT EXISTS "purchase_receipts" (
@@ -56,11 +59,17 @@ ALTER TABLE "purchase_receipts" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "purchase_receipt_items" ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies for purchase_receipts
-CREATE POLICY "tenant_isolation_policy" ON "purchase_receipts"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation_policy" ON "purchase_receipts"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "tenant_isolation_policy" ON "purchase_receipt_items"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation_policy" ON "purchase_receipt_items"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Grant permissions to app_user role
 GRANT SELECT, INSERT, UPDATE, DELETE ON "purchase_receipts" TO app_user;

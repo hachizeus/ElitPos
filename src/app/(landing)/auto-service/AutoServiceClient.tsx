@@ -193,7 +193,7 @@ export default function AutoServiceClient() {
             {/* Right: Hero mockup */}
             <FadeInRight className="hidden lg:block">
               <FloatingMockup>
-                <BrowserMockup url="retailsmarterp.com/work-orders">
+                <BrowserMockup url="elitpos.elitjohnsdigital.co.ke/work-orders">
                   <MockWorkOrders />
                 </BrowserMockup>
               </FloatingMockup>
@@ -326,7 +326,7 @@ export default function AutoServiceClient() {
             badge="Also Available"
             title="Solutions for every business type"
             highlight="every business type"
-            subtitle="RetailSmart ERP adapts to your industry. Explore other purpose-built solutions."
+            subtitle="ElitPOS adapts to your industry. Explore other purpose-built solutions."
             gradientClass="gradient-text-auto"
           />
 
@@ -337,7 +337,7 @@ export default function AutoServiceClient() {
                 description="Complete POS and inventory management for boutiques, shops, and retail chains."
                 href="/retail"
                 icon={Store}
-                gradient="from-blue-600 to-sky-500"
+                gradient="from-green-600 to-sky-500"
               />
             </StaggerItem>
             <StaggerItem>

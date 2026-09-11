@@ -1,0 +1,95 @@
+═══════════════════════════════════════════════════════════════════
+                    ELITPOS QUICK REFERENCE
+═══════════════════════════════════════════════════════════════════
+
+🚀 START SERVER (CLEAN)
+───────────────────────────────────────────────────────────────────
+.\start-clean.ps1
+
+OR manually:
+  1. Ctrl+C (stop server)
+  2. Remove-Item -Recurse -Force .next
+  3. Remove-Item -Recurse -Force node_modules\.cache
+  4. node scripts/build-server.mjs
+  5. $env:TURBOPACK = '0'
+  6. node server.js
+
+
+🔍 CHECK CONFIGURATION
+───────────────────────────────────────────────────────────────────
+.\check-config.ps1
+
+
+📊 EXPECTED PERFORMANCE
+───────────────────────────────────────────────────────────────────
+Development Mode:
+  - First load:       3-10 seconds
+  - Subsequent:       200-700ms
+  - Session checks:   46-113ms
+  - Login:           ✅ Works, no loop
+
+Production Mode:
+  npm run build
+  npm start
+  - All routes:       Sub-second loads
+  - No compilation:   Pre-built
+
+
+🐛 TROUBLESHOOTING
+───────────────────────────────────────────────────────────────────
+Issue: Still shows "Turbopack"
+→ Run: .\start-clean.ps1
+
+Issue: Login loops back to /login
+→ Check if you're a super admin (they go to /sys-control)
+→ Clear browser cookies: F12 → Application → Cookies → Delete all
+
+Issue: Still slow (30+ seconds)
+→ Nuclear option:
+  Stop-Process -Name "node" -Force
+  Remove-Item -Recurse -Force .next
+  Remove-Item -Recurse -Force node_modules\.cache
+  Remove-Item server.js
+  node scripts/build-server.mjs
+  $env:TURBOPACK = "0"
+  node server.js
+
+
+📖 DOCUMENTATION
+───────────────────────────────────────────────────────────────────
+README_FIXES.md              - Quick start guide
+FIX_TURBOPACK_AND_LOGIN.md  - Detailed troubleshooting
+PERFORMANCE_FIXES_APPLIED.md - Performance improvements
+
+
+✅ SUCCESS CHECKLIST
+───────────────────────────────────────────────────────────────────
+□ Server starts without "Turbopack" in logs
+□ No "Invalid next.config.ts" warnings
+□ Login works and redirects correctly
+□ First page load: 3-10 seconds
+□ Subsequent loads: 200-700ms
+□ No browser console errors
+
+
+🔑 KEY COMMANDS
+───────────────────────────────────────────────────────────────────
+Start clean:     .\start-clean.ps1
+Check config:    .\check-config.ps1
+Rebuild server:  node scripts/build-server.mjs
+Clear cache:     Remove-Item -Recurse -Force .next
+Build prod:      npm run build
+Start prod:      npm start
+
+
+💡 PRO TIPS
+───────────────────────────────────────────────────────────────────
+1. Use production mode for best performance
+2. Monitor [Pool] logs for database health
+3. 3-10s first compile in dev is NORMAL
+4. Super admins auto-redirect to /sys-control (not a bug!)
+
+
+═══════════════════════════════════════════════════════════════════
+Ready? Run: .\start-clean.ps1
+═══════════════════════════════════════════════════════════════════

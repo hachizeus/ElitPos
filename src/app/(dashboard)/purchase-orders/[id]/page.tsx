@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 import {
@@ -155,6 +155,8 @@ export default function PurchaseOrderDetailPage() {
   const [loading, setLoading] = useState(!isCreateMode)
   const [saving, setSaving] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  // Ref to block realtime fetchOrder from overwriting editingItems while a save is in flight
+  const savingRef = React.useRef(false)
 
   // Data
   const [warehouses, setWarehouses] = useState<Warehouse[]>([])
@@ -224,6 +226,8 @@ export default function PurchaseOrderDetailPage() {
   const [showTagInput, setShowTagInput] = useState(false)
 
   const fetchOrder = useCallback(async () => {
+    // Don't overwrite the editing state while a save is in progress
+    if (savingRef.current) return
     try {
       const res = await fetch(`/api/purchase-orders/${id}`)
       if (res.ok) {
@@ -377,21 +381,18 @@ export default function PurchaseOrderDetailPage() {
     }
   }
 
-  // Save changes
+  // Save changes — only handles header fields + qty/price edits on existing rows.
+  // New rows are auto-saved in autoSaveNewRow() the moment an item is selected.
   async function handleSave() {
     if (!order) return
     setSaving(true)
+    savingRef.current = true
 
     try {
-      // Build item changes summary
       const itemChanges: string[] = []
       const originalItems = order.items || []
       if (deletedItemNames.length > 0) {
         itemChanges.push(`removed ${deletedItemNames.join(', ')}`)
-      }
-      const newItems = editingItems.filter(i => i.isNew && i.itemId)
-      if (newItems.length > 0) {
-        itemChanges.push(`added ${newItems.map(i => i.itemName).join(', ')}`)
       }
       for (const item of editingItems) {
         if (item.isNew) continue
@@ -409,6 +410,7 @@ export default function PurchaseOrderDetailPage() {
       }
       const changesSummary = itemChanges.length > 0 ? itemChanges.join('; ') : undefined
 
+      // Save header fields
       const headerRes = await fetch(`/api/purchase-orders/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -425,6 +427,7 @@ export default function PurchaseOrderDetailPage() {
         const data = await headerRes.json()
         if (data.code === 'CONFLICT') {
           toast.error('Modified by another user. Refreshing...')
+          savingRef.current = false
           fetchOrder()
           return
         }
@@ -432,43 +435,30 @@ export default function PurchaseOrderDetailPage() {
         return
       }
 
+      // Update qty/price on existing rows
       let itemError = false
       for (const item of editingItems) {
-        if (item.isNew) {
-          if (!item.itemId) continue
-          const res = await fetch(`/api/purchase-orders/${id}/items`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              itemId: item.itemId,
-              itemName: item.itemName,
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
-              tax: 0,
-            }),
-          })
-          if (!res.ok) {
-            const data = await res.json().catch(() => ({}))
-            toast.error(data.error || 'Failed to save item')
-            itemError = true
-            break
-          }
-        } else {
-          const res = await fetch(`/api/purchase-orders/${id}/items/${item.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
-              tax: 0,
-            }),
-          })
-          if (!res.ok) {
-            const data = await res.json().catch(() => ({}))
-            toast.error(data.error || 'Failed to update item')
-            itemError = true
-            break
-          }
+        if (item.isNew) continue // new rows already saved via autoSaveNewRow
+        const orig = originalItems.find((o: OrderItem) => o.id === item.id)
+        if (!orig) continue
+        const qtyChanged = item.quantity !== (parseFloat(orig.quantity) || 0)
+        const priceChanged = item.unitPrice !== (parseFloat(orig.unitPrice) || 0)
+        if (!qtyChanged && !priceChanged) continue
+
+        const res = await fetch(`/api/purchase-orders/${id}/items/${item.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            tax: 0,
+          }),
+        })
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}))
+          toast.error(data.error || 'Failed to update item')
+          itemError = true
+          break
         }
       }
 
@@ -477,11 +467,34 @@ export default function PurchaseOrderDetailPage() {
       }
       setHasUnsavedChanges(false)
       setDeletedItemNames([])
-      fetchOrder()
+      // Refresh to get latest totals from server
+      const orderRes = await fetch(`/api/purchase-orders/${id}`)
+      if (orderRes.ok) {
+        const data = await orderRes.json()
+        setOrder(data)
+        setHeaderForm({
+          warehouseId: data.warehouseId || '',
+          expectedDeliveryDate: data.expectedDeliveryDate || '',
+          notes: data.notes || '',
+        })
+        setEditingItems(data.items.map((i: OrderItem) => ({
+          id: i.id,
+          itemId: i.itemId || '',
+          itemName: i.itemName,
+          itemSku: i.itemSku,
+          itemBarcode: i.itemBarcode || null,
+          itemPartNumber: i.itemOemPartNumber || i.itemPluCode || null,
+          quantity: parseFloat(i.quantity) || 0,
+          unitPrice: parseFloat(i.unitPrice) || 0,
+          total: parseFloat(i.total) || 0,
+        })))
+        try { setTags(data.tags ? JSON.parse(data.tags) : []) } catch { setTags([]) }
+      }
     } catch (error) {
       console.error('Error saving:', error)
       toast.error('Failed to save')
     } finally {
+      savingRef.current = false
       setSaving(false)
     }
   }
@@ -752,14 +765,15 @@ export default function PurchaseOrderDetailPage() {
       total: 0,
       isNew: true,
     }])
-    setHasUnsavedChanges(true)
+    // Don't mark unsaved until the user actually selects an item in the row
+    // setHasUnsavedChanges is triggered in handleItemChange when itemId is set
   }
 
   function handleItemChange(index: number, field: string, value: unknown, option?: LinkFieldOption) {
     const newItems = [...editingItems]
     if (field === 'itemId' && option) {
       const costPrice = parseFloat(option.data?.costPrice as string || '0')
-      newItems[index] = {
+      const updatedItem = {
         ...newItems[index],
         itemId: String(value),
         itemName: option.data?.name as string || option.label,
@@ -769,15 +783,81 @@ export default function PurchaseOrderDetailPage() {
         unitPrice: costPrice,
         total: newItems[index].quantity * costPrice,
       }
+      newItems[index] = updatedItem
+      setEditingItems(newItems)
+      // Auto-save this row immediately when an item is selected
+      if (updatedItem.isNew && updatedItem.itemId && updatedItem.itemName) {
+        autoSaveNewRow(updatedItem)
+      }
     } else if (field === 'quantity') {
       const qty = parseFloat(String(value)) || 0
       newItems[index] = { ...newItems[index], quantity: qty, total: qty * newItems[index].unitPrice }
+      setEditingItems(newItems)
+      setHasUnsavedChanges(true)
     } else if (field === 'unitPrice') {
       const price = parseFloat(String(value)) || 0
       newItems[index] = { ...newItems[index], unitPrice: price, total: newItems[index].quantity * price }
+      setEditingItems(newItems)
+      setHasUnsavedChanges(true)
     }
-    setEditingItems(newItems)
-    setHasUnsavedChanges(true)
+  }
+
+  // Immediately POST a new row to the API as soon as the item is selected.
+  // This avoids the "rows reset to zero" problem caused by fetchOrder() running
+  // after Save, and eliminates the need to click Save for new rows.
+  async function autoSaveNewRow(item: EditableItem) {
+    try {
+      savingRef.current = true
+      const res = await fetch(`/api/purchase-orders/${id}/items`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          // Only send itemId if it's a real UUID (not empty string)
+          itemId: item.itemId && item.itemId.trim() !== '' ? item.itemId : undefined,
+          itemName: item.itemName,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          tax: 0,
+        }),
+      })
+
+      if (res.ok) {
+        const result = await res.json()
+        // Refresh order — marks the row as persisted (isNew → false) with a real DB id
+        // savingRef stays true during the fetch so realtime doesn't race
+        const orderRes = await fetch(`/api/purchase-orders/${id}`)
+        if (orderRes.ok) {
+          const data = await orderRes.json()
+          setOrder(data)
+          setHeaderForm({
+            warehouseId: data.warehouseId || '',
+            expectedDeliveryDate: data.expectedDeliveryDate || '',
+            notes: data.notes || '',
+          })
+          setEditingItems(data.items.map((i: OrderItem) => ({
+            id: i.id,
+            itemId: i.itemId || '',
+            itemName: i.itemName,
+            itemSku: i.itemSku,
+            itemBarcode: i.itemBarcode || null,
+            itemPartNumber: i.itemOemPartNumber || i.itemPluCode || null,
+            quantity: parseFloat(i.quantity) || 0,
+            unitPrice: parseFloat(i.unitPrice) || 0,
+            total: parseFloat(i.total) || 0,
+          })))
+          setHasUnsavedChanges(false)
+          try { setTags(data.tags ? JSON.parse(data.tags) : []) } catch { setTags([]) }
+        }
+        void result
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || 'Failed to save item')
+      }
+    } catch {
+      toast.error('Failed to save item')
+    } finally {
+      savingRef.current = false
+    }
   }
 
   async function handleDeleteRow(index: number) {

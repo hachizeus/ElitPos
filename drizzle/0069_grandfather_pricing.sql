@@ -3,9 +3,9 @@
 -- the tier price, existing subscribers keep their old (grandfathered) price.
 
 ALTER TABLE subscriptions
-  ADD COLUMN subscribed_price_monthly DECIMAL(10,2),
-  ADD COLUMN subscribed_price_yearly DECIMAL(10,2),
-  ADD COLUMN price_locked_at TIMESTAMP;
+  ADD COLUMN IF NOT EXISTS subscribed_price_monthly DECIMAL(10,2),
+  ADD COLUMN IF NOT EXISTS subscribed_price_yearly DECIMAL(10,2),
+  ADD COLUMN IF NOT EXISTS price_locked_at TIMESTAMP;
 
 -- Backfill: snapshot current tier prices for all existing subscriptions
 UPDATE subscriptions s

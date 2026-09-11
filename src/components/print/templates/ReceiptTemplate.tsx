@@ -70,7 +70,7 @@ export function ReceiptTemplate({
   receiptHeader,
   receiptFooter,
 }: ReceiptTemplateProps) {
-  const currency = currencyCode || 'LKR'
+  const currency = currencyCode || 'KES'
   const isThermal = settings.paperSize.startsWith('thermal')
 
   const formatCurrency = (value: string | null) => {

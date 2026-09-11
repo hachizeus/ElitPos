@@ -1,8 +1,11 @@
 -- Create pending company status enum
-CREATE TYPE "public"."pending_company_status" AS ENUM('pending_payment', 'pending_approval', 'approved', 'rejected', 'expired');--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."pending_company_status" AS ENUM('pending_payment', 'pending_approval', 'approved', 'rejected', 'expired');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
 
 -- Create pending_companies table
-CREATE TABLE "pending_companies" (
+CREATE TABLE IF NOT EXISTS "pending_companies" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"account_id" uuid NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -26,9 +29,18 @@ CREATE TABLE "pending_companies" (
 );--> statement-breakpoint
 
 -- Add pending_company_id column to payment_deposits
-ALTER TABLE "payment_deposits" ADD COLUMN "pending_company_id" uuid;--> statement-breakpoint
+ALTER TABLE "payment_deposits" ADD COLUMN IF NOT EXISTS "pending_company_id" uuid;--> statement-breakpoint
 
 -- Add foreign key constraints
-ALTER TABLE "pending_companies" ADD CONSTRAINT "pending_companies_account_id_accounts_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."accounts"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "pending_companies" ADD CONSTRAINT "pending_companies_tier_id_pricing_tiers_id_fk" FOREIGN KEY ("tier_id") REFERENCES "public"."pricing_tiers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "payment_deposits" ADD CONSTRAINT "payment_deposits_pending_company_id_pending_companies_id_fk" FOREIGN KEY ("pending_company_id") REFERENCES "public"."pending_companies"("id") ON DELETE no action ON UPDATE no action;
+DO $$ BEGIN
+  ALTER TABLE "pending_companies" ADD CONSTRAINT "pending_companies_account_id_accounts_id_fk" FOREIGN KEY ("account_id") REFERENCES "public"."accounts"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "pending_companies" ADD CONSTRAINT "pending_companies_tier_id_pricing_tiers_id_fk" FOREIGN KEY ("tier_id") REFERENCES "public"."pricing_tiers"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "payment_deposits" ADD CONSTRAINT "payment_deposits_pending_company_id_pending_companies_id_fk" FOREIGN KEY ("pending_company_id") REFERENCES "public"."pending_companies"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

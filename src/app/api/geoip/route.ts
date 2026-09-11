@@ -58,13 +58,11 @@ export async function GET(request: NextRequest) {
     const cfCountry = request.headers.get('cf-ipcountry')
     if (cfCountry && cfCountry !== 'XX' && cfCountry !== 'T1') {
       const countryCode = cfCountry.toUpperCase()
-      const currencyInfo = COUNTRY_CURRENCY_MAP[countryCode] || { currency: 'USD', symbol: '$' }
-      return NextResponse.json({
-        country: countryCode,
-        currency: currencyInfo.currency,
-        symbol: currencyInfo.symbol,
-        source: 'cloudflare',
-      })
+      const currencyInfo = COUNTRY_CURRENCY_MAP[countryCode] || { currency: 'KES', symbol: 'KSh' }
+      return NextResponse.json(
+        { country: countryCode, currency: currencyInfo.currency, symbol: currencyInfo.symbol, source: 'cloudflare' },
+        { headers: { 'Cache-Control': 'private, max-age=86400' } }
+      )
     }
 
     // 2. Try to get IP from headers (works behind proxies)
@@ -72,14 +70,12 @@ export async function GET(request: NextRequest) {
     const forwarded = request.headers.get('x-forwarded-for')
     const ip = cfIp || forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || ''
 
-    // Skip for localhost/private IPs
+    // Skip for localhost/private IPs - default to Kenya
     if (!ip || ip === '127.0.0.1' || ip === '::1' || ip.startsWith('192.168.') || ip.startsWith('10.')) {
-      return NextResponse.json({
-        country: 'LK',
-        currency: 'LKR',
-        symbol: 'Rs',
-        source: 'default',
-      })
+      return NextResponse.json(
+        { country: 'KE', currency: 'KES', symbol: 'KSh', source: 'default' },
+        { headers: { 'Cache-Control': 'private, max-age=86400' } }
+      )
     }
 
     // 3. Try ip-api.com (free, 45 req/min, no key needed)
@@ -90,23 +86,23 @@ export async function GET(request: NextRequest) {
       result = await fetchFromIpinfo(ip)
     }
 
-    // Default to Sri Lanka if all APIs fail
+    // Default to Kenya if all APIs fail
     if (!result) {
-      return NextResponse.json({
-        country: 'LK',
-        currency: 'LKR',
-        symbol: 'Rs',
-        source: 'default',
-      })
+      return NextResponse.json(
+        { country: 'KE', currency: 'KES', symbol: 'KSh', source: 'default' },
+        { headers: { 'Cache-Control': 'private, max-age=86400' } }
+      )
     }
 
-    return NextResponse.json(result)
+    return NextResponse.json(result, {
+      headers: { 'Cache-Control': 'private, max-age=86400' },
+    })
   } catch (error) {
     logError('api/geoip', error)
     return NextResponse.json({
-      country: 'LK',
-      currency: 'LKR',
-      symbol: 'Rs',
+      country: 'KE',
+      currency: 'KES',
+      symbol: 'KSh',
       source: 'default',
     })
   }
@@ -123,7 +119,7 @@ async function fetchFromIpApi(ip: string): Promise<GeoipResult | null> {
     if (data.status === 'fail') return null
 
     const countryCode = data.countryCode as string
-    const currencyInfo = COUNTRY_CURRENCY_MAP[countryCode] || { currency: 'USD', symbol: '$' }
+    const currencyInfo = COUNTRY_CURRENCY_MAP[countryCode] || { currency: 'KES', symbol: 'KSh' }
 
     return {
       country: countryCode,
@@ -145,7 +141,7 @@ async function fetchFromIpinfo(ip: string): Promise<GeoipResult | null> {
 
     const data = await response.json()
     const countryCode = data.country as string
-    const currencyInfo = COUNTRY_CURRENCY_MAP[countryCode] || { currency: 'USD', symbol: '$' }
+    const currencyInfo = COUNTRY_CURRENCY_MAP[countryCode] || { currency: 'KES', symbol: 'KSh' }
 
     return {
       country: countryCode,

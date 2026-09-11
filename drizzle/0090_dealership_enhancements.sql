@@ -46,7 +46,10 @@ CREATE TABLE IF NOT EXISTS "dealers" (
 CREATE UNIQUE INDEX IF NOT EXISTS "dealers_tenant_code" ON "dealers" ("tenant_id", "code");
 
 -- Add FK from users to dealers (now that dealers table exists)
-ALTER TABLE "users" ADD CONSTRAINT "users_dealer_id_fk" FOREIGN KEY ("dealer_id") REFERENCES "dealers"("id");
+DO $$ BEGIN
+  ALTER TABLE "users" ADD CONSTRAINT "users_dealer_id_fk" FOREIGN KEY ("dealer_id") REFERENCES "dealers"("id");
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Create vehicle_imports table
 CREATE TABLE IF NOT EXISTS "vehicle_imports" (
@@ -238,10 +241,31 @@ ALTER TABLE "dealer_payments" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "vehicle_documents" ENABLE ROW LEVEL SECURITY;
 
 -- RLS policies for new tables
-CREATE POLICY "tenant_isolation" ON "dealers" USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
-CREATE POLICY "tenant_isolation" ON "vehicle_imports" USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
-CREATE POLICY "tenant_isolation" ON "dealer_allocations" USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
-CREATE POLICY "tenant_isolation" ON "vehicle_expenses" USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
-CREATE POLICY "tenant_isolation" ON "dealership_inspections" USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
-CREATE POLICY "tenant_isolation" ON "dealer_payments" USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
-CREATE POLICY "tenant_isolation" ON "vehicle_documents" USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation" ON "dealers" USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation" ON "vehicle_imports" USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation" ON "dealer_allocations" USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation" ON "vehicle_expenses" USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation" ON "dealership_inspections" USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation" ON "dealer_payments" USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation" ON "vehicle_documents" USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

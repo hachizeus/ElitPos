@@ -19,7 +19,7 @@ export async function GET() {
     const account = await db.query.accounts.findFirst({
       where: eq(accounts.id, session.user.accountId),
     })
-    const userCurrency = account?.currency || 'LKR'
+    const userCurrency = account?.currency || 'KES'
 
     // Get all active companies where user is the billing account
     const companies = await db
@@ -53,11 +53,15 @@ export async function GET() {
 
       return {
         tenantId: c.tenant.id,
+        subscriptionId: c.subscription.id,                              // ← added
         tenantName: c.tenant.name,
         tierName: c.tier.displayName,
+        billingCycle,                                                    // ← added
         priceMonthly: billingCycle === 'yearly' ? effectivePrice / 12 : effectivePrice,
-        tierCurrency: c.tier.currency || 'LKR',
+        renewalAmount: effectivePrice,                                   // ← full period amount
+        tierCurrency: c.tier.currency || 'KES',
         status: c.subscription.status,
+        currentPeriodEnd: c.subscription.currentPeriodEnd?.toISOString() ?? null, // ← added
         trialEndsAt: c.subscription.trialEndsAt,
         grandfathered,
         currentTierPrice: c.tier.priceMonthly ? parseFloat(c.tier.priceMonthly) : null,
@@ -87,8 +91,10 @@ export async function GET() {
         subtotal,
         discount,
         total,
-        currency: 'LKR',
+        currency: 'KES',
       },
+      walletBalance: Number(account?.walletBalance || 0),   // ← added
+      walletCurrency: account?.currency || 'KES',           // ← added
       lineItems,
       userCurrency,
       discountTiers: (await getVolumeDiscountTiers()).map(t => ({

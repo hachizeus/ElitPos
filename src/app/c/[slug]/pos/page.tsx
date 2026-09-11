@@ -49,15 +49,18 @@ import { roundCurrency } from '@/lib/utils/currency'
 import { calculateItemTax, aggregateTaxBreakdown, type ResolvedTaxTemplate, type TaxBreakdownItem } from '@/lib/utils/tax-template'
 import { POS_ITEMS_LIMIT } from '@/components/pos/types'
 import { usePOSBusinessConfig } from '@/hooks/usePOSBusinessConfig'
-import { useCompany } from '@/components/providers/CompanyContextProvider'
+import { useCompanyOptional } from '@/components/providers/CompanyContextProvider'
 import { formatItemLabel } from '@/lib/utils/item-display'
+import { useOfflineFetch } from '@/hooks/useOfflineFetch'
 
 export default function POSPage() {
   const { currency: currencyCode } = useCurrency()
   const config = usePOSBusinessConfig()
-  const company = useCompany()
+  const company = useCompanyOptional()
+  const companyBusinessType = company?.businessType ?? 'retail'
   const router = useRouter()
   const params = useParams()
+  const offlineFetch = useOfflineFetch()
 
   // Dealership redirect
   useEffect(() => {
@@ -212,9 +215,20 @@ export default function POSPage() {
 
   // ─── Data Fetchers ────────────────────────────────────────────
 
+  /**
+   * Returns true if the response is a 401, meaning the session is not yet
+   * established (e.g. during HMR, layout transition, or login race). In that
+   * case callers should bail out silently — no toast, no console error — because
+   * the layout will redirect to login if auth is genuinely absent.
+   */
+  function isUnauthorized(res: Response): boolean {
+    return res.status === 401
+  }
+
   const fetchCategories = useCallback(async () => {
     try {
       const res = await fetch('/api/categories?all=true')
+      if (isUnauthorized(res)) return
       if (res.ok) {
         const data = await res.json()
         setCategories(Array.isArray(data) ? data : [])
@@ -234,7 +248,12 @@ export default function POSPage() {
       if (warehouseId) params.set('warehouseId', warehouseId)
       if (categoryId) params.set('categoryId', categoryId)
 
-      const res = await fetch(`/api/items?${params.toString()}`)
+      const res = await offlineFetch(`/api/items?${params.toString()}`, {
+        method: 'GET',
+        entityType: 'items',
+        cacheTtl: 10 * 60 * 1000, // cache items 10 min for offline
+      })
+      if (isUnauthorized(res)) return
       if (res.ok) {
         const response = await res.json()
         const data = response.data || response
@@ -254,7 +273,12 @@ export default function POSPage() {
 
   const fetchCustomers = useCallback(async () => {
     try {
-      const res = await fetch('/api/customers?all=true')
+      const res = await offlineFetch('/api/customers?all=true', {
+        method: 'GET',
+        entityType: 'customers',
+        cacheTtl: 10 * 60 * 1000,
+      })
+      if (isUnauthorized(res)) return
       if (res.ok) {
         const data = await res.json()
         setCustomers(Array.isArray(data) ? data : [])
@@ -268,6 +292,7 @@ export default function POSPage() {
     if (!config.showVehicleSelector) return
     try {
       const res = await fetch('/api/vehicles?all=true')
+      if (isUnauthorized(res)) return
       if (res.ok) {
         const data = await res.json()
         setVehicles(Array.isArray(data) ? data : [])
@@ -281,6 +306,7 @@ export default function POSPage() {
     if (!config.showVehicleSelector) return
     try {
       const res = await fetch('/api/vehicle-makes?all=true')
+      if (isUnauthorized(res)) return
       if (res.ok) {
         const data = await res.json()
         setMakes(Array.isArray(data) ? data : [])
@@ -293,6 +319,7 @@ export default function POSPage() {
   const fetchHeldSales = useCallback(async () => {
     try {
       const res = await fetch('/api/held-sales?all=true')
+      if (isUnauthorized(res)) return
       if (res.ok) {
         const data = await res.json()
         setHeldSales(Array.isArray(data) ? data : [])
@@ -305,6 +332,7 @@ export default function POSPage() {
   const fetchActiveShift = useCallback(async () => {
     try {
       const res = await fetch('/api/pos-opening-entries?current=true')
+      if (isUnauthorized(res)) return
       if (res.ok) {
         const data = await res.json()
         setActiveShift(data.shift || null)
@@ -319,6 +347,7 @@ export default function POSPage() {
   const fetchTenantInfo = useCallback(async () => {
     try {
       const res = await fetch('/api/tenant')
+      if (isUnauthorized(res)) return
       if (res.ok) {
         const tenant = await res.json()
         setTenantInfo({
@@ -326,7 +355,7 @@ export default function POSPage() {
           phone: tenant.phone || null,
           address: tenant.address || null,
           email: tenant.email || null,
-          currency: tenant.currency || 'LKR',
+          currency: tenant.currency || 'KES',
           taxRate: parseFloat(tenant.taxRate) || 0,
           taxInclusive: tenant.taxInclusive || false,
         })
@@ -342,6 +371,7 @@ export default function POSPage() {
         fetch('/api/accounting/tax-templates?all=true'),
         fetch('/api/accounting/settings'),
       ])
+      if (isUnauthorized(ttRes)) return
       if (ttRes.ok) {
         const data = await ttRes.json()
         const list: Array<{ id: string; name: string; isActive: boolean; items: Array<{ taxName: string; rate: string; accountId: string | null; includedInPrice: boolean }> }> = Array.isArray(data) ? data : data.data || []
@@ -379,6 +409,7 @@ export default function POSPage() {
     if (!config.showTableSelector) return
     try {
       const res = await fetch('/api/restaurant-tables?all=true')
+      if (isUnauthorized(res)) return
       if (res.ok) {
         const data = await res.json()
         const items = Array.isArray(data) ? data : (data.data || [])
@@ -392,6 +423,7 @@ export default function POSPage() {
   const fetchLoyaltyProgram = useCallback(async () => {
     try {
       const res = await fetch('/api/loyalty-programs')
+      if (isUnauthorized(res)) return
       if (res.ok) {
         const data = await res.json()
         if (data && data.id) {
@@ -406,15 +438,44 @@ export default function POSPage() {
   // ─── Effects ──────────────────────────────────────────────────
 
   useEffect(() => {
-    Promise.all([fetchCategories(), fetchCustomers(), fetchVehicles(), fetchMakes(), fetchHeldSales(), fetchActiveShift(), fetchTenantInfo(), fetchLoyaltyProgram(), fetchTables(), fetchTaxTemplates(),
-      fetch('/api/accounting/cost-centers?all=true').then(r => r.ok ? r.json() : []).then(data => {
-        const list = Array.isArray(data) ? data : data.data || []
-        setHasCostCenters(list.filter((c: { isGroup?: boolean }) => !c.isGroup).length > 0)
-      }).catch(() => {}),
+    // Guard: company context must be present before firing any API calls.
+    // CompanyContextProvider is only mounted on authenticated layout branches,
+    // so a null company means we're in a context-less render (HMR transition,
+    // login page, or layout race). Firing fetches here would produce 401s.
+    if (!company) return
+
+    // Launch ALL initial fetches in parallel — items no longer wait for the shift.
+    // We fetch items speculatively with no warehouse filter on first mount so
+    // products appear immediately; once the shift resolves posWarehouse the
+    // warehouse-filtered refetch fires naturally via the posWarehouse effect below.
+    Promise.all([
+      fetchCategories(),
+      fetchCustomers(),
+      fetchVehicles(),
+      fetchMakes(),
+      fetchHeldSales(),
+      fetchActiveShift(),
+      fetchTenantInfo(),
+      fetchLoyaltyProgram(),
+      fetchTables(),
+      fetchTaxTemplates(),
+      // Kick off items fetch immediately — no warehouse filter on first load
+      fetchItems(undefined, null, null),
+      fetch('/api/accounting/cost-centers?all=true')
+        .then(r => isUnauthorized(r) ? [] : r.ok ? r.json() : [])
+        .then(data => {
+          const list = Array.isArray(data) ? data : data.data || []
+          setHasCostCenters(list.filter((c: { isGroup?: boolean }) => !c.isGroup).length > 0)
+        })
+        .catch(() => {}),
     ])
       .finally(() => setLoading(false))
-  }, [fetchCategories, fetchCustomers, fetchVehicles, fetchMakes, fetchHeldSales, fetchActiveShift, fetchTenantInfo, fetchLoyaltyProgram, fetchTables, fetchTaxTemplates])
+  // company is intentionally included: if it transitions null→object (context
+  // arrives after a brief loading state) we want to re-fire the initial loads.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [company])
 
+  // Once we know the warehouse from the active shift, re-fetch items scoped to it
   useEffect(() => {
     if (posWarehouse) {
       fetchItems(undefined, posWarehouse.id, selectedCategory)
@@ -470,6 +531,7 @@ export default function POSPage() {
       setSearchingReturns(true)
       try {
         const res = await fetch(`/api/sales?search=${encodeURIComponent(debouncedReturnSearchQuery)}&status=completed&pageSize=20&all=true`)
+        if (isUnauthorized(res)) return
         if (res.ok) {
           const data = await res.json()
           setReturnSearchResults(Array.isArray(data) ? data : [])
@@ -515,7 +577,7 @@ export default function POSPage() {
     setCart([...cart, {
       cartLineId: `${item.id}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       itemId: item.id,
-      name: formatItemLabel(item, company.businessType),
+      name: formatItemLabel(item, companyBusinessType),
       quantity: 1,
       unitPrice: total,
       total,
@@ -537,7 +599,7 @@ export default function POSPage() {
     setCart([...cart, {
       cartLineId: `${item.id}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       itemId: item.id,
-      name: formatItemLabel(item, company.businessType),
+      name: formatItemLabel(item, companyBusinessType),
       quantity: 1,
       unitPrice,
       total: unitPrice,
@@ -564,7 +626,7 @@ export default function POSPage() {
     setCart(prev => [...prev, {
       cartLineId: `${item.id}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       itemId: item.id,
-      name: formatItemLabel(item, company.businessType),
+      name: formatItemLabel(item, companyBusinessType),
       quantity,
       unitPrice: price,
       total: quantity * price,
@@ -592,7 +654,7 @@ export default function POSPage() {
           return [...prev, {
             cartLineId: `${item.id}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
             itemId: item.id,
-            name: formatItemLabel(item, company.businessType),
+            name: formatItemLabel(item, companyBusinessType),
             quantity: -1,
             unitPrice: price,
             total: -price,
@@ -626,7 +688,7 @@ export default function POSPage() {
         return [...prev, {
           cartLineId: `${item.id}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
           itemId: item.id,
-          name: formatItemLabel(item, company.businessType),
+          name: formatItemLabel(item, companyBusinessType),
           quantity: 1,
           unitPrice: price,
           total: price,
@@ -1188,9 +1250,10 @@ export default function POSPage() {
       const refundAmount = Math.abs(total)
       setProcessing(true)
       try {
-        const res = await fetch('/api/sales', {
+        const res = await offlineFetch('/api/sales', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          entityType: 'sales',
           body: JSON.stringify({
             customerId: selectedCustomer?.id,
             warehouseId: posWarehouse?.id,
@@ -1210,6 +1273,11 @@ export default function POSPage() {
             refundAmount,
             refundMethod,
           }),
+          optimisticData: {
+            invoiceNo: `OFFLINE-${Date.now()}`,
+            id: `offline-${Date.now()}`,
+            _offline: true,
+          },
         })
 
         if (res.ok) {
@@ -1265,9 +1333,10 @@ export default function POSPage() {
 
     setProcessing(true)
     try {
-      const res = await fetch('/api/sales', {
+      const res = await offlineFetch('/api/sales', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        entityType: 'sales',
         body: JSON.stringify({
           customerId: selectedCustomer?.id,
           vehicleId: selectedVehicle?.id,
@@ -1295,10 +1364,22 @@ export default function POSPage() {
           tipAmount: tip > 0 ? tip : undefined,
           giftCardId: paymentMethod === 'gift_card' && giftCardInfo ? giftCardInfo.id : undefined,
         }),
+        // Optimistic response — shown immediately when offline
+        optimisticData: {
+          invoiceNo: `OFFLINE-${Date.now()}`,
+          id: `offline-${Date.now()}`,
+          _offline: true,
+          generatedGiftCards: [],
+        },
       })
 
-      if (res.ok) {
+      if (res.ok || res.status === 201) {
         const sale = await res.json()
+
+        // Notify cashier if sale was queued offline
+        if (sale._offline || res.headers.get('X-Offline-Queue') === 'true') {
+          toast.warning('⚠️  You are offline. Sale saved locally and will sync when you reconnect.')
+        }
 
         // Complete restaurant order with skipSaleCreation (POS handles payment)
         if (restaurantOrderId) {
@@ -1544,7 +1625,7 @@ export default function POSPage() {
         cartHasItems={cart.length > 0}
         onReturnModeConfirm={() => setReturnModeConfirm(true)}
         config={config}
-        businessType={company.businessType}
+        businessType={company!.businessType}
       />
 
       <CartPanel

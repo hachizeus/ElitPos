@@ -248,7 +248,7 @@ export function SupplierFormModal({
                           ? 'text-green-600 dark:text-green-400'
                           : 'text-gray-600 dark:text-gray-400'
                     }`}>
-                      LKR {parseFloat(editSupplier.balance).toLocaleString()}
+                      KSh {parseFloat(editSupplier.balance).toLocaleString()}
                     </span>
                   </div>
                   {parseFloat(editSupplier.balance) < 0 && (

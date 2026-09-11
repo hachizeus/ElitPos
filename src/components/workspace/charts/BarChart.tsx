@@ -7,11 +7,11 @@ const DEFAULT_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#a855f7', '#ef4444', '
 const THEME_COLORS: Record<string, string> = {
   blue: '#3b82f6',
   green: '#22c55e',
-  violet: '#8b5cf6',
+  violet: '#00965c',
   amber: '#f59e0b',
   emerald: '#10b981',
   red: '#ef4444',
-  purple: '#a855f7',
+  purple: '#00965c',
   slate: '#64748b',
 }
 

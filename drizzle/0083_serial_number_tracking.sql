@@ -88,10 +88,16 @@ CREATE INDEX IF NOT EXISTS idx_serial_movements_reference ON serial_number_movem
 
 ALTER TABLE item_serial_numbers ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS item_serial_numbers_tenant_isolation ON item_serial_numbers;
-CREATE POLICY item_serial_numbers_tenant_isolation ON item_serial_numbers
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY item_serial_numbers_tenant_isolation ON item_serial_numbers
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 ALTER TABLE serial_number_movements ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS serial_number_movements_tenant_isolation ON serial_number_movements;
-CREATE POLICY serial_number_movements_tenant_isolation ON serial_number_movements
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY serial_number_movements_tenant_isolation ON serial_number_movements
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

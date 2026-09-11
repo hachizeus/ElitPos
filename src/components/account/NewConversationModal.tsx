@@ -70,7 +70,7 @@ export function NewConversationModal({ isOpen, onClose, onCreated }: NewConversa
               onChange={e => setSubject(e.target.value)}
               placeholder="What do you need help with?"
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-400 focus:border-transparent"
             />
           </div>
 
@@ -111,7 +111,7 @@ export function NewConversationModal({ isOpen, onClose, onCreated }: NewConversa
               rows={4}
               placeholder="Describe your issue or question..."
               required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-green-400 focus:border-transparent"
             />
           </div>
 

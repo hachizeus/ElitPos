@@ -419,178 +419,202 @@ type QuickListFn = (db: TenantDb, limit: number) => Promise<QuickListResult>
 
 const QUICK_LISTS: Record<string, QuickListFn> = {
   recent_sales: async (db, limit) => {
-    const rows = await db
-      .select({
-        id: sales.id,
-        invoiceNo: sales.invoiceNo,
-        customerName: sales.customerName,
-        total: sales.total,
-        status: sales.status,
-        createdAt: sales.createdAt,
-      })
-      .from(sales)
-      .orderBy(desc(sales.createdAt))
-      .limit(limit)
+    try {
+      const rows = await db
+        .select({
+          id: sales.id,
+          invoiceNo: sales.invoiceNo,
+          customerName: sales.customerName,
+          total: sales.total,
+          status: sales.status,
+          createdAt: sales.createdAt,
+        })
+        .from(sales)
+        .orderBy(desc(sales.createdAt))
+        .limit(limit)
 
-    const [countResult] = await db.select({ count: sql<number>`COUNT(*)` }).from(sales)
+      const [countResult] = await db.select({ count: sql<number>`COUNT(*)` }).from(sales)
 
-    return {
-      title: 'Recent Sales',
-      columns: [
-        { key: 'invoiceNo', label: 'Invoice #', type: 'text' },
-        { key: 'customerName', label: 'Customer', type: 'text' },
-        { key: 'total', label: 'Total', type: 'currency' },
-        { key: 'status', label: 'Status', type: 'status' },
-        { key: 'createdAt', label: 'Date', type: 'date' },
-      ],
-      rows: rows as unknown as Record<string, unknown>[],
-      totalCount: Number(countResult?.count || 0),
+      return {
+        title: 'Recent Sales',
+        columns: [
+          { key: 'invoiceNo', label: 'Invoice #', type: 'text' },
+          { key: 'customerName', label: 'Customer', type: 'text' },
+          { key: 'total', label: 'Total', type: 'currency' },
+          { key: 'status', label: 'Status', type: 'status' },
+          { key: 'createdAt', label: 'Date', type: 'date' },
+        ],
+        rows: rows as unknown as Record<string, unknown>[],
+        totalCount: Number(countResult?.count || 0),
+      }
+    } catch {
+      return { title: 'Recent Sales', columns: [], rows: [], totalCount: 0 }
     }
   },
 
   recent_work_orders: async (db, limit) => {
-    const rows = await db
-      .select({
-        id: workOrders.id,
-        orderNo: workOrders.orderNo,
-        customerName: sql<string>`COALESCE(${workOrders.customerName}, ${customers.name}, 'Walk-in')`,
-        vehiclePlate: sql<string>`COALESCE(${workOrders.vehiclePlate}, CONCAT(${vehicles.licensePlate}, ' ', ${vehicles.year}, ' ', ${vehicles.make}, ' ', ${vehicles.model}), '')`,
-        status: workOrders.status,
-        createdAt: workOrders.createdAt,
-      })
-      .from(workOrders)
-      .leftJoin(customers, eq(workOrders.customerId, customers.id))
-      .leftJoin(vehicles, eq(workOrders.vehicleId, vehicles.id))
-      .orderBy(desc(workOrders.createdAt))
-      .limit(limit)
+    try {
+      const rows = await db
+        .select({
+          id: workOrders.id,
+          orderNo: workOrders.orderNo,
+          customerName: sql<string>`COALESCE(${workOrders.customerName}, ${customers.name}, 'Walk-in')`,
+          vehiclePlate: sql<string>`COALESCE(${workOrders.vehiclePlate}, CONCAT(${vehicles.licensePlate}, ' ', ${vehicles.year}, ' ', ${vehicles.make}, ' ', ${vehicles.model}), '')`,
+          status: workOrders.status,
+          createdAt: workOrders.createdAt,
+        })
+        .from(workOrders)
+        .leftJoin(customers, eq(workOrders.customerId, customers.id))
+        .leftJoin(vehicles, eq(workOrders.vehicleId, vehicles.id))
+        .orderBy(desc(workOrders.createdAt))
+        .limit(limit)
 
-    const [countResult] = await db.select({ count: sql<number>`COUNT(*)` }).from(workOrders)
+      const [countResult] = await db.select({ count: sql<number>`COUNT(*)` }).from(workOrders)
 
-    return {
-      title: 'Recent Work Orders',
-      columns: [
-        { key: 'orderNo', label: 'Order #', type: 'text' },
-        { key: 'customerName', label: 'Customer', type: 'text' },
-        { key: 'vehiclePlate', label: 'Vehicle', type: 'text' },
-        { key: 'status', label: 'Status', type: 'status' },
-        { key: 'createdAt', label: 'Date', type: 'date' },
-      ],
-      rows: rows as unknown as Record<string, unknown>[],
-      totalCount: Number(countResult?.count || 0),
+      return {
+        title: 'Recent Work Orders',
+        columns: [
+          { key: 'orderNo', label: 'Order #', type: 'text' },
+          { key: 'customerName', label: 'Customer', type: 'text' },
+          { key: 'vehiclePlate', label: 'Vehicle', type: 'text' },
+          { key: 'status', label: 'Status', type: 'status' },
+          { key: 'createdAt', label: 'Date', type: 'date' },
+        ],
+        rows: rows as unknown as Record<string, unknown>[],
+        totalCount: Number(countResult?.count || 0),
+      }
+    } catch {
+      return { title: 'Recent Work Orders', columns: [], rows: [], totalCount: 0 }
     }
   },
 
   recent_customers: async (db, limit) => {
-    const rows = await db
-      .select({
-        id: customers.id,
-        name: customers.name,
-        phone: customers.phone,
-        email: customers.email,
-        createdAt: customers.createdAt,
-      })
-      .from(customers)
-      .orderBy(desc(customers.createdAt))
-      .limit(limit)
+    try {
+      const rows = await db
+        .select({
+          id: customers.id,
+          name: customers.name,
+          phone: customers.phone,
+          email: customers.email,
+          createdAt: customers.createdAt,
+        })
+        .from(customers)
+        .orderBy(desc(customers.createdAt))
+        .limit(limit)
 
-    const [countResult] = await db.select({ count: sql<number>`COUNT(*)` }).from(customers)
+      const [countResult] = await db.select({ count: sql<number>`COUNT(*)` }).from(customers)
 
-    return {
-      title: 'Recent Customers',
-      columns: [
-        { key: 'name', label: 'Name', type: 'text' },
-        { key: 'phone', label: 'Phone', type: 'text' },
-        { key: 'email', label: 'Email', type: 'text' },
-        { key: 'createdAt', label: 'Date', type: 'date' },
-      ],
-      rows: rows as unknown as Record<string, unknown>[],
-      totalCount: Number(countResult?.count || 0),
+      return {
+        title: 'Recent Customers',
+        columns: [
+          { key: 'name', label: 'Name', type: 'text' },
+          { key: 'phone', label: 'Phone', type: 'text' },
+          { key: 'email', label: 'Email', type: 'text' },
+          { key: 'createdAt', label: 'Date', type: 'date' },
+        ],
+        rows: rows as unknown as Record<string, unknown>[],
+        totalCount: Number(countResult?.count || 0),
+      }
+    } catch {
+      return { title: 'Recent Customers', columns: [], rows: [], totalCount: 0 }
     }
   },
 
   recent_purchase_orders: async (db, limit) => {
-    const rows = await db
-      .select({
-        id: purchaseOrders.id,
-        orderNo: purchaseOrders.orderNo,
-        total: purchaseOrders.total,
-        status: purchaseOrders.status,
-        createdAt: purchaseOrders.createdAt,
-      })
-      .from(purchaseOrders)
-      .orderBy(desc(purchaseOrders.createdAt))
-      .limit(limit)
+    try {
+      const rows = await db
+        .select({
+          id: purchaseOrders.id,
+          orderNo: purchaseOrders.orderNo,
+          total: purchaseOrders.total,
+          status: purchaseOrders.status,
+          createdAt: purchaseOrders.createdAt,
+        })
+        .from(purchaseOrders)
+        .orderBy(desc(purchaseOrders.createdAt))
+        .limit(limit)
 
-    const [countResult] = await db.select({ count: sql<number>`COUNT(*)` }).from(purchaseOrders)
+      const [countResult] = await db.select({ count: sql<number>`COUNT(*)` }).from(purchaseOrders)
 
-    return {
-      title: 'Recent Purchase Orders',
-      columns: [
-        { key: 'orderNo', label: 'PO #', type: 'text' },
-        { key: 'total', label: 'Total', type: 'currency' },
-        { key: 'status', label: 'Status', type: 'status' },
-        { key: 'createdAt', label: 'Date', type: 'date' },
-      ],
-      rows: rows as unknown as Record<string, unknown>[],
-      totalCount: Number(countResult?.count || 0),
+      return {
+        title: 'Recent Purchase Orders',
+        columns: [
+          { key: 'orderNo', label: 'PO #', type: 'text' },
+          { key: 'total', label: 'Total', type: 'currency' },
+          { key: 'status', label: 'Status', type: 'status' },
+          { key: 'createdAt', label: 'Date', type: 'date' },
+        ],
+        rows: rows as unknown as Record<string, unknown>[],
+        totalCount: Number(countResult?.count || 0),
+      }
+    } catch {
+      return { title: 'Recent Purchase Orders', columns: [], rows: [], totalCount: 0 }
     }
   },
 
   recent_estimates: async (db, limit) => {
-    const rows = await db
-      .select({
-        id: insuranceEstimates.id,
-        estimateNo: insuranceEstimates.estimateNo,
-        status: insuranceEstimates.status,
-        originalTotal: insuranceEstimates.originalTotal,
-        createdAt: insuranceEstimates.createdAt,
-      })
-      .from(insuranceEstimates)
-      .orderBy(desc(insuranceEstimates.createdAt))
-      .limit(limit)
+    try {
+      const rows = await db
+        .select({
+          id: insuranceEstimates.id,
+          estimateNo: insuranceEstimates.estimateNo,
+          status: insuranceEstimates.status,
+          originalTotal: insuranceEstimates.originalTotal,
+          createdAt: insuranceEstimates.createdAt,
+        })
+        .from(insuranceEstimates)
+        .orderBy(desc(insuranceEstimates.createdAt))
+        .limit(limit)
 
-    const [countResult] = await db.select({ count: sql<number>`COUNT(*)` }).from(insuranceEstimates)
+      const [countResult] = await db.select({ count: sql<number>`COUNT(*)` }).from(insuranceEstimates)
 
-    return {
-      title: 'Recent Estimates',
-      columns: [
-        { key: 'estimateNo', label: 'Estimate #', type: 'text' },
-        { key: 'originalTotal', label: 'Total', type: 'currency' },
-        { key: 'status', label: 'Status', type: 'status' },
-        { key: 'createdAt', label: 'Date', type: 'date' },
-      ],
-      rows: rows as unknown as Record<string, unknown>[],
-      totalCount: Number(countResult?.count || 0),
+      return {
+        title: 'Recent Estimates',
+        columns: [
+          { key: 'estimateNo', label: 'Estimate #', type: 'text' },
+          { key: 'originalTotal', label: 'Total', type: 'currency' },
+          { key: 'status', label: 'Status', type: 'status' },
+          { key: 'createdAt', label: 'Date', type: 'date' },
+        ],
+        rows: rows as unknown as Record<string, unknown>[],
+        totalCount: Number(countResult?.count || 0),
+      }
+    } catch {
+      return { title: 'Recent Estimates', columns: [], rows: [], totalCount: 0 }
     }
   },
 
   recent_appointments: async (db, limit) => {
-    const rows = await db
-      .select({
-        id: appointments.id,
-        customerName: appointments.customerName,
-        vehiclePlate: appointments.vehiclePlate,
-        serviceName: appointments.serviceName,
-        scheduledDate: appointments.scheduledDate,
-        status: appointments.status,
-      })
-      .from(appointments)
-      .orderBy(desc(appointments.scheduledDate))
-      .limit(limit)
+    try {
+      const rows = await db
+        .select({
+          id: appointments.id,
+          customerName: appointments.customerName,
+          vehiclePlate: appointments.vehiclePlate,
+          serviceName: appointments.serviceName,
+          scheduledDate: appointments.scheduledDate,
+          status: appointments.status,
+        })
+        .from(appointments)
+        .orderBy(desc(appointments.scheduledDate))
+        .limit(limit)
 
-    const [countResult] = await db.select({ count: sql<number>`COUNT(*)` }).from(appointments)
+      const [countResult] = await db.select({ count: sql<number>`COUNT(*)` }).from(appointments)
 
-    return {
-      title: 'Recent Appointments',
-      columns: [
-        { key: 'customerName', label: 'Customer', type: 'text' },
-        { key: 'vehiclePlate', label: 'Vehicle', type: 'text' },
-        { key: 'serviceName', label: 'Service', type: 'text' },
-        { key: 'scheduledDate', label: 'Date', type: 'date' },
-        { key: 'status', label: 'Status', type: 'status' },
-      ],
-      rows: rows as unknown as Record<string, unknown>[],
-      totalCount: Number(countResult?.count || 0),
+      return {
+        title: 'Recent Appointments',
+        columns: [
+          { key: 'customerName', label: 'Customer', type: 'text' },
+          { key: 'vehiclePlate', label: 'Vehicle', type: 'text' },
+          { key: 'serviceName', label: 'Service', type: 'text' },
+          { key: 'scheduledDate', label: 'Date', type: 'date' },
+          { key: 'status', label: 'Status', type: 'status' },
+        ],
+        rows: rows as unknown as Record<string, unknown>[],
+        totalCount: Number(countResult?.count || 0),
+      }
+    } catch {
+      return { title: 'Recent Appointments', columns: [], rows: [], totalCount: 0 }
     }
   },
 
@@ -644,5 +668,11 @@ export async function fetchQuickListData(
 ): Promise<QuickListResult | null> {
   const fn = QUICK_LISTS[key]
   if (!fn) return null
-  return fn(db, limit)
+  try {
+    return await fn(db, limit)
+  } catch {
+    // Individual function try/catches handle most errors; this is the last line
+    // of defence if a function unexpectedly throws (e.g. connection error).
+    return { title: key, columns: [], rows: [], totalCount: 0 }
+  }
 }

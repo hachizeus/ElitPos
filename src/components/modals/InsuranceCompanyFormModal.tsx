@@ -291,7 +291,7 @@ export function InsuranceCompanyFormModal({
               <div>
                 <label className="block text-sm font-medium mb-1 dark:text-gray-200">
                   <DollarSign size={14} className="inline mr-1" />
-                  Estimate Threshold (LKR)
+                  Estimate Threshold (KES)
                 </label>
                 <input
                   type="number"

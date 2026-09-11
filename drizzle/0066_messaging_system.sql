@@ -1,6 +1,6 @@
 -- Messaging system: conversations between accounts and admin support
 
-CREATE TABLE conversations (
+CREATE TABLE IF NOT EXISTS conversations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   account_id UUID NOT NULL REFERENCES accounts(id),
   subject VARCHAR(255) NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE conversations (
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE messages (
+CREATE TABLE IF NOT EXISTS messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   conversation_id UUID NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
   sender_type VARCHAR(20) NOT NULL,
@@ -30,8 +30,8 @@ CREATE TABLE messages (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_conversations_account_id ON conversations(account_id);
-CREATE INDEX idx_conversations_status ON conversations(status);
-CREATE INDEX idx_conversations_last_message ON conversations(last_message_at DESC);
-CREATE INDEX idx_messages_conversation_id ON messages(conversation_id);
-CREATE INDEX idx_messages_created_at ON messages(created_at);
+CREATE INDEX IF NOT EXISTS idx_conversations_account_id ON conversations(account_id);
+CREATE INDEX IF NOT EXISTS idx_conversations_status ON conversations(status);
+CREATE INDEX IF NOT EXISTS idx_conversations_last_message ON conversations(last_message_at DESC);
+CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);

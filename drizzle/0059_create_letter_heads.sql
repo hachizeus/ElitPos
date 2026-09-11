@@ -30,8 +30,11 @@ ALTER TABLE "letter_heads" ENABLE ROW LEVEL SECURITY;
 
 -- RLS policy: tenant isolation
 DROP POLICY IF EXISTS "letter_heads_tenant_isolation" ON "letter_heads";
-CREATE POLICY "letter_heads_tenant_isolation" ON "letter_heads"
-  USING (tenant_id::text = current_setting('app.tenant_id', true));
+DO $$ BEGIN
+  CREATE POLICY "letter_heads_tenant_isolation" ON "letter_heads"
+    USING (tenant_id::text = current_setting('app.tenant_id', true));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS "idx_letter_heads_tenant" ON "letter_heads" ("tenant_id");

@@ -1,4 +1,4 @@
-# Contributing to Retail Smart ERP
+# Contributing to ElitPOS
 
 Thank you for your interest in contributing! This guide will help you get started.
 

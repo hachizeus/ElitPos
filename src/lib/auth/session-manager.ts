@@ -2,6 +2,7 @@ import crypto from 'crypto'
 import { db } from '@/lib/db'
 import { accountSessions } from '@/lib/db/schema'
 import { eq, and, lt, ne, or } from 'drizzle-orm'
+import { sessionCacheUtil } from '@/lib/cache/session-cache'
 
 // Session lifetime: 24 hours (DB record), JWT is 15 min (handled by NextAuth)
 const SESSION_LIFETIME_MS = 24 * 60 * 60 * 1000
@@ -46,8 +47,17 @@ export async function createSession(
 /**
  * Validate a session token. Returns the session record if valid, null otherwise.
  * A session is valid if: exists, not revoked, not expired.
+ * 
+ * **PERFORMANCE OPTIMIZED:** Caches validation results for 60 seconds.
  */
 export async function validateSession(sessionToken: string) {
+  // Check cache first
+  const cached = sessionCacheUtil.get<typeof session>(sessionToken)
+  if (cached !== undefined) {
+    return cached
+  }
+
+  // Cache miss - query DB
   const session = await db.query.accountSessions.findFirst({
     where: and(
       eq(accountSessions.sessionToken, sessionToken),
@@ -62,13 +72,20 @@ export async function validateSession(sessionToken: string) {
     },
   })
 
-  if (!session) return null
-
-  // Check expiry
-  if (new Date(session.expiresAt) < new Date()) {
+  if (!session) {
+    // Cache negative result
+    sessionCacheUtil.set(sessionToken, null)
     return null
   }
 
+  // Check expiry
+  if (new Date(session.expiresAt) < new Date()) {
+    sessionCacheUtil.set(sessionToken, null)
+    return null
+  }
+
+  // Cache valid session
+  sessionCacheUtil.set(sessionToken, session)
   return session
 }
 

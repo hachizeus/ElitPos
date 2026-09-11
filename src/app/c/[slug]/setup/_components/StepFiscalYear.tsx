@@ -40,7 +40,7 @@ export function StepFiscalYear({ data, onChange, onNext, onBack }: StepFiscalYea
               id="fiscalYearStart"
               value={data.fiscalYearStart || `${currentYear}-01-01`}
               onChange={(e) => onChange({ ...data, fiscalYearStart: e.target.value })}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#00FF88] focus:border-[#00FF88]"
               required
             />
             <p className="mt-1 text-xs text-gray-500">
@@ -57,7 +57,7 @@ export function StepFiscalYear({ data, onChange, onNext, onBack }: StepFiscalYea
               id="fiscalYearEnd"
               value={data.fiscalYearEnd || `${currentYear}-12-31`}
               onChange={(e) => onChange({ ...data, fiscalYearEnd: e.target.value })}
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#00FF88] focus:border-[#00FF88]"
               required
             />
             <p className="mt-1 text-xs text-gray-500">
@@ -75,7 +75,7 @@ export function StepFiscalYear({ data, onChange, onNext, onBack }: StepFiscalYea
             id="fiscalYearName"
             value={data.fiscalYearName || `${currentYear}-${nextYear}`}
             onChange={(e) => onChange({ ...data, fiscalYearName: e.target.value })}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#00FF88] focus:border-[#00FF88]"
             placeholder={`e.g., ${currentYear}-${nextYear}`}
           />
           <p className="mt-1 text-xs text-gray-500">
@@ -83,9 +83,9 @@ export function StepFiscalYear({ data, onChange, onNext, onBack }: StepFiscalYea
           </p>
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-          <h3 className="text-sm font-medium text-blue-800 mb-2">Fiscal Year Information</h3>
-          <p className="text-sm text-blue-700">
+        <div className="bg-green-50 border border-green-200 rounded-md p-4">
+          <h3 className="text-sm font-medium text-green-800 mb-2">Fiscal Year Information</h3>
+          <p className="text-sm text-green-700">
             The fiscal year defines your company&apos;s financial reporting period. All financial statements,
             tax calculations, and reporting will be based on this period.
           </p>
@@ -95,13 +95,13 @@ export function StepFiscalYear({ data, onChange, onNext, onBack }: StepFiscalYea
           <button
             type="button"
             onClick={onBack}
-            className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00FF88]"
           >
             Back
           </button>
           <button
             type="submit"
-            className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-6 py-2.5 bg-[#00e67a] text-white font-medium rounded-md hover:bg-[#00cc6e] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00FF88]"
           >
             Save & Continue
           </button>

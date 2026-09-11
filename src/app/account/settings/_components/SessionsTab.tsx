@@ -172,7 +172,7 @@ export function SessionsTab() {
                             </span>
                           )}
                           {s.scope === 'company' && s.tenantSlug && (
-                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400">
+                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400">
                               {s.tenantSlug}
                             </span>
                           )}

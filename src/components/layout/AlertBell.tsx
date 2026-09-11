@@ -22,7 +22,7 @@ interface AIAlert {
 
 const typeConfig = {
   anomaly: { icon: AlertTriangle, color: 'text-amber-500' },
-  insight: { icon: Sparkles, color: 'text-purple-500' },
+  insight: { icon: Sparkles, color: 'text-green-600' },
   error: { icon: AlertCircle, color: 'text-red-500' },
   suggestion: { icon: Lightbulb, color: 'text-blue-500' },
 }
@@ -157,7 +157,7 @@ export function AlertBell() {
         <div className="absolute right-0 top-full mt-1 w-80 sm:w-96 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-50 max-h-[480px] flex flex-col">
           <div className="px-3 py-2.5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <Sparkles size={14} className="text-purple-500" />
+              <Sparkles size={14} className="text-green-600" />
               <span className="text-sm font-medium text-gray-900 dark:text-white">AI Alerts</span>
             </div>
             <Link

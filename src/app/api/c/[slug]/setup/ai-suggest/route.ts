@@ -73,7 +73,7 @@ export async function POST(
 
       const prompt = `Business type: ${context?.businessType || 'retail'}
 Country: ${context?.countryName || context?.country || 'Unknown'}
-Currency: ${context?.currency || 'LKR'}
+Currency: ${context?.currency || 'KES'}
 Company: ${context?.companyName || 'New Business'}
 
 User question: ${trimmedQuestion}`
@@ -193,7 +193,7 @@ Return JSON: { "suggestedCenters": ["Center 1", "Center 2", ...] }`,
     if (step === 'business_config') {
       const businessType = context?.businessType || 'retail'
       const countryName = context?.countryName || context?.country || 'any country'
-      const currency = context?.currency || 'LKR'
+      const currency = context?.currency || 'KES'
 
       if (!isTenantAIEnabled(tenant)) {
         return NextResponse.json({ suggestedCategories: [] })
@@ -234,7 +234,7 @@ Respond with JSON: { ${extraSchema}"suggestedCategories": ["Category 1", "Catego
     if (step === 'pos') {
       const businessType = context?.businessType || 'retail'
       const countryName = context?.countryName || context?.country || 'any country'
-      const currency = context?.currency || 'LKR'
+      const currency = context?.currency || 'KES'
 
       if (!isTenantAIEnabled(tenant)) {
         return NextResponse.json({

@@ -135,7 +135,7 @@ export const deleteSessionsSchema = z.object({
 
 // PUT /api/account/subscriptions/[tenantId]
 export const updateSubscriptionSchema = z.object({
-  cancelAtPeriodEnd: z.boolean(),
+  cancelAtPeriodEnd: z.boolean().optional(),
   // tierId is explicitly rejected by the route (must use /upgrade endpoint)
   tierId: uuidSchema.optional(),
 })

@@ -39,7 +39,7 @@ const notificationIcons: Record<string, typeof Bell> = {
 }
 
 const notificationColors: Record<string, { bg: string; icon: string; border: string }> = {
-  info: { bg: 'bg-blue-100 dark:bg-blue-900/30', icon: 'text-blue-600 dark:text-blue-400', border: 'border-blue-200 dark:border-blue-700' },
+  info: { bg: 'bg-green-100 dark:bg-green-900/30', icon: 'text-green-600 dark:text-green-400', border: 'border-green-200 dark:border-blue-700' },
   warning: { bg: 'bg-amber-100 dark:bg-amber-900/30', icon: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-700' },
   success: { bg: 'bg-green-100 dark:bg-green-900/30', icon: 'text-green-600 dark:text-green-400', border: 'border-green-200 dark:border-green-700' },
   billing: { bg: 'bg-purple-100 dark:bg-purple-900/30', icon: 'text-purple-600 dark:text-purple-400', border: 'border-purple-200 dark:border-purple-700' },
@@ -148,7 +148,7 @@ export default function NotificationsPage() {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Notifications</h1>
             {unreadCount > 0 && (
-              <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-blue-500 rounded-full">
+              <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-green-400 rounded-full">
                 {unreadCount}
               </span>
             )}
@@ -180,7 +180,7 @@ export default function NotificationsPage() {
           onClick={() => setFilter('all')}
           className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
             filter === 'all'
-              ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-lg'
+              ? 'bg-green-600 text-white shadow-lg'
               : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
           }`}
         >
@@ -190,7 +190,7 @@ export default function NotificationsPage() {
           onClick={() => setFilter('unread')}
           className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
             filter === 'unread'
-              ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-lg'
+              ? 'bg-green-600 text-white shadow-lg'
               : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
           }`}
         >
@@ -231,7 +231,7 @@ export default function NotificationsPage() {
                 <div
                   key={notification.id}
                   className={`px-6 py-5 flex items-start gap-4 transition-colors ${
-                    !notification.isRead ? 'bg-blue-50/50 dark:bg-blue-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                    !notification.isRead ? 'bg-green-50/50 dark:bg-blue-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
                   <div className={`w-12 h-12 rounded-md flex items-center justify-center flex-shrink-0 ${colors.bg}`}>
@@ -245,7 +245,7 @@ export default function NotificationsPage() {
                             {notification.title}
                           </p>
                           {!notification.isRead && (
-                            <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></span>
+                            <span className="w-2 h-2 bg-green-400 rounded-full flex-shrink-0"></span>
                           )}
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{notification.message}</p>

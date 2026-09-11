@@ -120,7 +120,7 @@ export function useSetupWizard(companySlug: string) {
         id: companyData.id,
         name: companyData.name,
         businessType: companyData.businessType || 'retail',
-        currency: companyData.currency || 'LKR',
+        currency: companyData.currency || 'KES',
         country: companyData.country || '',
         countryName: companyData.countryName || '',
         setupCompleted: !!companyData.setupCompletedAt,

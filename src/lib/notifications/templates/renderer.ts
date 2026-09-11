@@ -62,7 +62,7 @@ async function buildVariables(context: RenderContext): Promise<Record<string, st
 
   // Load tenant (business) info
   const tenant = await loadTenant(context.tenantId)
-  const currency = tenant?.currency || 'LKR'
+  const currency = tenant?.currency || 'KES'
   if (tenant) {
     variables.business_name = tenant.name
     variables.business_phone = tenant.phone || ''

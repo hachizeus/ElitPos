@@ -38,7 +38,7 @@ const emptyForm = {
   partyType: 'customer',
   partyId: '',
   amount: '',
-  currency: 'LKR',
+  currency: 'KES',
   emailTo: '',
   subject: '',
   message: '',

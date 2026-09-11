@@ -1,10 +1,9 @@
-# Retail Smart ERP
-
-[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-red)](https://github.com/sponsors/ravindu2012) [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/ravindu2012)
+# ElitPOS — by Elitjohns Digital Agency
 
 A multi-tenant SaaS Point of Sale and ERP system built with **Next.js 16**, **React 19**, and **PostgreSQL**. Supports five business types: Retail, Restaurant, Supermarket, Auto Service, and Dealership.
 
-**Live Demo:** [retailsmarterp.com](https://www.retailsmarterp.com)
+**Built by:** [Elitjohns Digital Agency](https://elitjohnsdigital.co.ke)
+**Live Demo:** [elitpos.elitjohnsdigital.co.ke](https://elitpos.elitjohnsdigital.co.ke)
 ## Screenshots
 
 ### Landing Page
@@ -44,7 +43,7 @@ A multi-tenant SaaS Point of Sale and ERP system built with **Next.js 16**, **Re
 - Loyalty program with points tracking
 
 ### Multi-Tenant Architecture
-- Subdomain-based tenant isolation (`company.retailsmarterp.com`)
+- Subdomain-based tenant isolation (`company.elitpos.elitjohnsdigital.co.ke`)
 - Row Level Security (RLS) at the database level
 - Per-tenant settings, currency, and branding
 - Role-based access control with 15+ roles
@@ -221,6 +220,6 @@ This project is licensed under the [GNU General Public License v3.0](LICENSE).
 
 ## Contact
 
-- **Author:** Ravindu Gajanayaka
-- **Website:** [retailsmarterp.com](https://www.retailsmarterp.com)
-- **Issues:** [GitHub Issues](https://github.com/ravindu2012/retail-smart-erp/issues)
+- **Built by:** Elitjohns Digital Agency
+- **Website:** [elitjohnsdigital.co.ke](https://elitjohnsdigital.co.ke)
+- **Issues:** [GitHub Issues](https://github.com/elitjohns/elitpos/issues)

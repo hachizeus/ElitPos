@@ -65,11 +65,17 @@ ALTER TABLE "item_supplier_costs" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "item_cost_history" ENABLE ROW LEVEL SECURITY;
 
 -- RLS policies
-CREATE POLICY "tenant_isolation" ON "item_supplier_costs"
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation" ON "item_supplier_costs"
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "tenant_isolation" ON "item_cost_history"
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation" ON "item_cost_history"
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Grant permissions to app_user role
 DO $$ BEGIN

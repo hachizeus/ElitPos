@@ -157,14 +157,14 @@ export function StepAccounting({ data, companySlug, businessType, country, count
               {tabBadges[tab.id] > 0 && (
                 <span className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-md text-[10px] font-bold ${
                   isActive
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
                     : 'bg-gray-200/80 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
                 }`}>
                   {tabBadges[tab.id]}
                 </span>
               )}
               {isUnvisited && !isActive && (
-                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               )}
             </button>
           )
@@ -218,8 +218,8 @@ export function StepAccounting({ data, companySlug, businessType, country, count
                       onClick={() => setDefaultCostCenter(name)}
                       className={`p-1.5 rounded-lg transition-all ${
                         defaultCostCenter === name && name.trim()
-                          ? 'text-blue-600 dark:text-blue-400'
-                          : 'text-gray-300 dark:text-gray-600 hover:text-blue-400'
+                          ? 'text-[#00cc6e] dark:text-green-400'
+                          : 'text-gray-300 dark:text-gray-600 hover:text-green-400'
                       }`}
                       title={defaultCostCenter === name ? 'Default' : 'Set as default'}
                     >
@@ -246,7 +246,7 @@ export function StepAccounting({ data, companySlug, businessType, country, count
                   type="button"
                   onClick={addCostCenter}
                   disabled={costCenters.length >= 10}
-                  className="w-full py-2.5 border-2 border-dashed border-gray-200 dark:border-gray-700/50 rounded-xl text-sm text-gray-400 dark:text-gray-500 hover:border-blue-300 hover:text-blue-600 dark:hover:border-blue-700 dark:hover:text-blue-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                  className="w-full py-2.5 border-2 border-dashed border-gray-200 dark:border-gray-700/50 rounded-xl text-sm text-gray-400 dark:text-gray-500 hover:border-green-300 hover:text-[#00cc6e] dark:hover:border-green-700 dark:hover:text-green-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                 >
                   <Plus size={14} />
                   Add Cost Center
@@ -255,7 +255,7 @@ export function StepAccounting({ data, companySlug, businessType, country, count
 
               {/* Reminder to check other tab */}
               {!visitedTabs.has('bank-accounts') && (
-                <div className="mt-4 p-3 bg-blue-50/60 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-lg text-sm text-blue-600 dark:text-blue-300 flex items-center gap-2.5">
+                <div className="mt-4 p-3 bg-green-50/60 dark:bg-green-900/20 border border-green-100 dark:border-green-800/50 rounded-lg text-sm text-[#00cc6e] dark:text-green-300 flex items-center gap-2.5">
                   <Info size={15} className="flex-shrink-0" />
                   <span>
                     Remember to configure your <strong>Bank Accounts</strong> in the tab above.
@@ -283,7 +283,7 @@ export function StepAccounting({ data, companySlug, businessType, country, count
                     key={index}
                     className={`rounded-xl border p-4 transition-all duration-200 ${
                       account.isDefault
-                        ? 'border-blue-200 dark:border-blue-800/60 bg-gradient-to-r from-blue-50/60 to-transparent dark:from-blue-950/20 dark:to-transparent'
+                        ? 'border-green-200 dark:border-green-800/60 bg-gradient-to-r from-green-50/60 to-transparent dark:from-green-950/20 dark:to-transparent'
                         : 'border-gray-200/60 dark:border-gray-700/40 bg-gray-50/40 dark:bg-slate-800/30'
                     }`}
                   >
@@ -314,7 +314,7 @@ export function StepAccounting({ data, companySlug, businessType, country, count
                       </div>
                       <div className="flex items-center gap-1 pt-1">
                         {account.isDefault ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300">
                             <Star size={10} fill="currentColor" />
                             Default
                           </span>
@@ -322,7 +322,7 @@ export function StepAccounting({ data, companySlug, businessType, country, count
                           <button
                             type="button"
                             onClick={() => setBankAccountDefault(index)}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all"
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-[#00cc6e] hover:bg-green-50 dark:hover:bg-green-950/30 transition-all"
                             title="Set as default"
                           >
                             <Star size={12} />
@@ -344,7 +344,7 @@ export function StepAccounting({ data, companySlug, businessType, country, count
                   type="button"
                   onClick={addBankAccount}
                   disabled={bankAccounts.length >= 5}
-                  className="w-full py-2.5 border-2 border-dashed border-gray-200 dark:border-gray-700/50 rounded-xl text-sm text-gray-400 dark:text-gray-500 hover:border-blue-300 hover:text-blue-600 dark:hover:border-blue-700 dark:hover:text-blue-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                  className="w-full py-2.5 border-2 border-dashed border-gray-200 dark:border-gray-700/50 rounded-xl text-sm text-gray-400 dark:text-gray-500 hover:border-green-300 hover:text-[#00cc6e] dark:hover:border-green-700 dark:hover:text-green-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                 >
                   <Plus size={14} />
                   Add Bank Account
@@ -356,13 +356,13 @@ export function StepAccounting({ data, companySlug, businessType, country, count
       </AnimatePresence>
 
       {/* Modes of Payment info */}
-      <div className="flex items-start gap-3 px-4 py-3 bg-blue-50/60 dark:bg-blue-900/15 border border-blue-100 dark:border-blue-800/40 rounded-xl">
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex-shrink-0">
-          <CreditCard size={14} className="text-blue-600 dark:text-blue-400" />
+      <div className="flex items-start gap-3 px-4 py-3 bg-green-50/60 dark:bg-green-900/15 border border-green-100 dark:border-green-800/40 rounded-xl">
+        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/40 flex-shrink-0">
+          <CreditCard size={14} className="text-[#00cc6e] dark:text-green-400" />
         </div>
         <div>
-          <p className="text-sm font-medium text-blue-800 dark:text-blue-300">Modes of Payment</p>
-          <p className="text-xs text-blue-600/80 dark:text-blue-400/80 mt-0.5 leading-relaxed">
+          <p className="text-sm font-medium text-green-800 dark:text-green-300">Modes of Payment</p>
+          <p className="text-xs text-[#00cc6e]/80 dark:text-green-400/80 mt-0.5 leading-relaxed">
             4 standard modes (Cash, Bank Transfer, Credit Card, Cheque) will be created automatically during setup, linked to your Chart of Accounts.
           </p>
         </div>

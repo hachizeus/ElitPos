@@ -78,7 +78,7 @@ export function WorkOrderTemplate({
   businessAddress,
   businessPhone,
   businessEmail,
-  currencyCode = 'LKR'
+  currencyCode = 'KES'
 }: WorkOrderTemplateProps) {
   const formatCurrency = (value: string | null) => {
     if (!value) return '-'

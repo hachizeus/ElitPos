@@ -30,7 +30,7 @@ async function createFirstCompany() {
     
     // Get user's account
     const account = await adminDb.query.accounts.findFirst({
-      where: eq(schema.accounts.email, 'ravindu2012@hotmail.com'),
+      where: eq(schema.accounts.email, 'info@elitjohnsdigital.co.ke'),
     });
     
     if (!account) {
@@ -39,12 +39,12 @@ async function createFirstCompany() {
       // Create account if it doesn't exist
       const passwordHash = await bcrypt.hash('password123', 10);
       const [newAccount] = await adminDb.insert(schema.accounts).values({
-        email: 'ravindu2012@hotmail.com',
-        fullName: 'Ravindu Gajanayaka',
+        email: 'info@elitjohnsdigital.co.ke',
+        fullName: 'Ravindu elitjohns',
         passwordHash,
         emailVerified: true,
         isSuperAdmin: false,
-        phone: '+94123456789',
+        phone: '+254700123456',
       }).returning();
       
       console.log('Created account:', newAccount.email);
@@ -54,7 +54,7 @@ async function createFirstCompany() {
     
     // Check if tenant already exists
     const existingTenant = await adminDb.query.tenants.findFirst({
-      where: eq(schema.tenants.slug, 'gajanayakaenterprises'),
+      where: eq(schema.tenants.slug, 'elitjohnsenterprises'),
     });
     
     if (existingTenant) {
@@ -68,7 +68,7 @@ async function createFirstCompany() {
     const trialEndsAt = new Date();
     trialEndsAt.setDate(trialEndsAt.getDate() + 14); // 14-day trial
     
-    console.log('Creating tenant "gajanayakaenterprises"...');
+    console.log('Creating tenant "elitjohnsenterprises"...');
     
     // Get trial tier
     const trialTier = await adminDb.query.pricingTiers.findFirst({
@@ -82,7 +82,7 @@ async function createFirstCompany() {
         displayName: 'Trial',
         priceMonthly: '0',
         priceYearly: '0',
-        currency: 'USD',
+        currency: 'USD', // pricingTier uses USD as base
         maxDatabaseBytes: 1073741824, // 1GB
         maxFileStorageBytes: 5368709120, // 5GB
         maxUsers: null,
@@ -97,14 +97,14 @@ async function createFirstCompany() {
     const result = await adminDb.transaction(async (tx) => {
       // Create tenant
       const [tenant] = await tx.insert(schema.tenants).values({
-        name: 'Gajanayaka Enterprises',
-        slug: 'gajanayakaenterprises',
-        email: 'ravindu2012@hotmail.com',
+        name: 'elitjohns Enterprises',
+        slug: 'elitjohnsenterprises',
+        email: 'info@elitjohnsdigital.co.ke',
         phone: null,
         address: null,
         businessType: 'retail',
-        country: 'LK',
-        currency: 'LKR',
+        country: 'KE',
+        currency: 'KES',
         dateFormat: 'DD/MM/YYYY',
         timeFormat: '24h',
         primaryOwnerId: account?.id || 'unknown',
@@ -148,8 +148,8 @@ async function createFirstCompany() {
       await tx.insert(schema.users).values({
         tenantId: tenant.id,
         accountId: account?.id || 'unknown',
-        email: account?.email || 'ravindu2012@hotmail.com',
-        fullName: account?.fullName || 'Ravindu Gajanayaka',
+        email: account?.email || 'info@elitjohnsdigital.co.ke',
+        fullName: account?.fullName || 'Ravindu elitjohns',
         passwordHash: account?.passwordHash || '',
         role: 'owner',
         isActive: true,
@@ -173,7 +173,7 @@ async function createFirstCompany() {
     console.log(`Status: ${result.status}`);
     console.log(`Access URL: http://${result.slug}.localhost:3000/dashboard`);
     console.log('\nYou can now access your company at:');
-    console.log(`- http://gajanayakaenterprises.localhost:3000`);
+    console.log(`- http://elitjohnsenterprises.localhost:3000`);
     console.log(`- Or from your account page at: http://localhost:3000/account`);
     
   } catch (error) {

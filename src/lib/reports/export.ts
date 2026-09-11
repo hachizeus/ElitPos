@@ -1,6 +1,5 @@
 'use client'
 
-import ExcelJS from 'exceljs'
 import Papa from 'papaparse'
 
 export interface ExportColumn {
@@ -15,8 +14,11 @@ export async function exportToExcel(
   columns: ExportColumn[],
   reportName: string
 ): Promise<void> {
+  // Dynamic import keeps ExcelJS (~2MB) out of the initial JS bundle.
+  // It only loads when the user actually clicks "Export to Excel".
+  const ExcelJS = (await import('exceljs')).default
   const workbook = new ExcelJS.Workbook()
-  workbook.creator = 'RetailSmart POS'
+  workbook.creator = 'ElitPOS by Elitjohns Digital Agency'
   workbook.created = new Date()
 
   const worksheet = workbook.addWorksheet(reportName)

@@ -11,7 +11,7 @@ import { PAYHERE_CONFIG } from './config'
 export function generateCheckoutHash(
   orderId: string,
   amount: number,
-  currency: string = 'LKR'
+  currency: string = 'KES'
 ): string {
   const { merchantId, merchantSecret } = PAYHERE_CONFIG
 

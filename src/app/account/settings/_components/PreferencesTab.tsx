@@ -43,9 +43,10 @@ const DATE_FORMATS = [
 ]
 
 const CURRENCIES = [
-  { value: 'LKR', label: 'Sri Lankan Rupee (Rs)' },
+  { value: 'KES', label: 'Kenyan Shilling (KSh)' },
   { value: 'USD', label: 'US Dollar ($)' },
   { value: 'EUR', label: 'Euro (€)' },
+  { value: 'LKR', label: 'Sri Lankan Rupee (Rs)' },
   { value: 'GBP', label: 'British Pound (£)' },
   { value: 'INR', label: 'Indian Rupee (₹)' },
   { value: 'AUD', label: 'Australian Dollar (A$)' },
@@ -146,12 +147,12 @@ export function PreferencesTab({ preferences, onPreferencesChange }: Preferences
                 onClick={() => setTheme(opt.id)}
                 className={`flex flex-col items-center gap-2 p-4 rounded-md border-2 transition-all ${
                   theme === opt.id
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                    ? 'border-green-400 bg-green-50 dark:bg-green-900/30'
                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
               >
-                <opt.icon className={`w-6 h-6 ${theme === opt.id ? 'text-blue-600' : 'text-gray-500 dark:text-gray-400'}`} />
-                <span className={`text-sm font-medium ${theme === opt.id ? 'text-blue-600' : 'text-gray-700 dark:text-gray-300'}`}>
+                <opt.icon className={`w-6 h-6 ${theme === opt.id ? 'text-green-600' : 'text-gray-500 dark:text-gray-400'}`} />
+                <span className={`text-sm font-medium ${theme === opt.id ? 'text-green-600' : 'text-gray-700 dark:text-gray-300'}`}>
                   {opt.label}
                 </span>
               </button>
@@ -189,7 +190,7 @@ export function PreferencesTab({ preferences, onPreferencesChange }: Preferences
         <button
           onClick={handleSave}
           disabled={saving}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 dark:bg-gray-700 text-white rounded-md hover:bg-gray-800 dark:hover:bg-gray-600 disabled:opacity-50 font-medium transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 font-medium transition-colors"
         >
           {saving ? (
             <Loader2 className="w-4 h-4 animate-spin" />

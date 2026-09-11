@@ -9,6 +9,7 @@ import { Mail, Lock, Loader2, CheckCircle, Eye, EyeOff, LogIn } from 'lucide-rea
 import { Logo } from '@/components/ui/logo'
 import { InstallPromptPopup } from '@/components/ui/install-prompt-popup'
 import { broadcastAuthEvent } from '@/lib/auth/events'
+import { resolveFileUrl } from '@/lib/files/client'
 
 // Business-type-aware gradient and accent colors
 const GRADIENTS: Record<string, string> = {
@@ -47,7 +48,7 @@ function CompanyLogo({
   if (logoUrl) {
     return (
       <Image
-        src={logoUrl}
+        src={resolveFileUrl(logoUrl) ?? ''}
         alt={`${name} logo`}
         width={size}
         height={size}
@@ -286,7 +287,7 @@ function CompanyLoginForm({ slug }: { slug: string }) {
         <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-indigo-400/10 rounded-full blur-3xl" />
 
         <div className="w-full max-w-md relative z-10 animate-auth-fade-in">
-          {/* Mobile branding (replaces Retail Smart ERP logo) */}
+          {/* Mobile branding (replaces ElitPOS logo) */}
           <div className="lg:hidden flex flex-col items-center mb-8 gap-3">
             <CompanyLogo logoUrl={companyLogo} name={displayName} size={64} variant="light" />
             <div className="text-center">

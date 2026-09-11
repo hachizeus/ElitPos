@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { Clock, AlertTriangle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-const SESSION_TIMEOUT_MS = 15 * 60 * 1000 // 15 minutes
-const WARNING_THRESHOLD_MS = 2 * 60 * 1000 // Warn at 2 minutes remaining
+const SESSION_TIMEOUT_MS = 60 * 60 * 1000  // 1 hour
+const WARNING_THRESHOLD_MS = 5 * 60 * 1000  // Warn at 5 minutes remaining
 
 export function AdminSessionTimer() {
   const router = useRouter()

@@ -99,7 +99,7 @@ export function SecurityTab() {
         <button
           onClick={handleChangePassword}
           disabled={saving || !passwords.current || !passwords.new || !passwords.confirm}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 dark:bg-gray-700 text-white rounded-md hover:bg-gray-800 dark:hover:bg-gray-600 disabled:opacity-50 font-medium transition-colors"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 font-medium transition-colors"
         >
           {saving && <Loader2 className="w-4 h-4 animate-spin" />}
           Update Password

@@ -148,7 +148,9 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json(companies)
+    return NextResponse.json(companies, {
+      headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=120' },
+    })
   } catch (error) {
     logError('api/account/companies', error)
     return NextResponse.json({ error: 'Failed to fetch companies' }, { status: 500 })

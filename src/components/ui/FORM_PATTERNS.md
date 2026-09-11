@@ -1,7 +1,7 @@
 # Form Patterns & Migration Guide
 
 ## Overview
-This document provides standardized form patterns for the Retail Smart POS application. Many pages currently use native HTML inputs (`<input>`, `<textarea>`, `<select>`) which should be migrated to use the consistent form components (`FormInput`, `FormSelect`, `FormTextarea`) for better consistency, accessibility, and mobile responsiveness.
+This document provides standardized form patterns for the ElitPOS application. Many pages currently use native HTML inputs (`<input>`, `<textarea>`, `<select>`) which should be migrated to use the consistent form components (`FormInput`, `FormSelect`, `FormTextarea`) for better consistency, accessibility, and mobile responsiveness.
 
 ## Why Migrate to Form Components?
 

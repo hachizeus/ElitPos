@@ -1,24 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSession, signOut } from 'next-auth/react'
 import {
-  Search,
   Menu,
   X,
-  ChevronDown,
   LogOut,
   User,
   Settings,
   Moon,
   Sun,
-  Building2,
+  RefreshCw,
+  ChevronDown,
 } from 'lucide-react'
 import { broadcastAuthEvent } from '@/lib/auth/events'
 import { useTheme } from '@/components/providers/ThemeProvider'
 import { NotificationDropdown } from '@/components/account/NotificationDropdown'
 import { MessageDropdown } from '@/components/account/MessageDropdown'
+import { NetworkStatusBadge } from '@/components/ui/network-status'
+import { usePageRefresh } from '@/hooks/usePageRefresh'
+import { AccountSearch } from '@/components/account/AccountSearch'
 
 interface AccountHeaderProps {
   onMobileMenuToggle?: () => void
@@ -29,50 +31,69 @@ export function AccountHeader({ onMobileMenuToggle, mobileMenuOpen }: AccountHea
   const { data: session } = useSession()
   const { theme, setTheme } = useTheme()
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const { refreshing, refresh } = usePageRefresh()
+  const [companies, setCompanies] = useState<Array<{ id: string; name: string; slug: string }>>([])
+
+  useEffect(() => {
+    fetch('/api/account/companies')
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setCompanies((data || []).map((c: { id: string; name: string; slug: string }) => ({ id: c.id, name: c.name, slug: c.slug }))))
+      .catch(() => {})
+  }, [])
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-      <div className="flex h-16 items-center justify-between px-4 lg:px-6">
-        {/* Logo and mobile menu button */}
-        <div className="flex items-center gap-4">
+    <header className="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex h-14 items-center justify-between px-4 lg:px-6">
+        {/* Logo + mobile toggle */}
+        <div className="flex items-center gap-3">
           <button
             onClick={onMobileMenuToggle}
-            className="lg:hidden p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+            className="lg:hidden p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
 
-          <Link href="/account" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gray-900 rounded flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-white" />
-            </div>
-            <span className="hidden sm:block font-semibold text-gray-900 dark:text-white">Smart POS</span>
+          <Link href="/account" className="flex items-center gap-2.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/icons/iconlogo.svg"
+              alt="ElitPOS"
+              width={28}
+              height={28}
+              className="w-7 h-7 object-contain"
+            />
+            <span className="hidden sm:block font-bold text-gray-900 dark:text-white tracking-tight">
+              ElitPOS
+            </span>
           </Link>
         </div>
 
-        {/* Search */}
-        <div className="hidden md:flex flex-1 max-w-md mx-8">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
-            <input
-              type="text"
-              placeholder="Search sites, invoices..."
-              className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-300 focus:border-transparent text-gray-900 dark:text-gray-100"
-            />
-            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex h-5 items-center gap-1 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-1.5 font-mono text-xs text-gray-400 dark:text-gray-500">
-              ⌘K
-            </kbd>
-          </div>
+        {/* Search — live autocomplete */}
+        <div className="hidden md:flex flex-1 max-w-sm mx-8">
+          <AccountSearch companies={companies} />
         </div>
 
-        {/* Right side */}
-        <div className="flex items-center gap-2">
+        {/* Right actions */}
+        <div className="flex items-center gap-1">
+          {/* Network badge — shows when offline or just reconnected */}
+          <NetworkStatusBadge />
+
+          {/* Background refresh */}
+          <button
+            onClick={refresh}
+            disabled={refreshing}
+            title="Refresh page data"
+            className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
+
           {/* Theme toggle */}
           <button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+            className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
           >
-            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
 
           {/* Messages */}
@@ -82,36 +103,31 @@ export function AccountHeader({ onMobileMenuToggle, mobileMenuOpen }: AccountHea
           <NotificationDropdown />
 
           {/* User menu */}
-          <div className="relative">
+          <div className="relative ml-1">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+              className="flex items-center gap-2 pl-1.5 pr-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
             >
-              <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+              <div className="w-7 h-7 bg-gradient-to-br from-[#00FF88]/30 to-[#00cc6a]/20 border border-[#00FF88]/30 rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-bold text-[#00965c] dark:text-[#00FF88]">
                   {session?.user?.name?.charAt(0)?.toUpperCase() || 'U'}
                 </span>
               </div>
-              <div className="hidden md:block text-left">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate max-w-[120px]">
-                  {session?.user?.name || 'User'}
-                </p>
-              </div>
-              <ChevronDown className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+              <span className="hidden md:block text-sm font-medium text-gray-700 dark:text-gray-200 truncate max-w-[100px]">
+                {session?.user?.name?.split(' ')[0] || 'Account'}
+              </span>
+              <ChevronDown className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
             </button>
 
             {showUserMenu && (
               <>
-                <div
-                  className="fixed inset-0 z-10"
-                  onClick={() => setShowUserMenu(false)}
-                />
-                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-20">
-                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                <div className="fixed inset-0 z-10" onClick={() => setShowUserMenu(false)} />
+                <div className="absolute right-0 mt-1.5 w-56 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 py-1 z-20 overflow-hidden">
+                  <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/60 border-b border-gray-100 dark:border-gray-800">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                       {session?.user?.name}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
                       {session?.user?.email}
                     </p>
                   </div>
@@ -119,27 +135,27 @@ export function AccountHeader({ onMobileMenuToggle, mobileMenuOpen }: AccountHea
                   <Link
                     href="/account/profile"
                     onClick={() => setShowUserMenu(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
-                    <User className="h-4 w-4" />
+                    <User className="h-4 w-4 text-gray-400" />
                     Profile
                   </Link>
                   <Link
                     href="/account/settings"
                     onClick={() => setShowUserMenu(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
-                    <Settings className="h-4 w-4" />
+                    <Settings className="h-4 w-4 text-gray-400" />
                     Settings
                   </Link>
 
-                  <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1">
+                  <div className="border-t border-gray-100 dark:border-gray-800 mt-1 pt-1">
                     <button
                       onClick={() => {
                         broadcastAuthEvent('logout', 'account')
                         signOut({ callbackUrl: '/login' })
                       }}
-                      className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                     >
                       <LogOut className="h-4 w-4" />
                       Sign out
@@ -151,7 +167,8 @@ export function AccountHeader({ onMobileMenuToggle, mobileMenuOpen }: AccountHea
           </div>
         </div>
       </div>
-
     </header>
   )
 }
+
+

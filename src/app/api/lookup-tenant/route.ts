@@ -29,9 +29,6 @@ function cleanupExpiredEntries() {
 
 // GET lookup tenant by slug (internal use for middleware)
 export async function GET(request: NextRequest) {
-  const startTime = Date.now()
-  const MIN_RESPONSE_TIME = 100 // Minimum response time in ms
-
   try {
     const slug = request.nextUrl.searchParams.get('slug')
     
@@ -54,10 +51,6 @@ export async function GET(request: NextRequest) {
     if (rateLimit) {
       if (now - rateLimit.firstRequest < RATE_LIMIT_WINDOW) {
         if (rateLimit.count >= RATE_LIMIT_MAX) {
-          const elapsed = Date.now() - startTime
-          if (elapsed < MIN_RESPONSE_TIME) {
-            await new Promise(resolve => setTimeout(resolve, MIN_RESPONSE_TIME - elapsed))
-          }
           return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
         }
         rateLimit.count++
@@ -77,12 +70,6 @@ export async function GET(request: NextRequest) {
       columns: { id: true, slug: true, name: true }
     })
 
-    // Ensure minimum response time
-    const elapsed = Date.now() - startTime
-    if (elapsed < MIN_RESPONSE_TIME) {
-      await new Promise(resolve => setTimeout(resolve, MIN_RESPONSE_TIME - elapsed))
-    }
-
     if (tenant) {
       return NextResponse.json({ tenant: { id: tenant.id, slug: tenant.slug } })
     } else {
@@ -90,10 +77,6 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     logError('api/lookup-tenant/slug', error)
-    const elapsed = Date.now() - startTime
-    if (elapsed < 100) {
-      await new Promise(resolve => setTimeout(resolve, 100 - elapsed))
-    }
     return NextResponse.json({ error: 'Lookup failed' }, { status: 500 })
   }
 }

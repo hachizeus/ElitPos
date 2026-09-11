@@ -8,11 +8,18 @@ export interface ModuleAccessEntry {
   isEnabled: boolean
 }
 
+// Client-side cache with 5-minute TTL
+let cachedEntries: ModuleAccessEntry[] | null = null
+let cacheTimestamp = 0
+const CACHE_TTL = 300000 // 5 minutes
+
 /**
  * Fetches module access configuration for the current tenant.
  * Returns a lookup function: isModuleEnabled(moduleKey, role) => boolean
  * Defaults to true (enabled) if no row exists.
  * On network error, defaults to false (fail-closed) to prevent unauthorized access.
+ * 
+ * **Optimized:** Uses 5-minute client-side cache to avoid repeated API calls
  */
 export function useModuleAccess() {
   const [entries, setEntries] = useState<ModuleAccessEntry[]>([])
@@ -22,12 +29,29 @@ export function useModuleAccess() {
   useEffect(() => {
     let cancelled = false
     async function load() {
+      // Check cache first
+      const now = Date.now()
+      if (cachedEntries && (now - cacheTimestamp) < CACHE_TTL) {
+        if (!cancelled) {
+          setEntries(cachedEntries)
+          setLoaded(true)
+          setLoadError(false)
+        }
+        return
+      }
+
       try {
         const res = await fetch('/api/module-access')
         if (res.ok) {
           const data = await res.json()
+          const moduleEntries = Array.isArray(data) ? data : data.data || []
+          
+          // Update cache
+          cachedEntries = moduleEntries
+          cacheTimestamp = now
+          
           if (!cancelled) {
-            setEntries(Array.isArray(data) ? data : data.data || [])
+            setEntries(moduleEntries)
             setLoadError(false)
           }
         } else {
@@ -57,4 +81,10 @@ export function useModuleAccess() {
   }
 
   return { isModuleEnabled, loaded, loadError }
+}
+
+// Export function to manually clear cache (useful after settings changes)
+export function clearModuleAccessCache() {
+  cachedEntries = null
+  cacheTimestamp = 0
 }

@@ -27,7 +27,9 @@ export async function GET(request: NextRequest) {
 
     return await withTenant(session.user.tenantId, async (db) => {
       const results = await fetchMetrics(db, validKeys)
-      return NextResponse.json(results)
+      return NextResponse.json(results, {
+        headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=120' },
+      })
     })
   } catch (error) {
     logError('api/workspace/number-card', error)

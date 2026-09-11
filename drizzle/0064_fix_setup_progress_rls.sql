@@ -3,7 +3,10 @@
 
 DROP POLICY IF EXISTS tenant_access_policy ON setup_progress;
 
-CREATE POLICY tenant_isolation_policy ON setup_progress
-    FOR ALL
-    USING (tenant_id = current_setting('app.tenant_id')::UUID)
-    WITH CHECK (tenant_id = current_setting('app.tenant_id')::UUID);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON setup_progress
+      FOR ALL
+      USING (tenant_id = current_setting('app.tenant_id')::UUID)
+      WITH CHECK (tenant_id = current_setting('app.tenant_id')::UUID);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

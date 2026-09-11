@@ -86,7 +86,9 @@ export async function GET(
         colorScheme: defaultConfig?.colorScheme || 'blue',
         blocks,
       }
-      return NextResponse.json({ config })
+      return NextResponse.json({ config }, {
+        headers: { 'Cache-Control': 'private, max-age=60, stale-while-revalidate=300' },
+      })
     }
 
     // Fall back to default workspace
@@ -99,7 +101,9 @@ export async function GET(
       ...defaultConfig,
       blocks: resolveBlockHrefs(defaultConfig.blocks, basePath),
     }
-    return NextResponse.json({ config })
+    return NextResponse.json({ config }, {
+      headers: { 'Cache-Control': 'private, max-age=60, stale-while-revalidate=300' },
+    })
   } catch (error) {
     logError('api/workspace/[key]', error)
     return NextResponse.json({ error: 'Failed to fetch workspace config' }, { status: 500 })

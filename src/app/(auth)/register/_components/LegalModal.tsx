@@ -82,12 +82,12 @@ function TermsContent() {
 
       <section>
         <h3 className="text-base font-semibold text-white mt-6 mb-2">1. Acceptance of Terms</h3>
-        <p>By creating an account or using RetailSmart ERP, you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree to these terms, do not use our services.</p>
+        <p>By creating an account or using ElitPOS, you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree to these terms, do not use our services.</p>
       </section>
 
       <section>
         <h3 className="text-base font-semibold text-white mt-6 mb-2">2. Service Description</h3>
-        <p>RetailSmart ERP is a multi-tenant cloud-based business management platform providing Point of Sale, inventory management, accounting, HR, restaurant management, auto service management, and AI-powered analytics for retail, restaurant, supermarket, and auto service businesses.</p>
+        <p>ElitPOS is a multi-tenant cloud-based business management platform providing Point of Sale, inventory management, accounting, HR, restaurant management, auto service management, and AI-powered analytics for retail, restaurant, supermarket, and auto service businesses.</p>
       </section>
 
       <section>
@@ -106,7 +106,7 @@ function TermsContent() {
         <ul className="list-disc pl-5 space-y-1.5">
           <li>Additional companies require a paid subscription (Starter, Professional, or custom plans)</li>
           <li>Plans differ <span className="text-white font-medium">only in storage capacity</span> — all features are identical across all plans</li>
-          <li>Prices are listed in LKR (Sri Lankan Rupees); approximate conversions to your local currency are shown for reference only</li>
+          <li>Prices are listed in KES (Kenyan Shillings); approximate conversions to your local currency are shown for reference only</li>
           <li><span className="text-white font-medium">Grandfather Pricing:</span> Your subscription price is locked at the rate when you subscribed</li>
         </ul>
       </section>
@@ -114,7 +114,7 @@ function TermsContent() {
       <section>
         <h3 className="text-base font-semibold text-white mt-6 mb-2">5. Payment & Billing</h3>
         <ul className="list-disc pl-5 space-y-1.5">
-          <li>Payments are processed securely through PayHere (payhere.lk), supporting major credit and debit cards</li>
+          <li>Payments are processed securely through M-Pesa, Stripe, Paystack, or PayHero, supporting mobile money, credit, and debit cards</li>
           <li>Bank transfer payments are accepted with receipt verification and admin approval</li>
           <li>Annual subscriptions are billed upfront for the full year</li>
           <li>Charges are prorated when upgrading or downgrading</li>
@@ -182,7 +182,7 @@ function TermsContent() {
 
       <section>
         <h3 className="text-base font-semibold text-white mt-6 mb-2">12. Intellectual Property</h3>
-        <p>RetailSmart ERP, its brand, design, code, and documentation are our intellectual property. You are granted a non-exclusive, non-transferable license to use the platform for your business operations.</p>
+        <p>ElitPOS, its brand, design, code, and documentation are our intellectual property. You are granted a non-exclusive, non-transferable license to use the platform for your business operations.</p>
       </section>
 
       <section>
@@ -193,9 +193,9 @@ function TermsContent() {
       <section>
         <h3 className="text-base font-semibold text-white mt-6 mb-2">14. Limitation of Liability</h3>
         <ul className="list-disc pl-5 space-y-1.5">
-          <li>RetailSmart ERP is provided &quot;as is&quot; without warranties of any kind</li>
+          <li>ElitPOS is provided &quot;as is&quot; without warranties of any kind</li>
           <li>Total liability is limited to amounts paid in the preceding 12 months</li>
-          <li>For Free plan users, maximum liability is limited to LKR 5,000</li>
+          <li>For Free plan users, maximum liability is limited to KES 5,000</li>
         </ul>
       </section>
 
@@ -220,7 +220,7 @@ function TermsContent() {
 
       <section>
         <h3 className="text-base font-semibold text-white mt-6 mb-2">18. Contact</h3>
-        <p>For questions about these terms, email <span className="text-emerald-400">support@retailsmarterp.com</span>.</p>
+        <p>For questions about these terms, email <span className="text-emerald-400">support@elitpos.elitjohnsdigital.co.ke</span>.</p>
       </section>
     </div>
   )
@@ -292,7 +292,7 @@ function PrivacyContent() {
         <p className="mb-2">We share minimum necessary data with:</p>
         <ul className="list-disc pl-5 space-y-1.5">
           <li><span className="text-zinc-300">AI Providers</span> — business metrics for generating responses only</li>
-          <li><span className="text-zinc-300">PayHere</span> — billing name, email, subscription amount</li>
+          <li><span className="text-zinc-300">Payment Gateways</span> — phone, email, and subscription amount for M-Pesa, Stripe, Paystack, or PayHero processing</li>
           <li><span className="text-zinc-300">Email Service</span> — email addresses and notification content</li>
           <li><span className="text-zinc-300">Cloud Storage</span> — uploaded files</li>
           <li><span className="text-zinc-300">GeoIP Service</span> — IP address for currency display only</li>
@@ -349,7 +349,7 @@ function PrivacyContent() {
 
       <section>
         <h3 className="text-base font-semibold text-white mt-6 mb-2">10. Children&apos;s Privacy</h3>
-        <p>RetailSmart ERP is intended for users aged 18 and above. We do not knowingly collect information from children under 18.</p>
+        <p>ElitPOS is intended for users aged 18 and above. We do not knowingly collect information from children under 18.</p>
       </section>
 
       <section>
@@ -364,7 +364,7 @@ function PrivacyContent() {
 
       <section>
         <h3 className="text-base font-semibold text-white mt-6 mb-2">13. Contact</h3>
-        <p>For questions about this policy, email <span className="text-emerald-400">support@retailsmarterp.com</span>.</p>
+        <p>For questions about this policy, email <span className="text-emerald-400">support@elitpos.elitjohnsdigital.co.ke</span>.</p>
       </section>
     </div>
   )

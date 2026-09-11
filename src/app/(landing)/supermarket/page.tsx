@@ -7,19 +7,19 @@ export const metadata: Metadata = {
   description: 'Supermarket management with high-volume checkout, department tracking, temperature zones, batch inventory, and AI-assisted analytics. Unlimited users, free to start.',
   keywords: ['supermarket POS', 'grocery POS', 'high volume checkout', 'department management', 'supermarket software', 'grocery store management'],
   openGraph: {
-    title: 'Supermarket POS & Department Management | RetailSmart ERP',
+    title: 'Supermarket POS & Department Management | ElitPOS',
     description: 'High-volume checkout, department management, batch tracking. AI-powered. Unlimited users.',
-    url: 'https://www.retailsmarterp.com/supermarket',
-    images: [{ url: '/og/supermarket', width: 1200, height: 630, alt: 'RetailSmart ERP Supermarket POS' }],
+    url: 'https://www.elitpos.elitjohnsdigital.co.ke/supermarket',
+    images: [{ url: '/og/supermarket', width: 1200, height: 630, alt: 'ElitPOS Supermarket POS' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Supermarket POS & Department Management | RetailSmart ERP',
+    title: 'Supermarket POS & Department Management | ElitPOS',
     description: 'High-volume checkout, department management, batch tracking. AI-powered.',
     images: ['/og/supermarket'],
   },
   alternates: {
-    canonical: 'https://www.retailsmarterp.com/supermarket',
+    canonical: 'https://www.elitpos.elitjohnsdigital.co.ke/supermarket',
   },
 }
 
@@ -44,7 +44,7 @@ export default function SupermarketPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            "name": "RetailSmart ERP - Supermarket POS",
+            "name": "ElitPOS - Supermarket POS",
             "applicationCategory": "BusinessApplication",
             "applicationSubCategory": "Supermarket Management",
             "operatingSystem": "Web",

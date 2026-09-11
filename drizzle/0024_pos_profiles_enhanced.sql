@@ -34,7 +34,7 @@ END $$;
 ALTER TABLE IF EXISTS pos_profiles RENAME TO pos_profiles_old;
 
 -- Create new enhanced pos_profiles table
-CREATE TABLE pos_profiles (
+CREATE TABLE IF NOT EXISTS pos_profiles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id),
     name VARCHAR(100) NOT NULL,
@@ -95,7 +95,7 @@ LEFT JOIN users u ON p.user_id = u.id;
 -- =====================================================
 
 -- POS Profile Payment Methods (enabled payment methods per profile)
-CREATE TABLE pos_profile_payment_methods (
+CREATE TABLE IF NOT EXISTS pos_profile_payment_methods (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     pos_profile_id UUID NOT NULL REFERENCES pos_profiles(id) ON DELETE CASCADE,
     payment_method VARCHAR(30) NOT NULL, -- 'cash', 'card', 'bank_transfer', 'credit', 'gift_card'
@@ -105,7 +105,7 @@ CREATE TABLE pos_profile_payment_methods (
 );
 
 -- POS Profile Users (who can use this profile)
-CREATE TABLE pos_profile_users (
+CREATE TABLE IF NOT EXISTS pos_profile_users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id),
     pos_profile_id UUID NOT NULL REFERENCES pos_profiles(id) ON DELETE CASCADE,
@@ -126,7 +126,7 @@ SELECT
 FROM pos_profiles_old;
 
 -- POS Profile Item Groups (filter items by category)
-CREATE TABLE pos_profile_item_groups (
+CREATE TABLE IF NOT EXISTS pos_profile_item_groups (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     pos_profile_id UUID NOT NULL REFERENCES pos_profiles(id) ON DELETE CASCADE,
     category_id UUID NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
@@ -138,7 +138,7 @@ CREATE TABLE pos_profile_item_groups (
 -- =====================================================
 
 -- POS Opening Entry (shift start)
-CREATE TABLE pos_opening_entries (
+CREATE TABLE IF NOT EXISTS pos_opening_entries (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id),
     entry_number VARCHAR(30) NOT NULL,
@@ -155,7 +155,7 @@ CREATE TABLE pos_opening_entries (
 );
 
 -- Opening Entry Payment Balances (cash in drawer at start)
-CREATE TABLE pos_opening_balances (
+CREATE TABLE IF NOT EXISTS pos_opening_balances (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id),
     opening_entry_id UUID NOT NULL REFERENCES pos_opening_entries(id) ON DELETE CASCADE,
@@ -164,7 +164,7 @@ CREATE TABLE pos_opening_balances (
 );
 
 -- POS Closing Entry (shift end)
-CREATE TABLE pos_closing_entries (
+CREATE TABLE IF NOT EXISTS pos_closing_entries (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id),
     entry_number VARCHAR(30) NOT NULL,
@@ -191,7 +191,7 @@ CREATE TABLE pos_closing_entries (
 );
 
 -- Closing Entry Payment Reconciliation
-CREATE TABLE pos_closing_reconciliation (
+CREATE TABLE IF NOT EXISTS pos_closing_reconciliation (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id),
     closing_entry_id UUID NOT NULL REFERENCES pos_closing_entries(id) ON DELETE CASCADE,
@@ -223,7 +223,7 @@ ADD COLUMN IF NOT EXISTS tax_rate DECIMAL(5,2) DEFAULT 0;
 -- =====================================================
 
 -- Loyalty Program Configuration
-CREATE TABLE loyalty_programs (
+CREATE TABLE IF NOT EXISTS loyalty_programs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id),
     name VARCHAR(100) NOT NULL,
@@ -281,48 +281,75 @@ ALTER TABLE loyalty_programs ENABLE ROW LEVEL SECURITY;
 
 -- Policies for pos_profiles
 DROP POLICY IF EXISTS pos_profiles_tenant_isolation ON pos_profiles;
-CREATE POLICY pos_profiles_tenant_isolation ON pos_profiles
-    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY pos_profiles_tenant_isolation ON pos_profiles
+      USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Policies for pos_profile_payment_methods (via join to pos_profiles)
 DROP POLICY IF EXISTS pos_profile_payment_methods_tenant_isolation ON pos_profile_payment_methods;
-CREATE POLICY pos_profile_payment_methods_tenant_isolation ON pos_profile_payment_methods
-    USING (pos_profile_id IN (SELECT id FROM pos_profiles WHERE tenant_id = current_setting('app.tenant_id', true)::uuid));
+DO $$ BEGIN
+  CREATE POLICY pos_profile_payment_methods_tenant_isolation ON pos_profile_payment_methods
+      USING (pos_profile_id IN (SELECT id FROM pos_profiles WHERE tenant_id = current_setting('app.tenant_id', true)::uuid));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Policies for pos_profile_users
 DROP POLICY IF EXISTS pos_profile_users_tenant_isolation ON pos_profile_users;
-CREATE POLICY pos_profile_users_tenant_isolation ON pos_profile_users
-    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY pos_profile_users_tenant_isolation ON pos_profile_users
+      USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Policies for pos_profile_item_groups (via join)
 DROP POLICY IF EXISTS pos_profile_item_groups_tenant_isolation ON pos_profile_item_groups;
-CREATE POLICY pos_profile_item_groups_tenant_isolation ON pos_profile_item_groups
-    USING (pos_profile_id IN (SELECT id FROM pos_profiles WHERE tenant_id = current_setting('app.tenant_id', true)::uuid));
+DO $$ BEGIN
+  CREATE POLICY pos_profile_item_groups_tenant_isolation ON pos_profile_item_groups
+      USING (pos_profile_id IN (SELECT id FROM pos_profiles WHERE tenant_id = current_setting('app.tenant_id', true)::uuid));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Policies for pos_opening_entries
 DROP POLICY IF EXISTS pos_opening_entries_tenant_isolation ON pos_opening_entries;
-CREATE POLICY pos_opening_entries_tenant_isolation ON pos_opening_entries
-    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY pos_opening_entries_tenant_isolation ON pos_opening_entries
+      USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Policies for pos_opening_balances
 DROP POLICY IF EXISTS pos_opening_balances_tenant_isolation ON pos_opening_balances;
-CREATE POLICY pos_opening_balances_tenant_isolation ON pos_opening_balances
-    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY pos_opening_balances_tenant_isolation ON pos_opening_balances
+      USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Policies for pos_closing_entries
 DROP POLICY IF EXISTS pos_closing_entries_tenant_isolation ON pos_closing_entries;
-CREATE POLICY pos_closing_entries_tenant_isolation ON pos_closing_entries
-    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY pos_closing_entries_tenant_isolation ON pos_closing_entries
+      USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Policies for pos_closing_reconciliation
 DROP POLICY IF EXISTS pos_closing_reconciliation_tenant_isolation ON pos_closing_reconciliation;
-CREATE POLICY pos_closing_reconciliation_tenant_isolation ON pos_closing_reconciliation
-    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY pos_closing_reconciliation_tenant_isolation ON pos_closing_reconciliation
+      USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Policies for loyalty_programs
 DROP POLICY IF EXISTS loyalty_programs_tenant_isolation ON loyalty_programs;
-CREATE POLICY loyalty_programs_tenant_isolation ON loyalty_programs
-    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY loyalty_programs_tenant_isolation ON loyalty_programs
+      USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- =====================================================
 -- CLEANUP

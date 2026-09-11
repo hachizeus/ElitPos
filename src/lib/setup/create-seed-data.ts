@@ -236,7 +236,7 @@ export async function createSeedData(
   }
 
   // 7. Chart of Accounts (always create chart of accounts)
-  await seedChartOfAccounts(tx, tenantId, businessType, tenantCurrency || 'LKR', data.accountOverrides, data.coaTemplate)
+  await seedChartOfAccounts(tx, tenantId, businessType, tenantCurrency || 'KES', data.accountOverrides, data.coaTemplate)
 
   // 7a. Modes of Payment (always created — Cash, Bank Transfer, Credit Card, Cheque)
   await seedModesOfPayment(tx, tenantId)
@@ -760,7 +760,7 @@ export async function createMinimalDefaults(
 ) {
   const tenantInfo = await tx.query.tenants.findFirst({ where: eq(tenants.id, tenantId) })
   const bType = businessType || tenantInfo?.businessType || 'retail'
-  const currency = tenantCurrency || tenantInfo?.currency || 'LKR'
+  const currency = tenantCurrency || tenantInfo?.currency || 'KES'
 
   await tx.update(tenants).set({
     setupCompletedAt: new Date(),

@@ -105,7 +105,7 @@ export function StepPOS({ data, companySlug, businessType, country, countryName,
               key={pm.method}
               className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border cursor-pointer transition-all duration-200 text-sm ${
                 data.paymentMethods.includes(pm.method)
-                  ? 'border-blue-200 bg-blue-50/80 dark:bg-blue-950/30 dark:border-blue-800/60 text-blue-700 dark:text-blue-300 shadow-sm shadow-blue-500/5'
+                  ? 'border-green-200 bg-green-50/80 dark:bg-green-950/30 dark:border-green-800/60 text-green-700 dark:text-green-300 shadow-sm shadow-green-500/5'
                   : 'border-gray-200/60 dark:border-gray-700/50 hover:border-gray-300 dark:hover:border-gray-600 text-gray-600 dark:text-gray-400'
               }`}
             >
@@ -113,7 +113,7 @@ export function StepPOS({ data, companySlug, businessType, country, countryName,
                 type="checkbox"
                 checked={data.paymentMethods.includes(pm.method)}
                 onChange={() => togglePaymentMethod(pm.method)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="rounded border-gray-300 text-[#00cc6e] focus:ring-[#00FF88]"
               />
               <span className="font-medium">{pm.label}</span>
             </label>
@@ -153,7 +153,7 @@ export function StepPOS({ data, companySlug, businessType, country, countryName,
                 key={fmt.value}
                 className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border cursor-pointer transition-all duration-200 text-sm ${
                   data.receiptFormat === fmt.value
-                    ? 'border-blue-200 bg-blue-50/80 dark:bg-blue-950/30 dark:border-blue-800/60 text-blue-700 dark:text-blue-300 shadow-sm shadow-blue-500/5'
+                    ? 'border-green-200 bg-green-50/80 dark:bg-green-950/30 dark:border-green-800/60 text-green-700 dark:text-green-300 shadow-sm shadow-green-500/5'
                     : 'border-gray-200/60 dark:border-gray-700/50 hover:border-gray-300 dark:hover:border-gray-600 text-gray-600 dark:text-gray-400'
                 }`}
               >
@@ -162,7 +162,7 @@ export function StepPOS({ data, companySlug, businessType, country, countryName,
                   name="receiptFormat"
                   checked={data.receiptFormat === fmt.value}
                   onChange={() => onChange({ receiptFormat: fmt.value })}
-                  className="text-blue-600 focus:ring-blue-500"
+                  className="text-[#00cc6e] focus:ring-[#00FF88]"
                 />
                 <span className="font-medium">{fmt.label}</span>
               </label>

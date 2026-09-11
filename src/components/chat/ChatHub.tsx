@@ -58,7 +58,7 @@ function renderAiMarkdown(text: string, slugPrefix: string): React.ReactNode[] {
           <a
             key={`p-${lineIdx}-${partIdx++}`}
             href={href}
-            className="text-purple-400 hover:text-purple-300 underline underline-offset-2"
+            className="text-green-400 hover:text-green-300 underline underline-offset-2"
             target={url.startsWith('http') ? '_blank' : undefined}
             rel={url.startsWith('http') ? 'noopener noreferrer' : undefined}
           >
@@ -355,13 +355,13 @@ export function ChatHub() {
               onClick={() => setView('ai')}
               className="speed-dial-item animate-speed-dial-in flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-xl hover:scale-[1.02] transition-all text-left"
             >
-              <div className="w-9 h-9 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center shrink-0">
-                <Bot size={18} className="text-purple-600 dark:text-purple-400" />
+              <div className="w-9 h-9 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+                <Bot size={18} className="text-green-600 dark:text-green-400" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm font-medium text-gray-900 dark:text-white">AI Assistant</span>
-                  <span className="text-[10px] bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded-full font-medium">Beta</span>
+                  <span className="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-1.5 py-0.5 rounded-full font-medium">Beta</span>
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Ask about your data</p>
               </div>
@@ -423,7 +423,7 @@ export function ChatHub() {
                         className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
                         title="Switch to AI Assistant"
                       >
-                        <Bot size={14} className="text-purple-500" />
+                        <Bot size={14} className="text-green-600" />
                       </button>
                     )}
                     <Link
@@ -450,7 +450,7 @@ export function ChatHub() {
                         className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
                         title="Switch to AI Assistant"
                       >
-                        <Bot size={14} className="text-purple-500" />
+                        <Bot size={14} className="text-green-600" />
                       </button>
                     )}
                     <button
@@ -508,30 +508,30 @@ export function ChatHub() {
         {view === 'ai' && (
           <div className="absolute bottom-14 right-0 w-[380px] h-[550px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-chat-panel">
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-purple-600 text-white rounded-t-2xl">
+            <div className="flex items-center justify-between px-4 py-3 bg-green-700 text-white rounded-t-2xl">
               <div className="flex items-center gap-2">
                 <Bot size={18} />
-                <span className="font-medium text-sm">RetailSmart AI</span>
-                <span className="text-[10px] bg-purple-500 px-1.5 py-0.5 rounded-full">Beta</span>
+                <span className="font-medium text-sm">ElitPOS AI</span>
+                <span className="text-[10px] bg-green-600 px-1.5 py-0.5 rounded-full">Beta</span>
               </div>
               <div className="flex items-center gap-1">
                 {/* Switch to Team Chat */}
                 <button
                   type="button"
                   onClick={() => setView('staff')}
-                  className="relative p-1 hover:bg-purple-500 rounded transition-colors"
+                  className="relative p-1 hover:bg-green-600 rounded transition-colors"
                   title="Switch to Team Chat"
                 >
                   <MessageCircle size={14} />
                   {totalUnreadCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-400 rounded-full border border-purple-600" />
+                    <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-red-400 rounded-full border border-green-700" />
                   )}
                 </button>
                 {aiMessages.length > 0 && (
                   <button
                     type="button"
                     onClick={clearAiChat}
-                    className="p-1 hover:bg-purple-500 rounded transition-colors"
+                    className="p-1 hover:bg-green-600 rounded transition-colors"
                     title="Clear chat"
                   >
                     <Trash2 size={14} />
@@ -540,7 +540,7 @@ export function ChatHub() {
                 <button
                   type="button"
                   onClick={() => setView('closed')}
-                  className="p-1 hover:bg-purple-500 rounded transition-colors"
+                  className="p-1 hover:bg-green-600 rounded transition-colors"
                 >
                   <X size={16} />
                 </button>
@@ -551,7 +551,7 @@ export function ChatHub() {
             <div className="flex-1 overflow-y-auto p-3 space-y-3">
               {aiMessages.length === 0 && (
                 <div className="text-center py-8">
-                  <Sparkles size={32} className="mx-auto text-purple-300 mb-3" />
+                  <Sparkles size={32} className="mx-auto text-green-400 mb-3" />
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Hi! I&apos;m your AI assistant.
                   </p>
@@ -564,7 +564,7 @@ export function ChatHub() {
                         key={q}
                         type="button"
                         onClick={() => sendAiMessage(q)}
-                        className="block w-full text-left text-xs px-3 py-2 rounded bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                        className="block w-full text-left text-xs px-3 py-2 rounded bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-400 transition-colors"
                       >
                         {q}
                       </button>
@@ -581,7 +581,7 @@ export function ChatHub() {
                   <div
                     className={`max-w-[85%] rounded px-3 py-2 text-sm ${
                       msg.role === 'user'
-                        ? 'bg-purple-600 text-white'
+                        ? 'bg-green-700 text-white'
                         : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
                     }`}
                   >
@@ -598,7 +598,7 @@ export function ChatHub() {
               {aiLoading && (
                 <div className="flex justify-start">
                   <div className="bg-gray-100 dark:bg-gray-700 rounded px-3 py-2 flex items-center gap-2">
-                    <Loader2 size={14} className="animate-spin text-purple-500" />
+                    <Loader2 size={14} className="animate-spin text-green-500" />
                     <span className="text-xs text-gray-500 dark:text-gray-400">Thinking...</span>
                   </div>
                 </div>
@@ -617,7 +617,7 @@ export function ChatHub() {
                   onChange={e => setAiInput(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAiMessage() } }}
                   placeholder="Ask anything..."
-                  className="flex-1 text-sm px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="flex-1 text-sm px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   disabled={aiLoading}
                   maxLength={2000}
                 />
@@ -625,7 +625,7 @@ export function ChatHub() {
                   type="button"
                   onClick={() => sendAiMessage()}
                   disabled={!aiInput.trim() || aiLoading}
-                  className="p-2 rounded bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="p-2 rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <Send size={16} />
                 </button>
@@ -642,7 +642,7 @@ export function ChatHub() {
             className={cn(
               'relative w-11 h-11 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 text-white',
               view === 'closed'
-                ? 'bg-gradient-to-br from-blue-500 to-purple-600 hover:shadow-xl hover:scale-105 active:scale-95'
+            ? 'bg-gradient-to-br from-green-500 to-green-700 hover:shadow-xl hover:scale-105 active:scale-95'
                 : 'bg-gray-700 dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-500'
             )}
             aria-label={view === 'closed' ? 'Open chat' : 'Close chat menu'}

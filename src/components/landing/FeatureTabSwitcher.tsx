@@ -70,7 +70,7 @@ export default function FeatureTabSwitcher({ tabs }: FeatureTabSwitcherProps) {
           >
             {/* Mockup */}
             <div>
-              <BrowserMockup url="app.retailsmarterp.com">
+              <BrowserMockup url="app.elitpos.elitjohnsdigital.co.ke">
                 {current.mockup}
               </BrowserMockup>
             </div>

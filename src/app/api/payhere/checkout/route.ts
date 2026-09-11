@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
       pendingCompanyId: pendingCompanyId || null,
       orderId,
       amount: price.toFixed(2),
-      currency: 'LKR',
+      currency: 'KES',
       status: 'pending',
       description,
       periodMonths,
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
     const params = generateCheckoutParams({
       orderId,
       amount: price,
-      currency: 'LKR',
+      currency: 'KES',
       itemDescription: description,
       customerName: account.fullName,
       customerEmail: account.email,

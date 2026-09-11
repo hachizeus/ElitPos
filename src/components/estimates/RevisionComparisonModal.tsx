@@ -88,7 +88,7 @@ export function RevisionComparisonModal({ isOpen, onClose, revisions, estimateId
 
   const formatCurrency = (value: unknown) => {
     const num = parseFloat(String(value || 0))
-    return `LKR ${num.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+    return `KES ${num.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
   }
 
   const formatDate = (dateStr: string) => {

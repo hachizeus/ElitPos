@@ -13,6 +13,32 @@ import { requireQuota } from '@/lib/db/storage-quota'
 import { validateBody } from '@/lib/validation'
 import { createInviteSchema } from '@/lib/validation/schemas/users'
 
+// ── Per-tenant invite rate limit: max 20 invites per 10 minutes ───────────────
+const inviteRateMap = new Map<string, { count: number; windowStart: number }>()
+const INVITE_RATE_WINDOW_MS = 10 * 60 * 1000  // 10 minutes
+const INVITE_RATE_MAX = 20                      // 20 invites per window per tenant
+let inviteRateLastCleanup = Date.now()
+const INVITE_RATE_CLEANUP_MS = 30 * 60 * 1000  // cleanup every 30 min
+
+function checkInviteRateLimit(tenantId: string): boolean {
+  const now = Date.now()
+  // Periodic cleanup to prevent unbounded map growth
+  if (now - inviteRateLastCleanup > INVITE_RATE_CLEANUP_MS) {
+    inviteRateLastCleanup = now
+    for (const [key, entry] of inviteRateMap) {
+      if (now - entry.windowStart > INVITE_RATE_WINDOW_MS) inviteRateMap.delete(key)
+    }
+  }
+  const entry = inviteRateMap.get(tenantId)
+  if (!entry || now - entry.windowStart > INVITE_RATE_WINDOW_MS) {
+    inviteRateMap.set(tenantId, { count: 1, windowStart: now })
+    return false // not limited
+  }
+  if (entry.count >= INVITE_RATE_MAX) return true // limited
+  entry.count++
+  return false
+}
+
 // GET all users for the tenant with optional role filter
 // Query params:
 // - role: Filter by specific role (owner, manager, cashier, technician)
@@ -130,6 +156,14 @@ export async function POST(request: NextRequest) {
     const quotaError = await requireQuota(session.user.tenantId, 'standard')
     if (quotaError) return quotaError
 
+    // Rate limit: prevent invite flooding
+    if (checkInviteRateLimit(session.user.tenantId)) {
+      return NextResponse.json(
+        { error: 'Too many invitations sent. Please wait a few minutes before sending more.' },
+        { status: 429 }
+      )
+    }
+
     const parsed = await validateBody(request, createInviteSchema)
     if (!parsed.success) return parsed.response
     const { email, role, warehouseIds } = parsed.data
@@ -246,6 +280,7 @@ export async function POST(request: NextRequest) {
 
     // Send invite email
     const inviteUrl = `${process.env.NEXTAUTH_URL || ''}/invite/${token}`
+    let emailSent = false
     try {
       await sendStaffInviteEmail({
         email: normalizedEmail,
@@ -254,9 +289,11 @@ export async function POST(request: NextRequest) {
         role,
         inviteUrl,
       })
+      emailSent = true
     } catch (emailError) {
       logError('api/users', emailError)
-      // Don't fail the request — invite is created, email may not have sent
+      // Don't fail the whole request — the invite row is created.
+      // Surface the failure so the UI can show a warning.
     }
 
     return NextResponse.json({
@@ -268,6 +305,8 @@ export async function POST(request: NextRequest) {
         expiresAt: invite.expiresAt,
         inviteUrl,
       },
+      emailSent,
+      ...(emailSent ? {} : { warning: 'Invitation created but the confirmation email could not be sent. Share the invite link manually.' }),
     })
   } catch (error) {
     logError('api/users', error)

@@ -100,7 +100,7 @@ export function MessageDropdown() {
       >
         <MessageSquare className="h-5 w-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center px-1 text-[10px] font-bold text-white bg-blue-500 rounded-full">
+          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center px-1 text-[10px] font-bold text-white bg-green-400 rounded-full">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -117,7 +117,7 @@ export function MessageDropdown() {
                 setIsOpen(false)
                 router.push('/account/messages?new=true')
               }}
-              className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
+              className="text-xs text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 flex items-center gap-1"
             >
               <Plus className="w-3.5 h-3.5" />
               New Message
@@ -142,17 +142,17 @@ export function MessageDropdown() {
                     key={conversation.id}
                     onClick={() => handleConversationClick(conversation)}
                     className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
-                      conversation.unreadByAccount ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''
+                      conversation.unreadByAccount ? 'bg-green-50/50 dark:bg-green-950/20' : ''
                     }`}
                   >
                     <div className={`w-8 h-8 rounded flex items-center justify-center flex-shrink-0 ${
                       conversation.unreadByAccount
-                        ? 'bg-blue-100 dark:bg-blue-900/30'
+                        ? 'bg-green-100 dark:bg-green-900/30'
                         : 'bg-gray-100 dark:bg-gray-700'
                     }`}>
                       <MessageSquare className={`w-4 h-4 ${
                         conversation.unreadByAccount
-                          ? 'text-blue-600 dark:text-blue-400'
+                          ? 'text-green-600 dark:text-green-400'
                           : 'text-gray-600 dark:text-gray-400'
                       }`} />
                     </div>
@@ -166,7 +166,7 @@ export function MessageDropdown() {
                           {conversation.subject}
                         </p>
                         {conversation.unreadByAccount && (
-                          <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                          <span className="w-2 h-2 bg-green-400 rounded-full flex-shrink-0" />
                         )}
                       </div>
                       {conversation.lastMessagePreview && (
@@ -192,7 +192,7 @@ export function MessageDropdown() {
                 setIsOpen(false)
                 router.push('/account/messages')
               }}
-              className="w-full text-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+              className="w-full text-center text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium"
             >
               View all messages
             </button>

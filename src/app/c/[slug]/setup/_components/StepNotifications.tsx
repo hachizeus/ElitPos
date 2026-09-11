@@ -50,7 +50,7 @@ export function StepNotifications({ data, businessType, onChange, onNext, onBack
       <div className="mb-8">
         <div className="mb-6">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <Bell size={24} className="text-blue-600" />
+            <Bell size={24} className="text-[#00cc6e]" />
             Notifications
           </h2>
           <p className="text-gray-500 dark:text-gray-400 mt-1">
@@ -63,7 +63,7 @@ export function StepNotifications({ data, businessType, onChange, onNext, onBack
             type="checkbox"
             checked={enabled}
             onChange={(e) => onChange({ enableNotifications: e.target.checked })}
-            className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            className="w-5 h-5 rounded border-gray-300 text-[#00cc6e] focus:ring-[#00FF88]"
           />
           <div>
             <p className="font-medium text-gray-900 dark:text-white">Set up notifications now</p>
@@ -80,7 +80,7 @@ export function StepNotifications({ data, businessType, onChange, onNext, onBack
           <div className="mb-8">
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Mail size={20} className="text-blue-600" />
+                <Mail size={20} className="text-[#00cc6e]" />
                 Email Notifications
               </h3>
             </div>
@@ -99,7 +99,7 @@ export function StepNotifications({ data, businessType, onChange, onNext, onBack
           <div className="mb-8 pt-6 border-t border-gray-200 dark:border-gray-700">
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <MessageSquare size={20} className="text-blue-600" />
+                <MessageSquare size={20} className="text-[#00cc6e]" />
                 SMS Provider
               </h3>
             </div>
@@ -117,7 +117,7 @@ export function StepNotifications({ data, businessType, onChange, onNext, onBack
                   onClick={() => onChange({ smsProvider: opt.value })}
                   className={`py-2.5 px-3 rounded border text-sm font-medium transition-colors ${
                     smsProvider === opt.value
-                      ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-500'
+                      ? 'border-[#00FF88] bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400 dark:border-[#00FF88]'
                       : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500'
                   }`}
                 >
@@ -131,7 +131,7 @@ export function StepNotifications({ data, businessType, onChange, onNext, onBack
                 <button
                   type="button"
                   onClick={() => setShowSmsConfig(!showSmsConfig)}
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                  className="text-sm text-[#00cc6e] dark:text-green-400 hover:underline flex items-center gap-1"
                 >
                   Provider Configuration {showSmsConfig ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                 </button>
@@ -140,15 +140,15 @@ export function StepNotifications({ data, businessType, onChange, onNext, onBack
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">API Key</label>
-                      <input type="password" value={smsConfig.websmsApiKey || ''} onChange={(e) => updateSmsConfig('websmsApiKey', e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      <input type="password" value={smsConfig.websmsApiKey || ''} onChange={(e) => updateSmsConfig('websmsApiKey', e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">API Token</label>
-                      <input type="password" value={smsConfig.websmsApiToken || ''} onChange={(e) => updateSmsConfig('websmsApiToken', e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      <input type="password" value={smsConfig.websmsApiToken || ''} onChange={(e) => updateSmsConfig('websmsApiToken', e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sender ID</label>
-                      <input type="text" value={smsConfig.websmsSenderId || ''} onChange={(e) => updateSmsConfig('websmsSenderId', e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      <input type="text" value={smsConfig.websmsSenderId || ''} onChange={(e) => updateSmsConfig('websmsSenderId', e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent" />
                     </div>
                   </div>
                 )}
@@ -157,15 +157,15 @@ export function StepNotifications({ data, businessType, onChange, onNext, onBack
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Account SID</label>
-                      <input type="password" value={smsConfig.twilioAccountSid || ''} onChange={(e) => updateSmsConfig('twilioAccountSid', e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      <input type="password" value={smsConfig.twilioAccountSid || ''} onChange={(e) => updateSmsConfig('twilioAccountSid', e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Auth Token</label>
-                      <input type="password" value={smsConfig.twilioAuthToken || ''} onChange={(e) => updateSmsConfig('twilioAuthToken', e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                      <input type="password" value={smsConfig.twilioAuthToken || ''} onChange={(e) => updateSmsConfig('twilioAuthToken', e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent" />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone Number</label>
-                      <input type="text" value={smsConfig.twilioPhoneNumber || ''} onChange={(e) => updateSmsConfig('twilioPhoneNumber', e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="+1234567890" />
+                      <input type="text" value={smsConfig.twilioPhoneNumber || ''} onChange={(e) => updateSmsConfig('twilioPhoneNumber', e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent" placeholder="+1234567890" />
                     </div>
                   </div>
                 )}
@@ -192,7 +192,7 @@ export function StepNotifications({ data, businessType, onChange, onNext, onBack
                     type="checkbox"
                     checked={enabledTriggers.includes(trigger.key)}
                     onChange={() => toggleTrigger(trigger.key)}
-                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="w-4 h-4 rounded border-gray-300 text-[#00cc6e] focus:ring-[#00FF88]"
                   />
                   <div>
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{trigger.label}</p>
@@ -215,7 +215,7 @@ export function StepNotifications({ data, businessType, onChange, onNext, onBack
         </button>
         <button
           onClick={onNext}
-          className="px-6 py-2.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors font-medium"
+          className="px-6 py-2.5 bg-[#00e67a] text-white rounded hover:bg-[#00cc6e] transition-colors font-medium"
         >
           Continue
         </button>

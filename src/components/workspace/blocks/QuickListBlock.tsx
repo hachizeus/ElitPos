@@ -48,13 +48,13 @@ const statusColors: Record<string, string> = {
   pending: 'bg-yellow-100 text-yellow-700',
   draft: 'bg-gray-100 text-gray-600',
   in_progress: 'bg-amber-100 text-amber-700',
-  under_review: 'bg-purple-100 text-purple-700',
+  under_review: 'bg-green-100 text-green-700',
   approved: 'bg-green-100 text-green-700',
   cancelled: 'bg-red-100 text-red-700',
   void: 'bg-red-100 text-red-700',
   rejected: 'bg-red-100 text-red-700',
   arrived: 'bg-cyan-100 text-cyan-700',
-  invoiced: 'bg-violet-100 text-violet-700',
+  invoiced: 'bg-emerald-100 text-emerald-700',
 }
 
 export function QuickListBlock({ block, basePath, refreshKey }: QuickListBlockProps) {
@@ -83,52 +83,63 @@ export function QuickListBlock({ block, basePath, refreshKey }: QuickListBlockPr
   }, [fetchData, refreshKey])
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 overflow-hidden w-full flex flex-col">
-      <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-        <h3 className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+    <div
+      className="rounded-xl overflow-hidden w-full flex flex-col"
+      style={{
+        background: 'var(--card-bg, white)',
+        border: '1px solid var(--card-border, rgba(0,0,0,0.07))',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+      }}
+    >
+      <div
+        className="px-5 py-3 flex items-center justify-between"
+        style={{ borderBottom: '1px solid var(--card-border, rgba(0,0,0,0.06))' }}
+      >
+        <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(128,128,128,0.8)' }}>
           {title}
         </h3>
         <Link
           href={href}
-          className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-0.5"
+          className="text-xs font-semibold hover:underline underline-offset-2 flex items-center gap-0.5"
+          style={{ color: '#00965c' }}
         >
           View All <ChevronRight className="w-3 h-3" />
         </Link>
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+        <div className="flex items-center justify-center py-14">
+          <Loader2 className="w-5 h-5 animate-spin text-gray-300 dark:text-gray-600" />
         </div>
       ) : !data || data.rows.length === 0 ? (
-        <div className="text-center py-8 text-sm text-gray-400">
-          No records found
+        <div className="flex flex-col items-center justify-center py-12 text-gray-300 dark:text-gray-600 gap-2">
+          <svg className="w-10 h-10 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+          <span className="text-sm">No records found</span>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 dark:border-gray-700">
+              <tr className="border-b border-gray-100 dark:border-gray-800">
                 {data.columns.map((col) => (
                   <th
                     key={col.key}
-                    className="px-4 py-2 text-left text-xs font-medium text-gray-400 dark:text-gray-500"
+                    className="px-5 py-2.5 text-left text-xs font-semibold text-gray-400 dark:text-gray-500 bg-gray-50/50 dark:bg-gray-800/40"
                   >
                     {col.label}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
               {data.rows.map((row, i) => {
                 const id = row.id as string
-                // Determine detail link based on list key
                 const detailHref = getDetailHref(listKey, id, basePath)
 
                 return (
                   <tr
                     key={id || i}
-                    className="border-b border-gray-50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer"
+                    className="hover:bg-gray-50/70 dark:hover:bg-gray-800/40 transition-colors cursor-pointer group"
                     onClick={() => {
                       if (detailHref) window.location.href = detailHref
                     }}
@@ -137,17 +148,17 @@ export function QuickListBlock({ block, basePath, refreshKey }: QuickListBlockPr
                       const val = row[col.key]
                       if (col.type === 'status') {
                         const statusStr = String(val || '')
-                        const colorClass = statusColors[statusStr] || 'bg-gray-100 text-gray-600'
+                        const colorClass = statusColors[statusStr] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
                         return (
-                          <td key={col.key} className="px-4 py-2.5">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${colorClass}`}>
+                          <td key={col.key} className="px-5 py-3">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${colorClass}`}>
                               {formatValue(val, col.type)}
                             </span>
                           </td>
                         )
                       }
                       return (
-                        <td key={col.key} className="px-4 py-2.5 text-gray-700 dark:text-gray-300 truncate max-w-[200px]">
+                        <td key={col.key} className="px-5 py-3 text-sm text-gray-700 dark:text-gray-300 truncate max-w-[200px]">
                           {formatValue(val, col.type)}
                         </td>
                       )

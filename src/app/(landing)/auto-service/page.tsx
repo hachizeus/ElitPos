@@ -7,19 +7,19 @@ export const metadata: Metadata = {
   description: 'Auto service center management with work orders, vehicle tracking, multi-point inspections, insurance estimates, parts inventory, and AI analytics. Unlimited users, free to start.',
   keywords: ['auto service software', 'work order management', 'vehicle tracking', 'auto repair POS', 'insurance estimates', 'parts management', 'workshop management'],
   openGraph: {
-    title: 'Auto Service Management System | RetailSmart ERP',
+    title: 'Auto Service Management System | ElitPOS',
     description: 'Work orders, vehicle tracking, inspections, insurance estimates. AI-powered. Unlimited users.',
-    url: 'https://www.retailsmarterp.com/auto-service',
-    images: [{ url: '/og/auto-service', width: 1200, height: 630, alt: 'RetailSmart ERP Auto Service Management' }],
+    url: 'https://www.elitpos.elitjohnsdigital.co.ke/auto-service',
+    images: [{ url: '/og/auto-service', width: 1200, height: 630, alt: 'ElitPOS Auto Service Management' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Auto Service Management System | RetailSmart ERP',
+    title: 'Auto Service Management System | ElitPOS',
     description: 'Work orders, vehicle tracking, inspections, insurance estimates. AI-powered.',
     images: ['/og/auto-service'],
   },
   alternates: {
-    canonical: 'https://www.retailsmarterp.com/auto-service',
+    canonical: 'https://www.elitpos.elitjohnsdigital.co.ke/auto-service',
   },
 }
 
@@ -44,7 +44,7 @@ export default function AutoServicePage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            "name": "RetailSmart ERP - Auto Service Management",
+            "name": "ElitPOS - Auto Service Management",
             "applicationCategory": "BusinessApplication",
             "applicationSubCategory": "Auto Service Management",
             "operatingSystem": "Web",

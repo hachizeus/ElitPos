@@ -14,8 +14,8 @@ interface CurrencyDisplayResult {
   symbol: string
   country: string
   loading: boolean
-  convertFromLKR: (amountLKR: number) => number
-  formatPrice: (amountLKR: number) => string
+  convertFromKES: (amountKES: number) => number
+  formatPrice: (amountKES: number) => string
   // Enhanced methods
   format: (amount: number | string, options?: { precision?: number; showSymbol?: boolean }) => string
   formatWithSymbol: (amount: number | string) => string
@@ -40,9 +40,9 @@ export function useCurrencyDisplay(
   mode: 'geoip' | 'profile' | 'tenant' = 'geoip',
   tenantCurrency?: string
 ): CurrencyDisplayResult {
-  const [currency, setCurrency] = useState('LKR')
-  const [symbol, setSymbol] = useState('Rs')
-  const [country, setCountry] = useState('LK')
+  const [currency, setCurrency] = useState('KES')
+  const [symbol, setSymbol] = useState('KSh')
+  const [country, setCountry] = useState('KE')
   const [rates, setRates] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
 
@@ -65,16 +65,16 @@ export function useCurrencyDisplay(
           const accRes = await fetch('/api/account')
           if (!cancelled && accRes.ok) {
             const acc = await accRes.json()
-            const cur = acc.currency || 'LKR'
+            const cur = acc.currency || 'KES'
             setCurrency(cur)
             setSymbol(CURRENCY_SYMBOLS[cur] || cur)
-            setCountry(acc.country || 'LK')
+            setCountry(acc.country || 'KE')
           }
         } else if (mode === 'tenant' && tenantCurrency) {
           // Use tenant currency
           setCurrency(tenantCurrency)
           setSymbol(getCurrencySymbol(tenantCurrency))
-          setCountry('LK') // Default for tenant context
+          setCountry('KE') // Default for tenant context
         }
 
         // Fetch exchange rates
@@ -84,7 +84,7 @@ export function useCurrencyDisplay(
           setRates(data.rates || {})
         }
       } catch (error) {
-        console.warn('Currency detection failed, using LKR:', error)
+        console.warn('Currency detection failed, using KES:', error)
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -94,43 +94,43 @@ export function useCurrencyDisplay(
     return () => { cancelled = true }
   }, [mode, tenantCurrency])
 
-  const convertFromLKR = useCallback((amountLKR: number): number => {
-    if (currency === 'LKR') return amountLKR
+  const convertFromKES = useCallback((amountKES: number): number => {
+    if (currency === 'KES') return amountKES
 
-    const lkrRate = rates['LKR']
+    const kesRate = rates['KES']
     const targetRate = rates[currency]
 
-    if (!lkrRate || !targetRate) return amountLKR
+    if (!kesRate || !targetRate) return amountKES
 
-    // Convert: LKR → USD → target currency
-    const amountUsd = amountLKR / lkrRate
+    // Convert: KES → USD → target currency
+    const amountUsd = amountKES / kesRate
     const converted = amountUsd * targetRate
 
     return Math.round(converted * 100) / 100
   }, [currency, rates])
 
-  const formatPrice = useCallback((amountLKR: number): string => {
-    const converted = convertFromLKR(amountLKR)
+  const formatPrice = useCallback((amountKES: number): string => {
+    const converted = convertFromKES(amountKES)
     return formatCurrencyWithSymbol(converted, currency)
-  }, [convertFromLKR, currency])
+  }, [convertFromKES, currency])
 
   // Enhanced formatting methods
   const format = useCallback((amount: number | string, options?: { precision?: number; showSymbol?: boolean }): string => {
     const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
     if (isNaN(numAmount)) return '0'
     
-    // For LKR amounts, convert if needed
-    const convertedAmount = mode === 'geoip' || mode === 'profile' ? convertFromLKR(numAmount) : numAmount
+    // For KES amounts, convert if needed
+    const convertedAmount = mode === 'geoip' || mode === 'profile' ? convertFromKES(numAmount) : numAmount
     return formatCurrencyAuto(convertedAmount, currency, options)
-  }, [currency, convertFromLKR, mode])
+  }, [currency, convertFromKES, mode])
 
   const formatWithSymbol = useCallback((amount: number | string): string => {
     const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
     if (isNaN(numAmount)) return '0'
     
-    const convertedAmount = mode === 'geoip' || mode === 'profile' ? convertFromLKR(numAmount) : numAmount
+    const convertedAmount = mode === 'geoip' || mode === 'profile' ? convertFromKES(numAmount) : numAmount
     return formatCurrencyWithSymbol(convertedAmount, currency)
-  }, [currency, convertFromLKR, mode])
+  }, [currency, convertFromKES, mode])
 
   const getFormatter = useCallback((context?: Partial<CurrencyContext>) => {
     const finalContext: CurrencyContext = {
@@ -147,7 +147,7 @@ export function useCurrencyDisplay(
     symbol, 
     country, 
     loading, 
-    convertFromLKR, 
+    convertFromKES,
     formatPrice,
     format,
     formatWithSymbol,
@@ -158,9 +158,9 @@ export function useCurrencyDisplay(
 /**
  * Hook for tenant-specific currency formatting
  * @param tenantId - Tenant ID to fetch currency from
- * @param fallbackCurrency - Fallback currency if tenant not found (defaults to 'LKR')
+ * @param fallbackCurrency - Fallback currency if tenant not found (defaults to 'KES')
  */
-export function useTenantCurrency(tenantId?: string, fallbackCurrency: string = 'LKR') {
+export function useTenantCurrency(tenantId?: string, fallbackCurrency: string = 'KES') {
   const [tenantCurrency, setTenantCurrency] = useState(fallbackCurrency)
   const [loading, setLoading] = useState(true)
 
@@ -223,9 +223,9 @@ export function useTenantCurrency(tenantId?: string, fallbackCurrency: string = 
 /**
  * Hook for account-specific currency formatting
  * @param accountId - Account ID to fetch currency from
- * @param fallbackCurrency - Fallback currency if account not found (defaults to 'LKR')
+ * @param fallbackCurrency - Fallback currency if account not found (defaults to 'KES')
  */
-export function useAccountCurrency(accountId?: string, fallbackCurrency: string = 'LKR') {
+export function useAccountCurrency(accountId?: string, fallbackCurrency: string = 'KES') {
   const [accountCurrency, setAccountCurrency] = useState(fallbackCurrency)
   const [loading, setLoading] = useState(true)
 

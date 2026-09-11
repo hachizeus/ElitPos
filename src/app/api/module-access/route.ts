@@ -8,6 +8,7 @@ import { logAndBroadcast } from '@/lib/websocket/broadcast'
 import { logError } from '@/lib/ai/error-logger'
 import { validateBody } from '@/lib/validation/helpers'
 import { updateModuleAccessSchema } from '@/lib/validation/schemas/settings'
+import { dbCache, CacheTTL } from '@/lib/db/query-cache'
 
 export async function GET(_request: NextRequest) {
   try {
@@ -16,12 +17,26 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    return await withTenant(session.user.tenantId, async (db) => {
-      const result = await db.query.moduleAccess.findMany({
-        orderBy: (m, { asc }) => [asc(m.moduleKey), asc(m.role)],
-      })
+    // Use cache for module access (changes very rarely)
+    const cacheKey = `module-access:${session.user.tenantId}`
+    
+    const result = await dbCache.query(
+      cacheKey,
+      async () => {
+        return await withTenant(session.user.tenantId, async (db) => {
+          return await db.query.moduleAccess.findMany({
+            orderBy: (m, { asc }) => [asc(m.moduleKey), asc(m.role)],
+          })
+        })
+      },
+      CacheTTL.MODULE_ACCESS
+    )
 
-      return NextResponse.json(result)
+    // Add cache headers for browser caching
+    return NextResponse.json(result, {
+      headers: {
+        'Cache-Control': 'private, max-age=300, stale-while-revalidate=600',
+      },
     })
   } catch (error) {
     logError('api/module-access', error)
@@ -71,6 +86,9 @@ export async function PUT(request: NextRequest) {
           })
         }
       }
+
+      // Invalidate cache after update
+      dbCache.invalidate(`module-access:${session.user.tenantId}`)
 
       logAndBroadcast(session.user.tenantId, 'module-access', 'updated', 'bulk')
 

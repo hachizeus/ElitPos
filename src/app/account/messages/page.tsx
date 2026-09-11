@@ -33,7 +33,7 @@ const statusIcons: Record<string, typeof Clock> = {
 
 const priorityColors: Record<string, string> = {
   low: 'text-gray-500',
-  normal: 'text-blue-600',
+  normal: 'text-green-600',
   high: 'text-orange-600',
   urgent: 'text-red-600',
 }
@@ -85,7 +85,7 @@ export default function MessagesPage() {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Messages</h1>
             {unreadCount > 0 && (
-              <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-blue-500 rounded-full">
+              <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-green-400 rounded-full">
                 {unreadCount}
               </span>
             )}
@@ -96,7 +96,7 @@ export default function MessagesPage() {
         </div>
         <button
           onClick={() => setShowNewModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded hover:bg-gray-800 dark:hover:bg-gray-100 font-medium text-sm"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded hover:bg-green-700 font-medium text-sm"
         >
           <Plus className="w-4 h-4" />
           New Message
@@ -111,7 +111,7 @@ export default function MessagesPage() {
             onClick={() => setFilter(status)}
             className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
               filter === status
-                ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                ? 'bg-green-600 text-white'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
             }`}
           >
@@ -141,7 +141,7 @@ export default function MessagesPage() {
                   key={conv.id}
                   href={`/account/messages/${conv.id}`}
                   className={`block px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
-                    conv.unreadByAccount ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''
+                    conv.unreadByAccount ? 'bg-green-50/50 dark:bg-green-950/20' : ''
                   }`}
                 >
                   <div className="flex items-start justify-between gap-4">
@@ -151,7 +151,7 @@ export default function MessagesPage() {
                           {conv.subject}
                         </p>
                         {conv.unreadByAccount && (
-                          <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                          <span className="w-2 h-2 bg-green-400 rounded-full flex-shrink-0" />
                         )}
                       </div>
                       {conv.lastMessagePreview && (

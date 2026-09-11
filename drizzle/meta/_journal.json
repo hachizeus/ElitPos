@@ -834,6 +834,34 @@
       "when": 1771446337003,
       "tag": "0118_modes_of_payment_method_key",
       "breakpoints": true
+    },
+    {
+      "idx": 119,
+      "version": "7",
+      "when": 1771500000000,
+      "tag": "0119_label_templates",
+      "breakpoints": true
+    },
+    {
+      "idx": 120,
+      "version": "7",
+      "when": 1771500000001,
+      "tag": "0120_label_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 121,
+      "version": "7",
+      "when": 1771500000002,
+      "tag": "0121_performance_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 122,
+      "version": "7",
+      "when": 1788768208028,
+      "tag": "0122_payment_gateways",
+      "breakpoints": true
     }
   ]
 }

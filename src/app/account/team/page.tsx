@@ -11,7 +11,9 @@ import {
   X,
   Loader2,
   Crown,
-  Building2
+  Building2,
+  ChevronDown,
+  CheckCircle2,
 } from 'lucide-react'
 
 interface TeamMember {
@@ -34,21 +36,44 @@ interface Invite {
   tenantAssignments: { tenantId: string; tenantName: string; role: string }[]
 }
 
+interface Company {
+  id: string
+  name: string
+  slug: string
+  role: string
+  isOwner: boolean
+}
+
+const ROLE_OPTIONS = [
+  { value: 'manager', label: 'Manager' },
+  { value: 'cashier', label: 'Cashier' },
+  { value: 'technician', label: 'Technician' },
+  { value: 'accounts_manager', label: 'Accounts Manager' },
+  { value: 'stock_manager', label: 'Stock Manager' },
+  { value: 'report_user', label: 'Report User' },
+]
+
 export default function TeamPage() {
   const [members, setMembers] = useState<TeamMember[]>([])
   const [invites, setInvites] = useState<Invite[]>([])
+  const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [inviteEmail, setInviteEmail] = useState('')
+  const [selectedTenantId, setSelectedTenantId] = useState('')
+  const [selectedRole, setSelectedRole] = useState('cashier')
   const [inviting, setInviting] = useState(false)
+  const [inviteError, setInviteError] = useState('')
+  const [inviteSuccess, setInviteSuccess] = useState(false)
   const [resending, setResending] = useState<string | null>(null)
 
   const fetchTeam = useCallback(async () => {
     try {
-      const [membersRes, invitesRes] = await Promise.all([
+      const [membersRes, invitesRes, companiesRes] = await Promise.all([
         fetch('/api/account/team'),
         fetch('/api/account/invites'),
+        fetch('/api/account/companies'),
       ])
 
       if (membersRes.ok) {
@@ -60,11 +85,21 @@ export default function TeamPage() {
         const data = await invitesRes.json()
         setInvites(data || [])
       }
+
+      if (companiesRes.ok) {
+        const data = await companiesRes.json()
+        const owned = (data || []).filter((c: Company) => c.isOwner || c.role === 'owner')
+        setCompanies(owned)
+        if (owned.length > 0 && !selectedTenantId) {
+          setSelectedTenantId(owned[0].id)
+        }
+      }
     } catch (error) {
       console.error('Failed to fetch team:', error)
     } finally {
       setLoading(false)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -72,8 +107,9 @@ export default function TeamPage() {
   }, [fetchTeam])
 
   const handleInvite = async () => {
-    if (!inviteEmail) return
+    if (!inviteEmail || !selectedTenantId) return
     setInviting(true)
+    setInviteError('')
 
     try {
       const res = await fetch('/api/account/invites', {
@@ -81,17 +117,24 @@ export default function TeamPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: inviteEmail,
-          tenantAssignments: [],
+          tenantAssignments: [{ tenantId: selectedTenantId, role: selectedRole }],
         }),
       })
 
       if (res.ok) {
         setInviteEmail('')
-        setShowInviteModal(false)
+        setInviteSuccess(true)
+        setTimeout(() => {
+          setShowInviteModal(false)
+          setInviteSuccess(false)
+        }, 1500)
         fetchTeam()
+      } else {
+        const data = await res.json()
+        setInviteError(data.error || data.details?.[0]?.message || 'Failed to send invite')
       }
-    } catch (error) {
-      console.error('Failed to send invite:', error)
+    } catch {
+      setInviteError('An error occurred. Please try again.')
     } finally {
       setInviting(false)
     }
@@ -100,17 +143,10 @@ export default function TeamPage() {
   const handleResendInvite = async (inviteId: string) => {
     setResending(inviteId)
     try {
-      const res = await fetch(`/api/account/invites/${inviteId}/resend`, {
-        method: 'POST',
-      })
-      if (res.ok) {
-        fetchTeam()
-      }
-    } catch (error) {
-      console.error('Failed to resend invite:', error)
-    } finally {
-      setResending(null)
-    }
+      const res = await fetch(`/api/account/invites/${inviteId}/resend`, { method: 'POST' })
+      if (res.ok) fetchTeam()
+    } catch { /* ignore */ }
+    finally { setResending(null) }
   }
 
   const filteredMembers = members.filter(
@@ -140,8 +176,8 @@ export default function TeamPage() {
           </p>
         </div>
         <button
-          onClick={() => setShowInviteModal(true)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-md hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors font-medium"
+          onClick={() => { setShowInviteModal(true); setInviteError(''); setInviteSuccess(false) }}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold shadow-sm"
         >
           <UserPlus className="w-4 h-4" />
           Invite Member
@@ -150,55 +186,46 @@ export default function TeamPage() {
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
           type="text"
           placeholder="Search members..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
+          className="w-full pl-11 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-[#00FF88]/40 placeholder:text-gray-400"
         />
       </div>
 
       {/* Pending Invites */}
       {pendingInvites.length > 0 && (
-        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30 border border-amber-200 dark:border-amber-700 rounded-2xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-amber-200 dark:border-amber-700 flex items-center gap-3">
-            <div className="w-10 h-10 bg-amber-100 dark:bg-amber-800/50 rounded-md flex items-center justify-center">
-              <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-amber-900 dark:text-amber-300">Pending Invitations</h3>
-              <p className="text-sm text-amber-700 dark:text-amber-400">{pendingInvites.length} invitation{pendingInvites.length > 1 ? 's' : ''} awaiting response</p>
-            </div>
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-amber-200 dark:border-amber-700/50 flex items-center gap-3">
+            <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+            <h3 className="font-semibold text-amber-900 dark:text-amber-300">
+              {pendingInvites.length} Pending Invitation{pendingInvites.length > 1 ? 's' : ''}
+            </h3>
           </div>
-          <div className="divide-y divide-amber-200 dark:divide-amber-700">
+          <div className="divide-y divide-amber-100 dark:divide-amber-800/30">
             {pendingInvites.map((invite) => (
-              <div
-                key={invite.id}
-                className="px-6 py-4 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-amber-100 dark:bg-amber-800/50 rounded-md flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              <div key={invite.id} className="px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-amber-100 dark:bg-amber-800/50 rounded-full flex items-center justify-center">
+                    <Mail className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white">{invite.email}</p>
-                    <p className="text-sm text-amber-700 dark:text-amber-400">
+                    <p className="font-medium text-sm text-gray-900 dark:text-white">{invite.email}</p>
+                    <p className="text-xs text-amber-600 dark:text-amber-400">
                       Expires {new Date(invite.expiresAt).toLocaleDateString()}
+                      {invite.tenantAssignments?.[0] && ` · ${invite.tenantAssignments[0].tenantName} (${invite.tenantAssignments[0].role})`}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => handleResendInvite(invite.id)}
                   disabled={resending === invite.id}
-                  className="px-4 py-2 text-sm font-medium text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-800/50 rounded transition-colors disabled:opacity-50"
+                  className="px-3 py-1.5 text-xs font-medium text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-800/40 rounded-md transition-colors disabled:opacity-50"
                 >
-                  {resending === invite.id ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    'Resend'
-                  )}
+                  {resending === invite.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Resend'}
                 </button>
               </div>
             ))}
@@ -207,72 +234,59 @@ export default function TeamPage() {
       )}
 
       {/* Members List */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-md flex items-center justify-center">
-            <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Team Members</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{members.length} member{members.length !== 1 ? 's' : ''}</p>
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
+        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Users className="w-5 h-5 text-[#00965c]" />
+            <h2 className="font-semibold text-gray-900 dark:text-white">
+              Team Members <span className="text-gray-400 font-normal text-sm ml-1">({members.length})</span>
+            </h2>
           </div>
         </div>
+
         {filteredMembers.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Users className="w-8 h-8 text-gray-300 dark:text-gray-500" />
+          <div className="p-16 text-center">
+            <div className="w-14 h-14 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Users className="w-7 h-7 text-gray-300 dark:text-gray-600" />
             </div>
-            <p className="text-gray-500 dark:text-gray-400 font-medium">No team members found</p>
-            {members.length === 0 && (
-              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Invite your first team member to get started</p>
-            )}
+            <p className="text-gray-500 dark:text-gray-400 font-medium">No team members yet</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Invite your first team member to get started</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-100 dark:divide-gray-700">
+          <div className="divide-y divide-gray-50 dark:divide-gray-800">
             {filteredMembers.map((member) => (
-              <div key={member.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <div key={member.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50/50 dark:hover:bg-gray-800/40 transition-colors">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-gray-700 to-gray-900 rounded-md flex items-center justify-center">
-                    <span className="text-lg font-semibold text-white">
-                      {member.fullName.charAt(0).toUpperCase()}
-                    </span>
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center flex-shrink-0">
+                    <span className="text-sm font-bold text-white">{member.fullName.charAt(0).toUpperCase()}</span>
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-medium text-gray-900 dark:text-white">{member.fullName}</p>
+                      <p className="font-semibold text-sm text-gray-900 dark:text-white">{member.fullName}</p>
                       {member.isOwner && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full">
-                          <Crown className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-[10px] font-bold rounded-full">
+                          <Crown className="w-2.5 h-2.5" />
                           Owner
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{member.email}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{member.email}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="hidden md:flex flex-wrap gap-1 max-w-xs">
+                <div className="flex items-center gap-3">
+                  <div className="hidden md:flex flex-wrap gap-1">
                     {member.sites.slice(0, 2).map((site) => (
-                      <span
-                        key={site.id}
-                        className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded"
-                      >
+                      <span key={site.id} className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs rounded-md">
                         <Building2 className="w-3 h-3" />
                         {site.name}
-                        <span className="text-gray-400 dark:text-gray-500">({site.role})</span>
                       </span>
                     ))}
                     {member.sites.length > 2 && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400 px-2 py-1">
-                        +{member.sites.length - 2} more
-                      </span>
+                      <span className="text-xs text-gray-400 px-1">+{member.sites.length - 2}</span>
                     )}
                   </div>
-                  <div className="hidden lg:block text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(member.joinedAt).toLocaleDateString()}
-                  </div>
-                  <button className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors">
-                    <MoreHorizontal className="w-5 h-5" />
+                  <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                    <MoreHorizontal className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -283,69 +297,119 @@ export default function TeamPage() {
 
       {/* Invite Modal */}
       {showInviteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md shadow-2xl">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md shadow-2xl border border-gray-100 dark:border-gray-800">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-md flex items-center justify-center">
-                  <UserPlus className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div className="w-9 h-9 bg-[#00FF88]/15 rounded-lg flex items-center justify-center">
+                  <UserPlus className="w-4.5 h-4.5 text-[#00965c]" />
                 </div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Invite Team Member</h2>
+                <h2 className="font-semibold text-gray-900 dark:text-white">Invite Team Member</h2>
               </div>
-              <button
-                onClick={() => setShowInviteModal(false)}
-                className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-              >
-                <X className="w-5 h-5" />
+              <button onClick={() => setShowInviteModal(false)} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                <X className="w-4 h-4" />
               </button>
             </div>
+
             <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
-                  <input
-                    type="email"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                    placeholder="colleague@example.com"
-                    className="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                  />
+              {inviteSuccess ? (
+                <div className="py-8 text-center">
+                  <CheckCircle2 className="w-12 h-12 text-[#00FF88] mx-auto mb-3" />
+                  <p className="font-semibold text-gray-900 dark:text-white">Invitation sent!</p>
+                  <p className="text-sm text-gray-500 mt-1">They&apos;ll receive an email with instructions.</p>
                 </div>
-              </div>
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-md">
-                <p className="text-sm text-blue-800 dark:text-blue-300">
-                  An invitation email will be sent. They can accept and join your team with access to manage billing and view sites.
-                </p>
-              </div>
+              ) : (
+                <>
+                  {inviteError && (
+                    <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
+                      {inviteError}
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Email Address
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="email"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
+                        placeholder="colleague@example.com"
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00FF88]/40 focus:border-[#00FF88]"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Company
+                    </label>
+                    <div className="relative">
+                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <select
+                        value={selectedTenantId}
+                        onChange={(e) => setSelectedTenantId(e.target.value)}
+                        className="w-full pl-10 pr-8 py-2.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00FF88]/40 appearance-none"
+                      >
+                        {companies.length === 0 ? (
+                          <option value="">No companies available</option>
+                        ) : (
+                          companies.map((c) => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                          ))
+                        )}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Role
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={selectedRole}
+                        onChange={(e) => setSelectedRole(e.target.value)}
+                        className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00FF88]/40 appearance-none"
+                      >
+                        {ROLE_OPTIONS.map((r) => (
+                          <option key={r.value} value={r.value}>{r.label}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 rounded-lg">
+                    An invitation email will be sent. They&apos;ll have access to manage this company&apos;s portal with the selected role.
+                  </p>
+                </>
+              )}
             </div>
-            <div className="flex justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-b-2xl">
-              <button
-                onClick={() => setShowInviteModal(false)}
-                className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleInvite}
-                disabled={!inviteEmail || inviting}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white dark:text-gray-900 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-gray-200 rounded-md disabled:opacity-50 transition-colors"
-              >
-                {inviting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Mail className="w-4 h-4" />
-                    Send Invite
-                  </>
-                )}
-              </button>
-            </div>
+
+            {!inviteSuccess && (
+              <div className="flex justify-end gap-2 px-6 py-4 border-t border-gray-100 dark:border-gray-800">
+                <button
+                  onClick={() => setShowInviteModal(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleInvite}
+                  disabled={!inviteEmail || !selectedTenantId || inviting}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-black bg-[#00FF88] hover:bg-green-700 rounded-lg disabled:opacity-50 transition-colors"
+                >
+                  {inviting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Mail className="w-3.5 h-3.5" />}
+                  {inviting ? 'Sending...' : 'Send Invite'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

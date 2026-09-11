@@ -23,9 +23,12 @@ CREATE INDEX IF NOT EXISTS idx_custom_roles_tenant ON custom_roles(tenant_id);
 
 ALTER TABLE custom_roles ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY tenant_isolation_policy ON custom_roles
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON custom_roles
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON custom_roles TO app_user;
 
@@ -60,9 +63,12 @@ CREATE INDEX IF NOT EXISTS idx_rpo_tenant ON role_permission_overrides(tenant_id
 
 ALTER TABLE role_permission_overrides ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY tenant_isolation_policy ON role_permission_overrides
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_policy ON role_permission_overrides
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
+    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON role_permission_overrides TO app_user;
 

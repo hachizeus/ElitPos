@@ -163,15 +163,9 @@ export async function PUT(
             updatedAt: users.updatedAt,
           })
 
-        // Sync isActive to accountTenants when status changes
-        if (isActive !== undefined && current.accountId) {
-          await db.update(accountTenants)
-            .set({ isActive, updatedAt: new Date() })
-            .where(and(
-              eq(accountTenants.accountId, current.accountId),
-              eq(accountTenants.tenantId, session.user.tenantId)
-            ))
-        }
+        // NOTE: We intentionally do NOT sync isActive to accountTenants here.
+        // Deactivating a staff user within a tenant does not revoke their account-portal
+        // access. accountTenants.isActive is managed separately (leave company, admin action).
 
         return updated
       })
@@ -259,15 +253,13 @@ export async function DELETE(
         .set({ isActive: false, updatedAt: new Date() })
         .where(eq(users.id, id))
 
-      // Sync to accountTenants if user has a linked account
-      if (user.accountId) {
-        await db.update(accountTenants)
-          .set({ isActive: false, updatedAt: new Date() })
-          .where(and(
-            eq(accountTenants.accountId, user.accountId),
-            eq(accountTenants.tenantId, session.user.tenantId)
-          ))
-      }
+      // NOTE: We intentionally do NOT sync isActive=false to accountTenants here.
+      // accountTenants tracks account-portal membership (can the account owner see this company).
+      // users tracks tenant-level staff access. These are separate concerns:
+      // - An owner may deactivate their own user record within a tenant (e.g. to clean up duplicates)
+      //   but should still retain account-portal access to manage billing/settings.
+      // - Only explicit account portal operations (leave company, admin deactivation) should
+      //   affect accountTenants.isActive.
 
       // Broadcast the change
       logAndBroadcast(session.user.tenantId, 'user', 'deleted', id)

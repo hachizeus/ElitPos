@@ -166,7 +166,7 @@ export function StepCompletion({ completing, completed, error, wizardData, busin
             <button
               type="button"
               onClick={onRetry}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+              className="px-6 py-2.5 bg-[#00e67a] text-white rounded hover:bg-[#00cc6e] transition-colors font-medium flex items-center gap-2"
             >
               <RotateCcw size={16} />
               Try Again
@@ -182,7 +182,7 @@ export function StepCompletion({ completing, completed, error, wizardData, busin
       {!completed ? (
         <>
           <div className="mb-8">
-            <Loader2 size={48} className="mx-auto text-blue-600 animate-spin mb-4" />
+            <Loader2 size={48} className="mx-auto text-[#00cc6e] animate-spin mb-4" />
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               Setting up your business...
             </h2>
@@ -243,7 +243,7 @@ export function StepCompletion({ completing, completed, error, wizardData, busin
           <button
             type="button"
             onClick={onGoToDashboard}
-            className="px-8 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors font-medium text-lg"
+            className="px-8 py-3 bg-[#00e67a] text-white rounded hover:bg-[#00cc6e] transition-colors font-medium text-lg"
           >
             Go to Dashboard
           </button>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { toast } from '@/components/ui/toast'
-import { Store, Wrench, Printer, ChevronDown, ChevronUp, Car, ClipboardList, ChevronRight, Users } from 'lucide-react'
+import { Store, Wrench, Printer, ChevronDown, ChevronUp, Car, ClipboardList, ChevronRight, Users, CreditCard } from 'lucide-react'
 import Link from 'next/link'
 import { DocumentType, PaperSize, PrintSettings, DocumentPrintSettings, DEFAULT_PRINT_SETTINGS, PAPER_SIZES } from '@/lib/print/types'
 import { useDebounce } from '@/hooks/useDebounce'
@@ -175,6 +175,21 @@ export default function SettingsPage() {
                 </div>
               </div>
               <ChevronRight size={20} className="text-gray-400 group-hover:text-green-600" />
+            </Link>
+            <Link
+              href={`/c/${tenantSlug}/settings/payment-gateways`}
+              className="flex items-center justify-between p-4 border rounded hover:bg-gray-50 transition-colors group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                  <CreditCard size={20} className="text-gray-600 group-hover:text-blue-600" />
+                </div>
+                <div>
+                  <p className="font-medium">Payment Gateways</p>
+                  <p className="text-sm text-gray-500">Connect M-Pesa, Stripe, Paystack, and PayHero</p>
+                </div>
+              </div>
+              <ChevronRight size={20} className="text-gray-400 group-hover:text-blue-600" />
             </Link>
           </div>
         )}

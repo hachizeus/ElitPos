@@ -3,18 +3,20 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useSession, signOut } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import {
   Menu, HelpCircle, ChevronDown, LogOut, Settings, User,
   Keyboard, Info, Bug, Search, X, MoreVertical, Home, MessageCircle,
-  Grid3X3,
+  Download, RefreshCw,
 } from 'lucide-react'
 import { useBreakpoint } from '@/hooks/useResponsive'
 import { BugReportModal } from '@/components/modals/BugReportModal'
 import { useSidebar } from './Sidebar'
 import { GlobalSearch } from './GlobalSearch'
+import { resolveFileUrl } from '@/lib/files/client'
 import { ConnectionDot } from '@/components/ui/connection-status'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { NetworkStatusBadge } from '@/components/ui/network-status'
 import { CompanySwitcher } from './CompanySwitcher'
 import { broadcastAuthEvent } from '@/lib/auth/events'
 import { Logo } from '@/components/ui/logo'
@@ -26,6 +28,8 @@ import { useModuleAccess } from '@/hooks/useModuleAccess'
 import { getTerms } from '@/lib/terminology'
 import { ICON_MAP } from '@/components/workspace/icon-map'
 import { cn } from '@/lib/utils'
+import { useInstallPrompt } from '@/hooks/useInstallPrompt'
+import { usePageRefresh } from '@/hooks/usePageRefresh'
 
 interface NavbarProps {
   tenantName: string
@@ -36,26 +40,25 @@ interface NavbarProps {
 
 export function Navbar({ tenantName, userEmail, appVersion, companySlug }: NavbarProps) {
   const pathname = usePathname()
-  const { data: session } = useSession()
   const company = useCompanyOptional()
-  const { mobileOpen, setMobileOpen } = useSidebar()
+  const { data: session } = useSession()
+  const { canInstall, isIOS, install } = useInstallPrompt()
+  const { refreshing, refresh } = usePageRefresh()
+  const { mobileOpen, setMobileOpen, collapsed, setCollapsed } = useSidebar()
   const { isModuleEnabled } = useModuleAccess()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [helpMenuOpen, setHelpMenuOpen] = useState(false)
   const [bugReportOpen, setBugReportOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [appSwitcherOpen, setAppSwitcherOpen] = useState(false)
   const [searchExpanded, setSearchExpanded] = useState(false)
   const chatStore = useChatStore()
   const userMenuRef = useRef<HTMLDivElement>(null)
   const helpMenuRef = useRef<HTMLDivElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
-  const appSwitcherRef = useRef<HTMLDivElement>(null)
-  const searchInputRef = useRef<HTMLInputElement>(null)
   const isDesktop = useBreakpoint('lg', 'up')
   const isCompact = !isDesktop
 
-  const businessType = company?.businessType || session?.user?.businessType
+  const businessType = company?.businessType
   const t = getTerms(businessType)
   const basePath = `/c/${companySlug}`
   const currentModule = getModuleFromPathname(pathname, businessType)
@@ -71,9 +74,6 @@ export function Navbar({ tenantName, userEmail, appVersion, companySlug }: Navba
       }
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
         setMobileMenuOpen(false)
-      }
-      if (appSwitcherRef.current && !appSwitcherRef.current.contains(event.target as Node)) {
-        setAppSwitcherOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -92,13 +92,6 @@ export function Navbar({ tenantName, userEmail, appVersion, companySlug }: Navba
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  // Focus search input when expanded on compact mode
-  useEffect(() => {
-    if (searchExpanded && searchInputRef.current && isCompact) {
-      searchInputRef.current.focus()
-    }
-  }, [searchExpanded, isCompact])
-
   // Persist theme change to API
   const handleThemeChange = useCallback((theme: 'light' | 'dark' | 'system') => {
     fetch('/api/account/preferences', {
@@ -109,7 +102,11 @@ export function Navbar({ tenantName, userEmail, appVersion, companySlug }: Navba
   }, [])
 
   function handleMobileToggle() {
-    setMobileOpen(!mobileOpen)
+    if (isDesktop) {
+      setCollapsed(!collapsed)
+    } else {
+      setMobileOpen(!mobileOpen)
+    }
   }
 
   function handleMobileMenuToggle() {
@@ -119,14 +116,11 @@ export function Navbar({ tenantName, userEmail, appVersion, companySlug }: Navba
   function handleSearchToggle() {
     if (isCompact) {
       setSearchExpanded(!searchExpanded)
-      if (!searchExpanded && searchInputRef.current) {
-        setTimeout(() => searchInputRef.current?.focus(), 100)
-      }
     }
   }
 
   // User initials for avatar
-  const userName = session?.user?.name || ''
+  const userName = company?.userName || ''
   const userInitials = userName
     .split(' ')
     .map((n: string) => n[0])
@@ -140,7 +134,7 @@ export function Navbar({ tenantName, userEmail, appVersion, companySlug }: Navba
     selling: t.sellingModule,
   }
 
-  const userRole = session?.user?.role
+  const userRole = company?.role
 
   // Filter tabs based on business type, permissions, and module access
   const visibleTabs = MODULE_TABS.filter((tab) => {
@@ -191,16 +185,17 @@ export function Navbar({ tenantName, userEmail, appVersion, companySlug }: Navba
       className="sticky top-0 z-50 h-12 flex items-center shrink-0"
       style={{
         backgroundColor: 'var(--navbar-bg)',
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        borderBottom: '1px solid var(--navbar-border, rgba(0,0,0,0.08))',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
       }}
     >
-      {/* Left section: Hamburger + Logo + App Switcher + Company */}
+      {/* Left section: Hamburger + Logo + Company */}
       <div className="flex items-center gap-1 shrink-0 px-3">
-        {/* Mobile sidebar toggle (below lg) */}
+        {/* Sidebar toggle — mobile opens drawer, desktop collapses/expands */}
         <button
           type="button"
           onClick={handleMobileToggle}
-          className="p-1.5 rounded transition-colors lg:hidden"
+          className="p-1.5 rounded transition-colors"
           style={{ color: 'var(--navbar-text-muted)' }}
           onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
           onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -208,49 +203,6 @@ export function Navbar({ tenantName, userEmail, appVersion, companySlug }: Navba
         >
           <Menu size={18} />
         </button>
-
-        {/* App Switcher Button (Odoo hamburger grid) */}
-        <div ref={appSwitcherRef} className="relative">
-          <button
-            type="button"
-            onClick={() => setAppSwitcherOpen(!appSwitcherOpen)}
-            className="p-1.5 rounded transition-colors hidden lg:flex items-center"
-            style={{ color: 'var(--navbar-text-muted)' }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-            aria-label="Open app switcher"
-          >
-            <Grid3X3 size={18} />
-          </button>
-
-          {/* App Switcher Dropdown */}
-          {appSwitcherOpen && (
-            <div className="absolute left-0 top-full mt-1 w-[320px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-50 p-4 animate-dropdown">
-              <div className="grid grid-cols-3 gap-1">
-                {visibleTabs.map((tab) => {
-                  const isActive = currentModule === tab.key
-                  const TabIcon = ICON_MAP[tab.icon]
-                  return (
-                    <Link
-                      key={tab.key}
-                      href={`${basePath}${tab.href}`}
-                      onClick={() => setAppSwitcherOpen(false)}
-                      className={cn(
-                        "flex flex-col items-center gap-1.5 p-3 rounded transition-colors text-center",
-                        isActive
-                          ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
-                          : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
-                      )}
-                    >
-                      {TabIcon && <TabIcon size={22} />}
-                      <span className="text-xs font-medium leading-tight">{tab.label}</span>
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Logo */}
         <Link href={`${basePath}/dashboard`} className="shrink-0">
@@ -280,26 +232,17 @@ export function Navbar({ tenantName, userEmail, appVersion, companySlug }: Navba
         {isCompact && searchExpanded ? (
           <div className="absolute top-0 left-0 right-0 h-12 flex items-center px-3 z-[60]" style={{ backgroundColor: 'var(--navbar-bg)' }}>
             <div className="relative flex-1">
-              <Search
-                className="absolute left-3 top-1/2 transform -translate-y-1/2"
-                size={18}
-                style={{ color: 'var(--navbar-text-muted)' }}
-              />
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search..."
-                className="w-full pl-10 pr-10 py-2 text-sm bg-white/10 border border-white/20 rounded text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                onBlur={() => setSearchExpanded(false)}
-              />
-              <button
-                onClick={() => setSearchExpanded(false)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1"
-                style={{ color: 'var(--navbar-text-muted)' }}
-              >
-                <X size={18} />
-              </button>
+              <GlobalSearch />
             </div>
+            <button
+              onClick={() => setSearchExpanded(false)}
+              className="ml-2 p-1.5 rounded transition-colors flex-shrink-0"
+              style={{ color: 'var(--navbar-text-muted)' }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(128,128,128,0.15)'}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <X size={18} />
+            </button>
           </div>
         ) : (
           <>
@@ -329,6 +272,25 @@ export function Navbar({ tenantName, userEmail, appVersion, companySlug }: Navba
         <div className="mx-1 hidden lg:block">
           <ConnectionDot />
         </div>
+
+        {/* Network online/offline badge (desktop only — visible when offline or just reconnected) */}
+        <div className="hidden lg:flex items-center">
+          <NetworkStatusBadge />
+        </div>
+
+        {/* Background refresh (desktop only) */}
+        <button
+          type="button"
+          onClick={refresh}
+          disabled={refreshing}
+          title="Refresh page data"
+          className="p-1.5 rounded transition-colors hidden lg:flex items-center justify-center disabled:opacity-50"
+          style={{ color: 'var(--navbar-text-muted)' }}
+          onMouseEnter={e => { if (!refreshing) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)' }}
+          onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+        >
+          <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
+        </button>
 
         {/* Staff Chat (desktop only) */}
         <button
@@ -385,7 +347,7 @@ export function Navbar({ tenantName, userEmail, appVersion, companySlug }: Navba
           {helpMenuOpen && (
             <div className="absolute right-0 top-full mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-50 py-1 animate-dropdown">
               <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Retail Smart ERP</p>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">ElitPOS</p>
                 {appVersion && (
                   <p className="text-xs text-gray-400 dark:text-gray-500">Version {appVersion}</p>
                 )}
@@ -403,7 +365,7 @@ export function Navbar({ tenantName, userEmail, appVersion, companySlug }: Navba
                 <span className="ml-auto text-xs text-gray-400 font-mono">Ctrl+K</span>
               </button>
               <a
-                href="https://github.com/ravindu2012/retail-smart-erp"
+                href="https://elitjohnsdigital.co.ke"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setHelpMenuOpen(false)}
@@ -421,6 +383,40 @@ export function Navbar({ tenantName, userEmail, appVersion, companySlug }: Navba
           <ThemeToggle onThemeChange={handleThemeChange} />
         </div>
 
+        {/* PWA Install button (desktop only — shown when app is installable) */}
+        {canInstall && (
+          <button
+            type="button"
+            onClick={() => {
+              if (isIOS) {
+                // iOS Safari doesn't support the install prompt API.
+                // Show a brief alert directing the user to the share sheet.
+                alert('To install ElitPOS:\n1. Tap the Share button (□↑) in Safari\n2. Tap "Add to Home Screen"\n3. Tap "Add"')
+              } else {
+                install()
+              }
+            }}
+            title={isIOS ? 'Tap Share → Add to Home Screen to install' : 'Install ElitPOS app'}
+            className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all"
+            style={{
+              background: 'rgba(0,255,136,0.15)',
+              color: '#00FF88',
+              border: '1px solid rgba(0,255,136,0.3)',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(0,255,136,0.25)'
+              e.currentTarget.style.borderColor = 'rgba(0,255,136,0.5)'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(0,255,136,0.15)'
+              e.currentTarget.style.borderColor = 'rgba(0,255,136,0.3)'
+            }}
+          >
+            <Download size={13} />
+            {isIOS ? 'Add to home screen' : 'Install app'}
+          </button>
+        )}
+
         {/* Divider */}
         <div className="h-5 w-px mx-1 hidden lg:block" style={{ backgroundColor: 'rgba(255,255,255,0.15)' }} />
 
@@ -436,7 +432,7 @@ export function Navbar({ tenantName, userEmail, appVersion, companySlug }: Navba
             {session?.user?.avatarUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
               <img
-                src={session.user.avatarUrl}
+                src={resolveFileUrl(session.user.avatarUrl) ?? ''}
                 alt={userName}
                 className="w-7 h-7 rounded-full object-cover"
               />
@@ -526,7 +522,7 @@ export function Navbar({ tenantName, userEmail, appVersion, companySlug }: Navba
                     {session?.user?.avatarUrl ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
-                        src={session.user.avatarUrl}
+                        src={resolveFileUrl(session.user.avatarUrl) ?? ''}
                         alt={userName}
                         className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                       />
@@ -586,8 +582,42 @@ export function Navbar({ tenantName, userEmail, appVersion, companySlug }: Navba
                   <div className="flex items-center gap-2">
                     <ConnectionDot />
                     <span className="text-xs text-gray-600 dark:text-gray-300">Connection</span>
+                    <NetworkStatusBadge />
                   </div>
-                  <div>
+                  <div className="flex items-center gap-2">
+                    {canInstall && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false)
+                          if (isIOS) {
+                            alert('To install ElitPOS:\n1. Tap the Share button (□↑) in Safari\n2. Tap "Add to Home Screen"\n3. Tap "Add"')
+                          } else {
+                            install()
+                          }
+                        }}
+                        className="flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold"
+                        style={{
+                          background: 'rgba(0,255,136,0.12)',
+                          color: '#00cc6a',
+                          border: '1px solid rgba(0,255,136,0.25)',
+                        }}
+                      >
+                        <Download size={11} />
+                        {isIOS ? 'Add to home' : 'Install'}
+                      </button>
+                    )}
+                    {/* Refresh for mobile */}
+                    <button
+                      type="button"
+                      onClick={() => { setMobileMenuOpen(false); refresh() }}
+                      disabled={refreshing}
+                      className="p-1.5 rounded disabled:opacity-50"
+                      style={{ color: 'var(--navbar-text-muted)' }}
+                      title="Refresh page"
+                    >
+                      <RefreshCw size={15} className={refreshing ? 'animate-spin' : ''} />
+                    </button>
                     <ThemeToggle onThemeChange={handleThemeChange} />
                   </div>
                 </div>

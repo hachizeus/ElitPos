@@ -7,19 +7,19 @@ export const metadata: Metadata = {
   description: 'Explore every feature: point of sale, inventory management, accounting, HR & payroll, kitchen display, work orders, and AI analytics. All included on every plan. No feature gating.',
   keywords: ['POS features', 'inventory management', 'accounting software', 'HR payroll', 'kitchen display system', 'work order management', 'AI analytics', 'restaurant POS features'],
   openGraph: {
-    title: 'Every Feature Included on Every Plan | RetailSmart ERP',
+    title: 'Every Feature Included on Every Plan | ElitPOS',
     description: 'POS, inventory, accounting, HR, restaurant, auto service, and AI analytics. No feature gating. No hidden costs.',
-    url: 'https://www.retailsmarterp.com/features',
-    images: [{ url: '/og/features', width: 1200, height: 630, alt: 'RetailSmart ERP Features' }],
+    url: 'https://www.elitpos.elitjohnsdigital.co.ke/features',
+    images: [{ url: '/og/features', width: 1200, height: 630, alt: 'ElitPOS Features' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Every Feature Included on Every Plan | RetailSmart ERP',
+    title: 'Every Feature Included on Every Plan | ElitPOS',
     description: 'POS, inventory, accounting, HR, restaurant, auto service, and AI. No feature gating.',
     images: ['/og/features'],
   },
   alternates: {
-    canonical: 'https://www.retailsmarterp.com/features',
+    canonical: 'https://www.elitpos.elitjohnsdigital.co.ke/features',
   },
 }
 
@@ -43,7 +43,7 @@ export default function FeaturesPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "HowTo",
-            "name": "How to Get Started with RetailSmart ERP",
+            "name": "How to Get Started with ElitPOS",
             "description": "Set up your free business management system in minutes",
             "totalTime": "PT5M",
             "step": [
@@ -51,8 +51,8 @@ export default function FeaturesPage() {
                 "@type": "HowToStep",
                 "position": 1,
                 "name": "Create your free account",
-                "text": "Register at retailsmarterp.com with your email. No credit card required.",
-                "url": "https://www.retailsmarterp.com/register"
+                "text": "Register at elitpos.elitjohnsdigital.co.ke with your email. No credit card required.",
+                "url": "https://www.elitpos.elitjohnsdigital.co.ke/register"
               },
               {
                 "@type": "HowToStep",
@@ -82,7 +82,7 @@ export default function FeaturesPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            "name": "RetailSmart ERP",
+            "name": "ElitPOS",
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "Web",
             "description": "All-in-one AI-powered cloud POS and ERP with every feature included on every plan. No feature gating, no hidden costs.",

@@ -79,7 +79,7 @@ export function StepEmployees({
         <div className="space-y-4">
           <div className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded border">
             <div className="flex items-center gap-3 mb-3">
-              <Building2 className="h-5 w-5 text-blue-600" />
+              <Building2 className="h-5 w-5 text-[#00cc6e]" />
               <h3 className="font-semibold text-gray-900 dark:text-white">Employee Structure</h3>
             </div>
             <div className="space-y-3">
@@ -90,7 +90,7 @@ export function StepEmployees({
                   value="basic"
                   checked={employeeStructure === 'basic'}
                   onChange={(e) => handleEmployeeStructureChange(e.target.value)}
-                  className="h-4 w-4 text-blue-600"
+                  className="h-4 w-4 text-[#00cc6e]"
                 />
                 <div>
                   <div className="font-medium">Basic</div>
@@ -106,7 +106,7 @@ export function StepEmployees({
                   value="advanced"
                   checked={employeeStructure === 'advanced'}
                   onChange={(e) => handleEmployeeStructureChange(e.target.value)}
-                  className="h-4 w-4 text-blue-600"
+                  className="h-4 w-4 text-[#00cc6e]"
                 />
                 <div>
                   <div className="font-medium">Advanced</div>
@@ -122,7 +122,7 @@ export function StepEmployees({
                   value="none"
                   checked={employeeStructure === 'none'}
                   onChange={(e) => handleEmployeeStructureChange(e.target.value)}
-                  className="h-4 w-4 text-blue-600"
+                  className="h-4 w-4 text-[#00cc6e]"
                 />
                 <div>
                   <div className="font-medium">Skip for now</div>
@@ -168,7 +168,7 @@ export function StepEmployees({
                     checked={payrollCycle === cycle}
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     onChange={(e) => setPayrollCycle(e.target.value as any)}
-                    className="h-4 w-4 text-blue-600"
+                    className="h-4 w-4 text-[#00cc6e]"
                   />
                   <div>
                     <div className="font-medium capitalize">{cycle}</div>
@@ -208,7 +208,7 @@ export function StepEmployees({
         <button
           type="button"
           onClick={handleNext}
-          className="px-6 py-2.5 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="px-6 py-2.5 bg-[#00e67a] text-white rounded hover:bg-[#00cc6e]"
         >
           Next: Sales Commissions
         </button>

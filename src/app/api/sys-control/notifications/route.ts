@@ -1,147 +1,303 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { accountNotifications, accounts } from '@/lib/db/schema'
-import { eq, desc, inArray } from 'drizzle-orm'
-import { adminAudit, withRateLimit, validateAdminSession } from '@/lib/admin'
+import {
+  paymentDeposits, pendingCompanies, adminAuditLogs,
+  accounts, pricingTiers, accountNotifications,
+} from '@/lib/db/schema'
+import { eq, desc, and, gt, inArray } from 'drizzle-orm'
+import { validateAdminSessionWithRefresh } from '@/lib/admin'
 import { logError } from '@/lib/ai/error-logger'
-import { validateBody } from '@/lib/validation/helpers'
-import { sysCreateNotificationSchema, sysDeleteNotificationsSchema } from '@/lib/validation/schemas/sys-control'
+import { sendBulkNotification } from '@/lib/notifications/sender'
 
-// GET /api/sys-control/notifications - Get sent notifications
-export async function GET(request: NextRequest) {
+export interface AdminNotification {
+  id: string
+  type: 'payment' | 'new_company' | 'approval' | 'rejection' | 'system'
+  title: string
+  message: string
+  link: string
+  createdAt: string
+  read: boolean
+}
+
+/**
+ * GET /api/sys-control/notifications
+ * Returns the 30 most recent admin-relevant events aggregated from:
+ *  - Pending payment deposits (new bank payments awaiting review)
+ *  - Pending companies (new company registrations)
+ *  - Recent audit log approvals/rejections
+ *
+ * "Read" state is persisted in system_settings key 'admin_notifications_read_until'
+ * (a timestamp — anything created before it is considered read).
+ */
+export async function GET() {
   try {
-    const rateLimited = await withRateLimit('/api/sys-control/notifications')
-    if (rateLimited) return rateLimited
-
-    const session = await validateAdminSession()
+    const session = await validateAdminSessionWithRefresh()
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { searchParams } = new URL(request.url)
-    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100)
-    const offset = parseInt(searchParams.get('offset') || '0')
+    // Get "read until" timestamp from system_settings
+    const { systemSettings } = await import('@/lib/db/schema')
+    const readSetting = await db.query.systemSettings.findFirst({
+      where: eq(systemSettings.key, 'admin_notifications_read_until'),
+    })
+    const readUntil: Date = readSetting?.value
+      ? new Date((readSetting.value as { timestamp: string }).timestamp)
+      : new Date(0)
 
-    // Get all notifications with account info
-    const notifications = await db
+    const notifications: AdminNotification[] = []
+
+    // 1. Pending payment deposits
+    const pendingPayments = await db
       .select({
-        id: accountNotifications.id,
-        accountId: accountNotifications.accountId,
-        type: accountNotifications.type,
-        title: accountNotifications.title,
-        message: accountNotifications.message,
-        link: accountNotifications.link,
-        isRead: accountNotifications.isRead,
-        createdAt: accountNotifications.createdAt,
-        accountName: accounts.fullName,
-        accountEmail: accounts.email,
+        id: paymentDeposits.id,
+        amount: paymentDeposits.amount,
+        currency: paymentDeposits.currency,
+        createdAt: paymentDeposits.createdAt,
+        accountId: paymentDeposits.accountId,
+        isWalletDeposit: paymentDeposits.isWalletDeposit,
+        pendingCompanyId: paymentDeposits.pendingCompanyId,
       })
-      .from(accountNotifications)
-      .leftJoin(accounts, eq(accountNotifications.accountId, accounts.id))
-      .orderBy(desc(accountNotifications.createdAt))
-      .limit(limit)
-      .offset(offset)
+      .from(paymentDeposits)
+      .where(eq(paymentDeposits.status, 'pending'))
+      .orderBy(desc(paymentDeposits.createdAt))
+      .limit(20)
 
-    return NextResponse.json({ notifications })
+    // Resolve account emails for payments
+    const accountIds = [...new Set(pendingPayments.map(p => p.accountId))]
+    const accountRows = accountIds.length > 0
+      ? await db.select({ id: accounts.id, email: accounts.email, fullName: accounts.fullName })
+          .from(accounts)
+          .where(inArray(accounts.id, accountIds))
+      : []
+    const accountMap = new Map(accountRows.map(a => [a.id, a]))
+
+    for (const p of pendingPayments) {
+      const acc = accountMap.get(p.accountId)
+      const who = acc?.fullName || acc?.email || 'A user'
+      const label = p.isWalletDeposit
+        ? 'wallet top-up'
+        : p.pendingCompanyId
+          ? 'new company payment'
+          : 'subscription payment'
+
+      notifications.push({
+        id: `pay-${p.id}`,
+        type: 'payment',
+        title: 'New Payment Awaiting Review',
+        message: `${who} submitted a ${label} of ${p.currency} ${Number(p.amount).toLocaleString()}`,
+        link: `/sys-control/payments`,
+        createdAt: p.createdAt.toISOString(),
+        read: p.createdAt <= readUntil,
+      })
+    }
+
+    // 2. Pending company registrations (not yet activated)
+    const pendingCos = await db
+      .select({
+        id: pendingCompanies.id,
+        name: pendingCompanies.name,
+        businessType: pendingCompanies.businessType,
+        status: pendingCompanies.status,
+        createdAt: pendingCompanies.createdAt,
+        tierId: pendingCompanies.tierId,
+      })
+      .from(pendingCompanies)
+      .where(
+        and(
+          inArray(pendingCompanies.status, ['pending_payment', 'pending_approval']),
+          gt(pendingCompanies.expiresAt, new Date()),
+        )
+      )
+      .orderBy(desc(pendingCompanies.createdAt))
+      .limit(15)
+
+    // Resolve tier names
+    const tierIds = [...new Set(pendingCos.map(c => c.tierId))]
+    const tierRows = tierIds.length > 0
+      ? await db.select({ id: pricingTiers.id, displayName: pricingTiers.displayName })
+          .from(pricingTiers)
+          .where(inArray(pricingTiers.id, tierIds))
+      : []
+    const tierMap = new Map(tierRows.map(t => [t.id, t]))
+
+    for (const c of pendingCos) {
+      const tier = tierMap.get(c.tierId)
+      const statusLabel = c.status === 'pending_approval' ? 'paid — awaiting approval' : 'pending payment'
+      notifications.push({
+        id: `co-${c.id}`,
+        type: 'new_company',
+        title: 'New Company Registration',
+        message: `"${c.name}" (${c.businessType}, ${tier?.displayName || 'paid'}) — ${statusLabel}`,
+        link: `/sys-control/payments`,
+        createdAt: c.createdAt.toISOString(),
+        read: c.createdAt <= readUntil,
+      })
+    }
+
+    // 3. Recent audit log approvals/rejections (last 7 days)
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    const recentAudits = await db
+      .select({
+        id: adminAuditLogs.id,
+        action: adminAuditLogs.action,
+        resource: adminAuditLogs.resource,
+        resourceId: adminAuditLogs.resourceId,
+        details: adminAuditLogs.details,
+        createdAt: adminAuditLogs.createdAt,
+      })
+      .from(adminAuditLogs)
+      .where(
+        and(
+          inArray(adminAuditLogs.action, ['approve', 'reject']),
+          gt(adminAuditLogs.createdAt, sevenDaysAgo),
+        )
+      )
+      .orderBy(desc(adminAuditLogs.createdAt))
+      .limit(10)
+
+    for (const a of recentAudits) {
+      const details = a.details as Record<string, unknown> | null
+      const action = a.action === 'approve' ? 'Approved' : 'Rejected'
+      notifications.push({
+        id: `audit-${a.id}`,
+        type: a.action === 'approve' ? 'approval' : 'rejection',
+        title: `${action}: ${a.resource}`,
+        message: details?.['amount']
+          ? `Payment of ${details['amount']} ${a.action === 'approve' ? 'approved' : 'rejected'}`
+          : `${a.resource} was ${a.action === 'approve' ? 'approved' : 'rejected'}`,
+        link: `/sys-control/payments`,
+        createdAt: a.createdAt.toISOString(),
+        read: a.createdAt <= readUntil,
+      })
+    }
+
+    // Sort all by createdAt desc, take 30
+    notifications.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    const trimmed = notifications.slice(0, 30)
+
+    const unreadCount = trimmed.filter(n => !n.read).length
+
+    return NextResponse.json({ notifications: trimmed, unreadCount })
   } catch (error) {
     logError('api/sys-control/notifications', error)
-    return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to load notifications' }, { status: 500 })
   }
 }
 
-// POST /api/sys-control/notifications - Send notification to users
-export async function POST(request: NextRequest) {
+/**
+ * POST /api/sys-control/notifications
+ * Send a notification to users (creates accountNotifications and sends via email/SMS)
+ */
+export async function POST(request: Request) {
   try {
-    const rateLimited = await withRateLimit('/api/sys-control/notifications')
-    if (rateLimited) return rateLimited
-
-    const session = await validateAdminSession()
+    const session = await validateAdminSessionWithRefresh()
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const parsed = await validateBody(request, sysCreateNotificationSchema)
-    if (!parsed.success) return parsed.response
-    const { type, title, message, link, accountIds, sendToAll } = parsed.data
+    const body = await request.json()
+    const { type, title, message, link, sendToAll, accountIds } = body
+
+    if (!type || !title || !message) {
+      return NextResponse.json({ error: 'Type, title, and message are required' }, { status: 400 })
+    }
 
     let targetAccountIds: string[] = []
 
     if (sendToAll) {
-      // Get all active accounts (non-super admins)
-      const allAccounts = await db
-        .select({ id: accounts.id })
-        .from(accounts)
-        .where(eq(accounts.isSuperAdmin, false))
-      targetAccountIds = allAccounts.map((a) => a.id)
-    } else if (accountIds && Array.isArray(accountIds) && accountIds.length > 0) {
-      targetAccountIds = accountIds
+      // Get all account IDs
+      const allAccounts = await db.select({ id: accounts.id }).from(accounts)
+      targetAccountIds = allAccounts.map(a => a.id)
     } else {
-      return NextResponse.json({ error: 'Either accountIds or sendToAll is required' }, { status: 400 })
+      if (!accountIds || accountIds.length === 0) {
+        return NextResponse.json({ error: 'No recipients specified' }, { status: 400 })
+      }
+      targetAccountIds = accountIds
     }
 
     if (targetAccountIds.length === 0) {
-      return NextResponse.json({ error: 'No target accounts found' }, { status: 400 })
+      return NextResponse.json({ error: 'No users to send to' }, { status: 400 })
     }
 
-    // Create notifications for all target accounts
-    const notificationValues = targetAccountIds.map((accountId) => ({
-      accountId,
+    console.log('[sys-control/notifications] Sending to', targetAccountIds.length, 'users')
+
+    // Send notifications via all channels (in-app, email, SMS)
+    const result = await sendBulkNotification(targetAccountIds, {
       type,
       title,
       message,
-      link: link || null,
-      metadata: { sentBy: 'system_admin', sentAt: new Date().toISOString() },
-    }))
-
-    const inserted = await db.insert(accountNotifications).values(notificationValues).returning()
-
-    // Audit log
-    await adminAudit.create(session.superAdminId, 'notification', 'bulk', {
-      count: inserted.length,
-      type,
-      title,
+      link,
+      sendInApp: true,
+      sendEmail: true,
+      sendSMS: true,
     })
+
+    console.log('[sys-control/notifications] Bulk send result:', result)
+
+    // Log admin action (only if admin user ID is available)
+    if (session.user?.id) {
+      await db.insert(adminAuditLogs).values({
+        adminId: session.user.id,
+        action: 'send_notification',
+        resource: 'notification',
+        details: {
+          type,
+          title,
+          sendToAll,
+          recipientCount: targetAccountIds.length,
+          sent: result.sent,
+          failed: result.failed,
+        },
+      })
+    }
 
     return NextResponse.json({
       success: true,
-      count: inserted.length,
-      message: `Notification sent to ${inserted.length} user${inserted.length > 1 ? 's' : ''}`,
+      message: `Notification sent to ${result.sent} user${result.sent === 1 ? '' : 's'}${result.failed > 0 ? ` (${result.failed} failed)` : ''}`,
+      stats: {
+        sent: result.sent,
+        failed: result.failed,
+        total: targetAccountIds.length,
+      },
     })
   } catch (error) {
-    logError('api/sys-control/notifications', error)
-    return NextResponse.json({ error: 'Failed to send notifications' }, { status: 500 })
+    console.error('[sys-control/notifications] POST error:', error)
+    logError('api/sys-control/notifications/POST', error)
+    
+    // Return more detailed error in development
+    const errorMessage = error instanceof Error ? error.message : 'Failed to send notification'
+    return NextResponse.json({ 
+      error: 'Failed to send notification',
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+    }, { status: 500 })
   }
 }
 
-// DELETE /api/sys-control/notifications - Delete notifications
-export async function DELETE(request: NextRequest) {
-  try {
-    const rateLimited = await withRateLimit('/api/sys-control/notifications')
-    if (rateLimited) return rateLimited
 
-    const session = await validateAdminSession()
+/**
+ * DELETE /api/sys-control/notifications
+ * Delete account notifications (admin cleanup)
+ */
+export async function DELETE(request: Request) {
+  try {
+    const session = await validateAdminSessionWithRefresh()
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const parsed = await validateBody(request, sysDeleteNotificationsSchema)
-    if (!parsed.success) return parsed.response
-    const { ids } = parsed.data
+    const body = await request.json()
+    const { ids } = body
 
-    // Delete the notifications
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return NextResponse.json({ error: 'Notification IDs required' }, { status: 400 })
+    }
+
     await db.delete(accountNotifications).where(inArray(accountNotifications.id, ids))
 
-    // Audit log
-    await adminAudit.create(session.superAdminId, 'notification', 'delete', {
-      count: ids.length,
-    })
-
-    return NextResponse.json({
-      success: true,
-      message: `Deleted ${ids.length} notification${ids.length > 1 ? 's' : ''}`,
-    })
+    return NextResponse.json({ success: true, message: `${ids.length} notification(s) deleted` })
   } catch (error) {
-    logError('api/sys-control/notifications', error)
+    logError('api/sys-control/notifications/DELETE', error)
     return NextResponse.json({ error: 'Failed to delete notifications' }, { status: 500 })
   }
 }

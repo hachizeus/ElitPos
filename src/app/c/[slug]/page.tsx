@@ -9,7 +9,8 @@ export default function CompanyIndexPage() {
   const slug = params.slug as string
 
   useEffect(() => {
-    router.replace(`/c/${slug}/dashboard`)
+    // Redirect to sales as the default workspace page
+    router.replace(`/c/${slug}/sales`)
   }, [router, slug])
 
   return null

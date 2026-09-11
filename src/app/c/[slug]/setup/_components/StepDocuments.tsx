@@ -85,7 +85,7 @@ export function StepDocuments({
     <div>
       <div className="mb-6">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <FileText size={24} className="text-blue-600" />
+          <FileText size={24} className="text-[#00cc6e]" />
           Document Settings
         </h2>
         <p className="text-gray-500 dark:text-gray-400 mt-1">
@@ -95,25 +95,25 @@ export function StepDocuments({
 
       {/* AI Suggestion Banner */}
       {!dismissed.has('documents') && suggestions && (
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded">
+        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <p className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-1">
+              <p className="text-sm font-medium text-green-800 dark:text-green-300 mb-1">
                 AI Suggestions for Document Settings
               </p>
               {suggestions.suggestionNote && (
-                <p className="text-xs text-blue-700 dark:text-blue-400 mb-2">
+                <p className="text-xs text-green-700 dark:text-green-400 mb-2">
                   {suggestions.suggestionNote}
                 </p>
               )}
               <div className="flex flex-wrap gap-2">
                 {suggestions.invoicePrefix && (
-                  <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-800/40 text-blue-700 dark:text-blue-300 rounded">
+                  <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-800/40 text-green-700 dark:text-green-300 rounded">
                     Invoice: {suggestions.invoicePrefix}{suggestions.invoiceStartNumber || 'XXXX'}
                   </span>
                 )}
                 {suggestions.quotationPrefix && (
-                  <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-800/40 text-blue-700 dark:text-blue-300 rounded">
+                  <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-800/40 text-green-700 dark:text-green-300 rounded">
                     Quotation: {suggestions.quotationPrefix}{suggestions.quotationStartNumber || 'XXXX'}
                   </span>
                 )}
@@ -123,7 +123,7 @@ export function StepDocuments({
               <button
                 onClick={handleApplyAllSuggestions}
                 disabled={loading}
-                className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 text-xs bg-[#00e67a] text-white rounded hover:bg-[#00cc6e] transition-colors disabled:opacity-50"
               >
                 Apply All
               </button>
@@ -142,7 +142,7 @@ export function StepDocuments({
         {/* Invoice Settings */}
         <div className="border border-gray-200 dark:border-gray-600 rounded p-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
-            <FileSignature size={20} className="text-blue-600" />
+            <FileSignature size={20} className="text-[#00cc6e]" />
             Invoice Settings
           </h3>
           
@@ -157,7 +157,7 @@ export function StepDocuments({
                   type="text"
                   value={data.invoicePrefix || defaultPrefixes.invoice}
                   onChange={(e) => onChange({ invoicePrefix: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent"
                   placeholder="e.g., INV-"
                   maxLength={10}
                 />
@@ -179,7 +179,7 @@ export function StepDocuments({
                   step="1"
                   value={data.invoiceStartNumber || 1001}
                   onChange={(e) => onChange({ invoiceStartNumber: parseInt(e.target.value) || 1001 })}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent"
                 />
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -192,7 +192,7 @@ export function StepDocuments({
         {/* Quotation Settings */}
         <div className="border border-gray-200 dark:border-gray-600 rounded p-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
-            <FileText size={20} className="text-blue-600" />
+            <FileText size={20} className="text-[#00cc6e]" />
             Quotation Settings
           </h3>
           
@@ -207,7 +207,7 @@ export function StepDocuments({
                   type="text"
                   value={data.quotationPrefix || defaultPrefixes.quotation}
                   onChange={(e) => onChange({ quotationPrefix: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent"
                   placeholder="e.g., QUO-"
                   maxLength={10}
                 />
@@ -229,7 +229,7 @@ export function StepDocuments({
                   step="1"
                   value={data.quotationStartNumber || 2001}
                   onChange={(e) => onChange({ quotationStartNumber: parseInt(e.target.value) || 2001 })}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent"
                 />
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -243,7 +243,7 @@ export function StepDocuments({
         <button
           type="button"
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+          className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#00cc6e] dark:hover:text-green-400 transition-colors"
         >
           {showAdvanced ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           Advanced Document Settings
@@ -254,14 +254,14 @@ export function StepDocuments({
             {/* Default Terms & Conditions */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
-                <MessageSquare size={16} className="text-blue-600" />
+                <MessageSquare size={16} className="text-[#00cc6e]" />
                 Default Terms & Conditions
               </label>
               <textarea
                 value={data.defaultTerms || ''}
                 onChange={(e) => onChange({ defaultTerms: e.target.value })}
                 rows={4}
-                className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent resize-none"
                 placeholder="Enter default terms and conditions that will appear on all documents..."
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -278,7 +278,7 @@ export function StepDocuments({
                 value={data.defaultNotes || ''}
                 onChange={(e) => onChange({ defaultNotes: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-[#00FF88] focus:border-transparent resize-none"
                 placeholder="Enter default notes that will appear on all documents..."
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -308,7 +308,7 @@ export function StepDocuments({
         </button>
         <button
           onClick={onNext}
-          className="px-6 py-2.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors font-medium"
+          className="px-6 py-2.5 bg-[#00e67a] text-white rounded hover:bg-[#00cc6e] transition-colors font-medium"
         >
           Continue
         </button>

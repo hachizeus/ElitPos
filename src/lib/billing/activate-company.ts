@@ -234,6 +234,16 @@ export async function activateCompanyFromPending(
   broadcastAccountChange(pending.accountId, 'account-site', 'created', result.tenantId)
   broadcastAccountChange(pending.accountId, 'account-notification', 'created', result.tenantId)
 
+  // Send activation email to user (fire-and-forget)
+  import('@/lib/email/admin-notifications').then(({ notifyUserCompanyApproved }) => {
+    notifyUserCompanyApproved({
+      accountId:   pending.accountId,
+      companyName: pending.name,
+      companySlug: result.tenantSlug,
+      planName:    'Paid',
+    }).catch(() => {})
+  }).catch(() => {})
+
   return result
 }
 
@@ -256,4 +266,9 @@ export async function notifyPendingCompanyRejected(
 
   broadcastAccountChange(accountId, 'account-notification', 'created', accountId)
   broadcastAccountChange(accountId, 'account-site', 'updated', accountId)
+
+  // Send rejection email to user (fire-and-forget)
+  import('@/lib/email/admin-notifications').then(({ notifyUserCompanyRejected }) => {
+    notifyUserCompanyRejected({ accountId, companyName, reason }).catch(() => {})
+  }).catch(() => {})
 }

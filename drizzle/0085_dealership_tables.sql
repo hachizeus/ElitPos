@@ -2,7 +2,7 @@
 -- Vehicle inventory, test drives, trade-ins, financing, sale details, and warranties
 
 -- Vehicle Inventory - dealership vehicle stock for sale
-CREATE TABLE "vehicle_inventory" (
+CREATE TABLE IF NOT EXISTS "vehicle_inventory" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   "tenant_id" uuid NOT NULL REFERENCES "tenants"("id"),
   "vin" varchar(50),
@@ -41,7 +41,7 @@ CREATE TABLE "vehicle_inventory" (
 );
 
 -- Test Drives - test drive scheduling
-CREATE TABLE "test_drives" (
+CREATE TABLE IF NOT EXISTS "test_drives" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   "tenant_id" uuid NOT NULL REFERENCES "tenants"("id"),
   "vehicle_inventory_id" uuid NOT NULL REFERENCES "vehicle_inventory"("id"),
@@ -63,7 +63,7 @@ CREATE TABLE "test_drives" (
 );
 
 -- Trade-In Vehicles - trade-in evaluations
-CREATE TABLE "trade_in_vehicles" (
+CREATE TABLE IF NOT EXISTS "trade_in_vehicles" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   "tenant_id" uuid NOT NULL REFERENCES "tenants"("id"),
   "sale_id" uuid REFERENCES "sales"("id"),
@@ -85,7 +85,7 @@ CREATE TABLE "trade_in_vehicles" (
 );
 
 -- Financing Options - lender configurations
-CREATE TABLE "financing_options" (
+CREATE TABLE IF NOT EXISTS "financing_options" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   "tenant_id" uuid NOT NULL REFERENCES "tenants"("id"),
   "lender_name" varchar(100) NOT NULL,
@@ -104,7 +104,7 @@ CREATE TABLE "financing_options" (
 );
 
 -- Vehicle Sale Details - extended sale info for vehicle sales
-CREATE TABLE "vehicle_sale_details" (
+CREATE TABLE IF NOT EXISTS "vehicle_sale_details" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   "tenant_id" uuid NOT NULL REFERENCES "tenants"("id"),
   "sale_id" uuid NOT NULL REFERENCES "sales"("id"),
@@ -130,7 +130,7 @@ CREATE TABLE "vehicle_sale_details" (
 );
 
 -- Vehicle Warranties - warranty tracking for sold vehicles
-CREATE TABLE "vehicle_warranties" (
+CREATE TABLE IF NOT EXISTS "vehicle_warranties" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   "tenant_id" uuid NOT NULL REFERENCES "tenants"("id"),
   "sale_id" uuid NOT NULL REFERENCES "sales"("id"),
@@ -151,40 +151,40 @@ CREATE TABLE "vehicle_warranties" (
 
 -- Indexes
 -- vehicle_inventory
-CREATE UNIQUE INDEX "vehicle_inventory_tenant_vin" ON "vehicle_inventory" ("tenant_id", "vin");
-CREATE INDEX "idx_vehicle_inventory_tenant" ON "vehicle_inventory" ("tenant_id");
-CREATE INDEX "idx_vehicle_inventory_status" ON "vehicle_inventory" ("tenant_id", "status");
-CREATE INDEX "idx_vehicle_inventory_make" ON "vehicle_inventory" ("make_id");
-CREATE INDEX "idx_vehicle_inventory_model" ON "vehicle_inventory" ("model_id");
-CREATE INDEX "idx_vehicle_inventory_sale" ON "vehicle_inventory" ("sale_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "vehicle_inventory_tenant_vin" ON "vehicle_inventory" ("tenant_id", "vin");
+CREATE INDEX IF NOT EXISTS "idx_vehicle_inventory_tenant" ON "vehicle_inventory" ("tenant_id");
+CREATE INDEX IF NOT EXISTS "idx_vehicle_inventory_status" ON "vehicle_inventory" ("tenant_id", "status");
+CREATE INDEX IF NOT EXISTS "idx_vehicle_inventory_make" ON "vehicle_inventory" ("make_id");
+CREATE INDEX IF NOT EXISTS "idx_vehicle_inventory_model" ON "vehicle_inventory" ("model_id");
+CREATE INDEX IF NOT EXISTS "idx_vehicle_inventory_sale" ON "vehicle_inventory" ("sale_id");
 
 -- test_drives
-CREATE INDEX "idx_test_drives_tenant" ON "test_drives" ("tenant_id");
-CREATE INDEX "idx_test_drives_status" ON "test_drives" ("tenant_id", "status");
-CREATE INDEX "idx_test_drives_vehicle" ON "test_drives" ("vehicle_inventory_id");
-CREATE INDEX "idx_test_drives_customer" ON "test_drives" ("customer_id");
-CREATE INDEX "idx_test_drives_salesperson" ON "test_drives" ("salesperson_id");
-CREATE INDEX "idx_test_drives_date" ON "test_drives" ("scheduled_date");
+CREATE INDEX IF NOT EXISTS "idx_test_drives_tenant" ON "test_drives" ("tenant_id");
+CREATE INDEX IF NOT EXISTS "idx_test_drives_status" ON "test_drives" ("tenant_id", "status");
+CREATE INDEX IF NOT EXISTS "idx_test_drives_vehicle" ON "test_drives" ("vehicle_inventory_id");
+CREATE INDEX IF NOT EXISTS "idx_test_drives_customer" ON "test_drives" ("customer_id");
+CREATE INDEX IF NOT EXISTS "idx_test_drives_salesperson" ON "test_drives" ("salesperson_id");
+CREATE INDEX IF NOT EXISTS "idx_test_drives_date" ON "test_drives" ("scheduled_date");
 
 -- trade_in_vehicles
-CREATE INDEX "idx_trade_in_vehicles_tenant" ON "trade_in_vehicles" ("tenant_id");
-CREATE INDEX "idx_trade_in_vehicles_status" ON "trade_in_vehicles" ("tenant_id", "status");
-CREATE INDEX "idx_trade_in_vehicles_sale" ON "trade_in_vehicles" ("sale_id");
+CREATE INDEX IF NOT EXISTS "idx_trade_in_vehicles_tenant" ON "trade_in_vehicles" ("tenant_id");
+CREATE INDEX IF NOT EXISTS "idx_trade_in_vehicles_status" ON "trade_in_vehicles" ("tenant_id", "status");
+CREATE INDEX IF NOT EXISTS "idx_trade_in_vehicles_sale" ON "trade_in_vehicles" ("sale_id");
 
 -- financing_options
-CREATE INDEX "idx_financing_options_tenant" ON "financing_options" ("tenant_id");
+CREATE INDEX IF NOT EXISTS "idx_financing_options_tenant" ON "financing_options" ("tenant_id");
 
 -- vehicle_sale_details
-CREATE UNIQUE INDEX "vehicle_sale_details_sale_unique" ON "vehicle_sale_details" ("sale_id");
-CREATE INDEX "idx_vehicle_sale_details_tenant" ON "vehicle_sale_details" ("tenant_id");
-CREATE INDEX "idx_vehicle_sale_details_vehicle" ON "vehicle_sale_details" ("vehicle_inventory_id");
-CREATE INDEX "idx_vehicle_sale_details_salesperson" ON "vehicle_sale_details" ("salesperson_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "vehicle_sale_details_sale_unique" ON "vehicle_sale_details" ("sale_id");
+CREATE INDEX IF NOT EXISTS "idx_vehicle_sale_details_tenant" ON "vehicle_sale_details" ("tenant_id");
+CREATE INDEX IF NOT EXISTS "idx_vehicle_sale_details_vehicle" ON "vehicle_sale_details" ("vehicle_inventory_id");
+CREATE INDEX IF NOT EXISTS "idx_vehicle_sale_details_salesperson" ON "vehicle_sale_details" ("salesperson_id");
 
 -- vehicle_warranties
-CREATE INDEX "idx_vehicle_warranties_tenant" ON "vehicle_warranties" ("tenant_id");
-CREATE INDEX "idx_vehicle_warranties_status" ON "vehicle_warranties" ("tenant_id", "status");
-CREATE INDEX "idx_vehicle_warranties_sale" ON "vehicle_warranties" ("sale_id");
-CREATE INDEX "idx_vehicle_warranties_vehicle" ON "vehicle_warranties" ("vehicle_inventory_id");
+CREATE INDEX IF NOT EXISTS "idx_vehicle_warranties_tenant" ON "vehicle_warranties" ("tenant_id");
+CREATE INDEX IF NOT EXISTS "idx_vehicle_warranties_status" ON "vehicle_warranties" ("tenant_id", "status");
+CREATE INDEX IF NOT EXISTS "idx_vehicle_warranties_sale" ON "vehicle_warranties" ("sale_id");
+CREATE INDEX IF NOT EXISTS "idx_vehicle_warranties_vehicle" ON "vehicle_warranties" ("vehicle_inventory_id");
 
 -- Enable RLS
 ALTER TABLE "vehicle_inventory" ENABLE ROW LEVEL SECURITY;
@@ -195,23 +195,41 @@ ALTER TABLE "vehicle_sale_details" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "vehicle_warranties" ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
-CREATE POLICY "tenant_isolation_policy" ON "vehicle_inventory"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation_policy" ON "vehicle_inventory"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "tenant_isolation_policy" ON "test_drives"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation_policy" ON "test_drives"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "tenant_isolation_policy" ON "trade_in_vehicles"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation_policy" ON "trade_in_vehicles"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "tenant_isolation_policy" ON "financing_options"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation_policy" ON "financing_options"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "tenant_isolation_policy" ON "vehicle_sale_details"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation_policy" ON "vehicle_sale_details"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "tenant_isolation_policy" ON "vehicle_warranties"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation_policy" ON "vehicle_warranties"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Grant permissions to app_user role
 GRANT SELECT, INSERT, UPDATE, DELETE ON "vehicle_inventory" TO app_user;

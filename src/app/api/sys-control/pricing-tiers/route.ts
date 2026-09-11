@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
         displayName,
         priceMonthly: priceMonthly != null ? String(priceMonthly) : null,
         priceYearly: priceYearly != null ? String(priceYearly) : (priceMonthly != null ? String(priceMonthly * 10) : null),
-        currency: currency || 'LKR',
+        currency: currency || 'KES',
         maxUsers: maxUsers || null,
         maxSalesMonthly: maxSalesMonthly || null,
         maxDatabaseBytes: maxDatabaseBytes || null,

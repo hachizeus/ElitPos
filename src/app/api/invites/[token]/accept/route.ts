@@ -7,6 +7,7 @@ import { logError } from '@/lib/ai/error-logger'
 import { validatePasswordStrength } from '@/lib/utils/validation'
 import { validateBody } from '@/lib/validation'
 import { acceptInviteSchema } from '@/lib/validation/schemas/auth'
+import { logAndBroadcast } from '@/lib/websocket/broadcast'
 
 // Rate limiting map for accept attempts
 const rateLimitMap = new Map<string, { count: number; firstRequest: number }>()
@@ -163,6 +164,24 @@ export async function POST(
       const passwordHash = await bcrypt.hash(password, 12)
 
       await db.transaction(async (tx) => {
+        // Create a global accounts record first so the user can log into the account portal
+        // and so they appear in the team member list
+        let accountRecord = await tx.query.accounts.findFirst({
+          where: eq(accounts.email, invite.email),
+        })
+
+        if (!accountRecord) {
+          const [newAccount] = await tx.insert(accounts).values({
+            email: invite.email,
+            fullName: fullName.trim(),
+            passwordHash,
+            phone: `+254${Date.now().toString().slice(-9)}`, // temp unique phone
+            isActive: true,
+            emailVerified: false,
+          }).returning()
+          accountRecord = newAccount
+        }
+
         for (const assignment of assignments) {
           // Set tenant context for RLS
           await tx.execute(sql`SELECT set_config('app.tenant_id', ${assignment.tenantId}, true)`)
@@ -183,20 +202,48 @@ export async function POST(
                   passwordHash,
                   fullName: fullName.trim(),
                   role: assignment.role as 'owner' | 'manager' | 'cashier' | 'technician',
+                  accountId: accountRecord.id,
                 })
                 .where(eq(users.id, existingUser.id))
             }
           } else {
-            // Create user directly — no account, no accountTenants
+            // Create user record linked to the new account
             await tx.insert(users).values({
               tenantId: assignment.tenantId,
-              accountId: null,
+              accountId: accountRecord.id,
               email: invite.email,
               passwordHash,
               fullName: fullName.trim(),
               role: assignment.role as 'owner' | 'manager' | 'cashier' | 'technician',
               isActive: true,
             })
+          }
+
+          // Reset RLS context to create accountTenants (not RLS-scoped)
+          await tx.execute(sql`SELECT set_config('app.tenant_id', '', true)`)
+
+          // Create accountTenants membership so user appears in team list
+          const existingMembership = await tx.query.accountTenants.findFirst({
+            where: and(
+              eq(accountTenants.accountId, accountRecord.id),
+              eq(accountTenants.tenantId, assignment.tenantId)
+            ),
+          })
+
+          if (!existingMembership) {
+            await tx.insert(accountTenants).values({
+              accountId: accountRecord.id,
+              tenantId: assignment.tenantId,
+              role: assignment.role as 'owner' | 'manager' | 'cashier' | 'technician',
+              isOwner: false,
+              isActive: true,
+              invitedBy: invite.invitedBy,
+              acceptedAt: new Date(),
+            })
+          } else if (!existingMembership.isActive) {
+            await tx.update(accountTenants)
+              .set({ isActive: true, acceptedAt: new Date() })
+              .where(eq(accountTenants.id, existingMembership.id))
           }
         }
 
@@ -207,11 +254,17 @@ export async function POST(
       })
     }
 
-    // Get tenant names for response
+    // Get tenant names for response and broadcast 'user created' to each tenant
     const tenantDetails = await Promise.all(
       assignments.map(async (a) => {
         const tenant = await db.query.tenants.findFirst({
           where: eq(tenants.id, a.tenantId),
+        })
+        // Broadcast to the tenant so staff lists live-update
+        logAndBroadcast(a.tenantId, 'user', 'created', invite.id, undefined, {
+          email: invite.email,
+          role: a.role,
+          source: 'invite-accept',
         })
         return {
           tenantId: a.tenantId,

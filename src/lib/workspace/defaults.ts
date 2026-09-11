@@ -11,23 +11,23 @@ function getDashboardBlocks(businessType?: string): WorkspaceBlock[] {
   const numberCards: WorkspaceBlock[] = []
   if (isAutoService) {
     numberCards.push(
-      { id: 'nc1', type: 'number_card', colSpan: 3, data: { label: "Today's Appointments", metricKey: 'today_appointments', color: 'blue', href: '/appointments', icon: 'Calendar' } },
+      { id: 'nc1', type: 'number_card', colSpan: 3, data: { label: "Today's Appointments", metricKey: 'today_appointments', color: 'emerald', href: '/appointments', icon: 'Calendar' } },
       { id: 'nc2', type: 'number_card', colSpan: 3, data: { label: 'Draft Work Orders', metricKey: 'draft_work_orders', color: 'amber', href: '/work-orders?status=draft', icon: 'Clock' } },
-      { id: 'nc3', type: 'number_card', colSpan: 3, data: { label: 'Pending Estimates', metricKey: 'pending_estimates', color: 'purple', href: '/insurance-estimates', icon: 'FileText' } },
+      { id: 'nc3', type: 'number_card', colSpan: 3, data: { label: 'Pending Estimates', metricKey: 'pending_estimates', color: 'emerald', href: '/insurance-estimates', icon: 'FileText' } },
       { id: 'nc4', type: 'number_card', colSpan: 3, data: { label: 'Low Stock Items', metricKey: 'low_stock_items', color: 'red', href: '/items?filter=low-stock', icon: 'AlertTriangle' } },
     )
   } else if (isDealership) {
     numberCards.push(
       { id: 'nc1', type: 'number_card', colSpan: 3, data: { label: 'Vehicle Inventory', metricKey: 'total_items', color: 'blue', href: '/items', icon: 'Car' } },
       { id: 'nc2', type: 'number_card', colSpan: 3, data: { label: 'Active Work Orders', metricKey: 'pending_work_orders', color: 'emerald', href: '/work-orders', icon: 'Wrench' } },
-      { id: 'nc3', type: 'number_card', colSpan: 3, data: { label: 'This Month Sales', metricKey: 'month_sales_total', color: 'purple', href: '/sales', icon: 'TrendingUp' } },
+      { id: 'nc3', type: 'number_card', colSpan: 3, data: { label: 'This Month Sales', metricKey: 'month_sales_total', color: 'green', href: '/sales', icon: 'TrendingUp' } },
       { id: 'nc4', type: 'number_card', colSpan: 3, data: { label: "Today's Appointments", metricKey: 'today_appointments', color: 'amber', href: '/appointments', icon: 'Calendar' } },
     )
   } else {
     numberCards.push(
-      { id: 'nc1', type: 'number_card', colSpan: 3, data: { label: "Today's Sales", metricKey: 'today_sales_count', color: 'blue', href: '/sales', icon: 'ShoppingCart' } },
+      { id: 'nc1', type: 'number_card', colSpan: 3, data: { label: "Today's Sales", metricKey: 'today_sales_count', color: 'emerald', href: '/sales', icon: 'ShoppingCart' } },
       { id: 'nc2', type: 'number_card', colSpan: 3, data: { label: 'Total Customers', metricKey: 'total_customers', color: 'green', href: '/customers', icon: 'Users' } },
-      { id: 'nc3', type: 'number_card', colSpan: 3, data: { label: 'Total Items', metricKey: 'total_items', color: 'purple', href: '/items', icon: 'Package' } },
+      { id: 'nc3', type: 'number_card', colSpan: 3, data: { label: 'Total Items', metricKey: 'total_items', color: 'amber', href: '/items', icon: 'Package' } },
       { id: 'nc4', type: 'number_card', colSpan: 3, data: { label: 'Low Stock Items', metricKey: 'low_stock_items', color: 'red', href: '/items?filter=low-stock', icon: 'AlertTriangle' } },
     )
   }
@@ -87,21 +87,21 @@ function getSellingBlocks(businessType?: string): WorkspaceBlock[] {
   if (isAutoService) {
     numberCards.push(
       { id: 'nc1', type: 'number_card', colSpan: 3, data: { label: "Today's Sales", metricKey: 'today_sales_count', color: 'green', href: '/sales', icon: 'Receipt' } },
-      { id: 'nc2', type: 'number_card', colSpan: 3, data: { label: "Today's Revenue", metricKey: 'today_sales_total', color: 'blue', href: '/sales', icon: 'DollarSign', prefix: 'Rs' } },
+      { id: 'nc2', type: 'number_card', colSpan: 3, data: { label: "Today's Revenue", metricKey: 'today_sales_total', color: 'blue', href: '/sales', icon: 'DollarSign', prefix: 'KSh' } },
       { id: 'nc3', type: 'number_card', colSpan: 3, data: { label: 'Active Work Orders', metricKey: 'pending_work_orders', color: 'emerald', href: '/work-orders', icon: 'Wrench' } },
       { id: 'nc4', type: 'number_card', colSpan: 3, data: { label: "Today's Appointments", metricKey: 'today_appointments', color: 'amber', href: '/appointments', icon: 'Calendar' } },
     )
   } else if (isDealership) {
     numberCards.push(
       { id: 'nc1', type: 'number_card', colSpan: 3, data: { label: "Today's Sales", metricKey: 'today_sales_count', color: 'green', href: '/sales', icon: 'Receipt' } },
-      { id: 'nc2', type: 'number_card', colSpan: 3, data: { label: 'Vehicle Sales (Month)', metricKey: 'month_sales_total', color: 'blue', href: '/dealership/sales', icon: 'Car', prefix: 'Rs' } },
+      { id: 'nc2', type: 'number_card', colSpan: 3, data: { label: 'Vehicle Sales (Month)', metricKey: 'month_sales_total', color: 'blue', href: '/dealership/sales', icon: 'Car', prefix: 'KSh' } },
       { id: 'nc3', type: 'number_card', colSpan: 3, data: { label: 'Active Work Orders', metricKey: 'pending_work_orders', color: 'emerald', href: '/work-orders', icon: 'Wrench' } },
       { id: 'nc4', type: 'number_card', colSpan: 3, data: { label: "Today's Appointments", metricKey: 'today_appointments', color: 'amber', href: '/appointments', icon: 'Calendar' } },
     )
   } else if (isRestaurant) {
     numberCards.push(
       { id: 'nc1', type: 'number_card', colSpan: 3, data: { label: "Today's Sales", metricKey: 'today_sales_count', color: 'green', href: '/sales', icon: 'Receipt' } },
-      { id: 'nc2', type: 'number_card', colSpan: 3, data: { label: "Today's Revenue", metricKey: 'today_sales_total', color: 'blue', href: '/sales', icon: 'DollarSign', prefix: 'Rs' } },
+      { id: 'nc2', type: 'number_card', colSpan: 3, data: { label: "Today's Revenue", metricKey: 'today_sales_total', color: 'blue', href: '/sales', icon: 'DollarSign', prefix: 'KSh' } },
       { id: 'nc3', type: 'number_card', colSpan: 3, data: { label: 'Active Orders', metricKey: 'active_restaurant_orders', color: 'emerald', href: '/restaurant/orders', icon: 'ClipboardList' } },
       { id: 'nc4', type: 'number_card', colSpan: 3, data: { label: 'Reservations Today', metricKey: 'today_reservations', color: 'amber', href: '/restaurant/reservations', icon: 'CalendarCheck' } },
     )
@@ -109,8 +109,8 @@ function getSellingBlocks(businessType?: string): WorkspaceBlock[] {
     // retail / supermarket (default)
     numberCards.push(
       { id: 'nc1', type: 'number_card', colSpan: 3, data: { label: "Today's Sales", metricKey: 'today_sales_count', color: 'green', href: '/sales', icon: 'Receipt' } },
-      { id: 'nc2', type: 'number_card', colSpan: 3, data: { label: "Today's Revenue", metricKey: 'today_sales_total', color: 'blue', href: '/sales', icon: 'DollarSign', prefix: 'Rs' } },
-      { id: 'nc3', type: 'number_card', colSpan: 3, data: { label: 'Month Revenue', metricKey: 'month_sales_total', color: 'purple', href: '/sales', icon: 'TrendingUp', prefix: 'Rs' } },
+      { id: 'nc2', type: 'number_card', colSpan: 3, data: { label: "Today's Revenue", metricKey: 'today_sales_total', color: 'blue', href: '/sales', icon: 'DollarSign', prefix: 'KSh' } },
+      { id: 'nc3', type: 'number_card', colSpan: 3, data: { label: 'Month Revenue', metricKey: 'month_sales_total', color: 'green', href: '/sales', icon: 'TrendingUp', prefix: 'KSh' } },
       { id: 'nc4', type: 'number_card', colSpan: 3, data: { label: 'Total Customers', metricKey: 'total_customers', color: 'amber', href: '/customers', icon: 'Users' } },
     )
   }
@@ -236,7 +236,7 @@ function getReportsBlocks(businessType?: string): WorkspaceBlock[] {
     { id: 's1', type: 'shortcut', colSpan: 12, data: { shortcuts: [
       { label: 'Sales Summary', href: '/accounting/reports/sales-summary', icon: 'BarChart3', color: 'blue' },
       { label: 'Profit & Loss', href: '/accounting/reports/profit-and-loss', icon: 'TrendingUp', color: 'green' },
-      { label: 'Stock Balance', href: '/accounting/reports/stock-balance', icon: 'Boxes', color: 'purple' },
+      { label: 'Stock Balance', href: '/accounting/reports/stock-balance', icon: 'Boxes', color: 'emerald' },
       { label: 'Daily Sales', href: '/accounting/reports/daily-sales', icon: 'CalendarDays', color: 'amber' },
       { label: 'Activity Log', href: '/activity-log', icon: 'Activity', color: 'slate' },
     ] } },
@@ -330,9 +330,9 @@ export const DEFAULT_WORKSPACES: Record<string, WorkspaceConfig> = {
     title: 'Stock',
     description: 'Manage your inventory, items, categories, and warehouses',
     icon: 'Package',
-    colorScheme: 'violet',
+    colorScheme: 'green',
     blocks: [
-      { id: 'nc1', type: 'number_card', colSpan: 4, data: { label: 'Total Items', metricKey: 'total_items', color: 'violet', href: '/items', icon: 'Package' } },
+      { id: 'nc1', type: 'number_card', colSpan: 4, data: { label: 'Total Items', metricKey: 'total_items', color: 'green', href: '/items', icon: 'Package' } },
       { id: 'nc2', type: 'number_card', colSpan: 4, data: { label: 'Low Stock', metricKey: 'low_stock_items', color: 'red', href: '/items?filter=low-stock', icon: 'AlertTriangle' } },
       { id: 'nc3', type: 'number_card', colSpan: 4, data: { label: 'Warehouses', metricKey: 'total_warehouses', color: 'blue', href: '/settings/warehouses', icon: 'Warehouse' } },
 
@@ -344,7 +344,7 @@ export const DEFAULT_WORKSPACES: Record<string, WorkspaceConfig> = {
         { label: 'Low Stock', href: '/items?filter=low-stock', icon: 'AlertTriangle', countMetricKey: 'low_stock_items' },
       ] } },
 
-      { id: 'ch1', type: 'chart', colSpan: 6, data: { title: 'Stock Value by Warehouse', chartKey: 'stock_value_by_warehouse', chartType: 'bar', color: 'violet' } },
+      { id: 'ch1', type: 'chart', colSpan: 6, data: { title: 'Stock Value by Warehouse', chartKey: 'stock_value_by_warehouse', chartType: 'bar', color: 'green' } },
       { id: 'ql1', type: 'quick_list', colSpan: 6, data: { title: 'Low Stock Items', listKey: 'low_stock_items', limit: 5, href: '/items?filter=low-stock' } },
 
       { id: 'c1', type: 'card', colSpan: 6, data: { title: 'Masters', links: [
@@ -377,7 +377,7 @@ export const DEFAULT_WORKSPACES: Record<string, WorkspaceConfig> = {
     blocks: [
       { id: 'nc1', type: 'number_card', colSpan: 4, data: { label: 'Total Suppliers', metricKey: 'total_suppliers', color: 'amber', href: '/suppliers', icon: 'Truck' } },
       { id: 'nc2', type: 'number_card', colSpan: 4, data: { label: 'Pending POs', metricKey: 'pending_purchase_orders', color: 'blue', href: '/purchase-orders', icon: 'ClipboardList' } },
-      { id: 'nc3', type: 'number_card', colSpan: 4, data: { label: 'Total Items', metricKey: 'total_items', color: 'violet', href: '/items', icon: 'Package' } },
+      { id: 'nc3', type: 'number_card', colSpan: 4, data: { label: 'Total Items', metricKey: 'total_items', color: 'emerald', href: '/items', icon: 'Package' } },
 
       { id: 's1', type: 'shortcut', colSpan: 12, data: { shortcuts: [
         { label: 'Suppliers', href: '/suppliers', icon: 'Truck' },
@@ -409,7 +409,7 @@ export const DEFAULT_WORKSPACES: Record<string, WorkspaceConfig> = {
     blocks: [
       { id: 'nc1', type: 'number_card', colSpan: 3, data: { label: "Today's Appointments", metricKey: 'today_appointments', color: 'blue', href: '/appointments', icon: 'Calendar' } },
       { id: 'nc2', type: 'number_card', colSpan: 3, data: { label: 'Active Work Orders', metricKey: 'pending_work_orders', color: 'emerald', href: '/work-orders', icon: 'Wrench' } },
-      { id: 'nc3', type: 'number_card', colSpan: 3, data: { label: 'Pending Estimates', metricKey: 'pending_estimates', color: 'purple', href: '/insurance-estimates', icon: 'FileText' } },
+      { id: 'nc3', type: 'number_card', colSpan: 3, data: { label: 'Pending Estimates', metricKey: 'pending_estimates', color: 'emerald', href: '/insurance-estimates', icon: 'FileText' } },
       { id: 'nc4', type: 'number_card', colSpan: 3, data: { label: 'Total Vehicles', metricKey: 'total_vehicles', color: 'amber', href: '/vehicles', icon: 'Car' } },
 
       { id: 's1', type: 'shortcut', colSpan: 12, data: { shortcuts: [
@@ -447,7 +447,7 @@ export const DEFAULT_WORKSPACES: Record<string, WorkspaceConfig> = {
     title: 'Reports',
     description: 'Activity logs, reports, and business analytics',
     icon: 'BarChart3',
-    colorScheme: 'indigo',
+    colorScheme: 'slate',
     blocks: [], // Populated by getReportsBlocks()
   },
 

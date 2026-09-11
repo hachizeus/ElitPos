@@ -35,7 +35,7 @@ export async function GET() {
       const txData = await db.query.creditTransactions.findMany({
         where: eq(creditTransactions.accountId, session.user.accountId),
         orderBy: [desc(creditTransactions.createdAt)],
-        limit: 50,
+        limit: 20, // Reduced from 50 — page loads faster, full history available on wallet page
       })
 
       transactions = txData.map(tx => ({
@@ -51,11 +51,19 @@ export async function GET() {
       console.warn('Failed to fetch credit transactions:', txError)
     }
 
-    return NextResponse.json({
-      balance: Number(account.walletBalance) || 0,
-      currency: account.currency || 'LKR',
-      transactions,
-    })
+    return NextResponse.json(
+      {
+        balance: Number(account.walletBalance) || 0,
+        currency: account.currency || 'KES',
+        transactions,
+      },
+      {
+        headers: {
+          // Wallet balance — short cache, stale-while-revalidate so it feels instant on repeat visits
+          'Cache-Control': 'private, max-age=30, stale-while-revalidate=120',
+        },
+      }
+    )
   } catch (error) {
     logError('api/account/wallet', error)
     return NextResponse.json({ error: 'Failed to fetch wallet' }, { status: 500 })

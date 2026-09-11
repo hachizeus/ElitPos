@@ -64,15 +64,21 @@ CREATE INDEX IF NOT EXISTS "ai_alerts_unread_idx" ON "ai_alerts" ("tenant_id", "
 ALTER TABLE "ai_error_logs" ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "ai_error_logs_tenant_isolation" ON "ai_error_logs";
-CREATE POLICY "ai_error_logs_tenant_isolation" ON "ai_error_logs"
-  USING (
-    tenant_id IS NULL
-    OR tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid
-  );
+DO $$ BEGIN
+  CREATE POLICY "ai_error_logs_tenant_isolation" ON "ai_error_logs"
+    USING (
+      tenant_id IS NULL
+      OR tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid
+    );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- RLS for ai_alerts
 ALTER TABLE "ai_alerts" ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "ai_alerts_tenant_isolation" ON "ai_alerts";
-CREATE POLICY "ai_alerts_tenant_isolation" ON "ai_alerts"
-  USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
+DO $$ BEGIN
+  CREATE POLICY "ai_alerts_tenant_isolation" ON "ai_alerts"
+    USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

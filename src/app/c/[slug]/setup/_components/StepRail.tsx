@@ -51,7 +51,7 @@ export function StepRail({ steps, currentStep, onStepClick }: StepRailProps) {
                   isCompleted
                     ? 'bg-gradient-to-br from-green-500 to-emerald-500 text-white shadow-sm shadow-green-500/20 hover:shadow-md hover:shadow-green-500/30'
                     : isCurrent
-                    ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md shadow-blue-500/25 ring-[3px] ring-blue-100 dark:ring-blue-900/50'
+                    ? 'bg-gradient-to-br from-[#00e67a] to-[#00cc6e] text-white shadow-md shadow-green-500/25 ring-[3px] ring-green-100 dark:ring-green-900/50'
                     : isClickable
                     ? 'bg-gray-100 dark:bg-gray-700/80 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 cursor-pointer'
                     : 'bg-gray-100/60 dark:bg-gray-800/50 text-gray-300 dark:text-gray-600 cursor-not-allowed'
@@ -87,7 +87,7 @@ export function StepRail({ steps, currentStep, onStepClick }: StepRailProps) {
                   <motion.p
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-[11px] text-blue-500 dark:text-blue-400 mt-0.5 font-medium"
+                    className="text-[11px] text-[#00FF88] dark:text-green-400 mt-0.5 font-medium"
                   >
                     {step.title}
                   </motion.p>
@@ -119,7 +119,7 @@ export function StepRail({ steps, currentStep, onStepClick }: StepRailProps) {
                   index < currentStep
                     ? 'bg-gradient-to-r from-green-500 to-emerald-500'
                     : index === currentStep
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600'
+                    ? 'bg-gradient-to-r from-[#00FF88] to-[#00e67a]'
                     : ''
                 }`}
                 initial={false}

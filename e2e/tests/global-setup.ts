@@ -6,6 +6,6 @@ setup('verify test environment', async ({ request }) => {
   expect(healthRes.ok()).toBeTruthy()
 
   // Check that our test tenant's login page loads
-  const loginRes = await request.get('/c/gajanayaka/login')
+  const loginRes = await request.get('/c/elitjohns/login')
   expect(loginRes.ok()).toBeTruthy()
 })

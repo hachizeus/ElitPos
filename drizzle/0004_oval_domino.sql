@@ -1,18 +1,39 @@
-CREATE TYPE "public"."checklist_item_type" AS ENUM('checkbox', 'select', 'text', 'number');--> statement-breakpoint
-CREATE TYPE "public"."checklist_response" AS ENUM('ok', 'concern', 'fail', 'na');--> statement-breakpoint
-CREATE TYPE "public"."damage_severity" AS ENUM('minor', 'moderate', 'severe');--> statement-breakpoint
-CREATE TYPE "public"."damage_type" AS ENUM('scratch', 'dent', 'crack', 'rust', 'paint', 'broken', 'missing', 'other');--> statement-breakpoint
-CREATE TYPE "public"."inspection_status" AS ENUM('draft', 'completed');--> statement-breakpoint
-CREATE TYPE "public"."inspection_type" AS ENUM('check_in', 'check_out');--> statement-breakpoint
-CREATE TYPE "public"."vehicle_body_type" AS ENUM('motorcycle', 'scooter', 'three_wheeler', 'sedan', 'hatchback', 'suv', 'pickup', 'van', 'coupe', 'wagon', 'convertible', 'mini_truck', 'lorry', 'bus', 'other');--> statement-breakpoint
-CREATE TABLE "inspection_categories" (
+DO $$ BEGIN
+  CREATE TYPE "public"."checklist_item_type" AS ENUM('checkbox', 'select', 'text', 'number');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."checklist_response" AS ENUM('ok', 'concern', 'fail', 'na');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."damage_severity" AS ENUM('minor', 'moderate', 'severe');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."damage_type" AS ENUM('scratch', 'dent', 'crack', 'rust', 'paint', 'broken', 'missing', 'other');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."inspection_status" AS ENUM('draft', 'completed');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."inspection_type" AS ENUM('check_in', 'check_out');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  CREATE TYPE "public"."vehicle_body_type" AS ENUM('motorcycle', 'scooter', 'three_wheeler', 'sedan', 'hatchback', 'suv', 'pickup', 'van', 'coupe', 'wagon', 'convertible', 'mini_truck', 'lorry', 'bus', 'other');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "inspection_categories" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"template_id" uuid NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"sort_order" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "inspection_checklist_items" (
+CREATE TABLE IF NOT EXISTS "inspection_checklist_items" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"category_id" uuid NOT NULL,
 	"item_name" varchar(255) NOT NULL,
@@ -22,7 +43,7 @@ CREATE TABLE "inspection_checklist_items" (
 	"sort_order" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "inspection_damage_marks" (
+CREATE TABLE IF NOT EXISTS "inspection_damage_marks" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"inspection_id" uuid NOT NULL,
 	"diagram_view_id" uuid,
@@ -36,7 +57,7 @@ CREATE TABLE "inspection_damage_marks" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "inspection_photos" (
+CREATE TABLE IF NOT EXISTS "inspection_photos" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"inspection_id" uuid NOT NULL,
 	"damage_mark_id" uuid,
@@ -46,7 +67,7 @@ CREATE TABLE "inspection_photos" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "inspection_responses" (
+CREATE TABLE IF NOT EXISTS "inspection_responses" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"inspection_id" uuid NOT NULL,
 	"checklist_item_id" uuid NOT NULL,
@@ -55,7 +76,7 @@ CREATE TABLE "inspection_responses" (
 	"notes" text
 );
 --> statement-breakpoint
-CREATE TABLE "inspection_templates" (
+CREATE TABLE IF NOT EXISTS "inspection_templates" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid,
 	"vehicle_type_id" uuid,
@@ -68,7 +89,7 @@ CREATE TABLE "inspection_templates" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "vehicle_inspections" (
+CREATE TABLE IF NOT EXISTS "vehicle_inspections" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid NOT NULL,
 	"work_order_id" uuid NOT NULL,
@@ -87,7 +108,7 @@ CREATE TABLE "vehicle_inspections" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "vehicle_type_diagram_views" (
+CREATE TABLE IF NOT EXISTS "vehicle_type_diagram_views" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"vehicle_type_id" uuid NOT NULL,
 	"view_name" varchar(50) NOT NULL,
@@ -95,7 +116,7 @@ CREATE TABLE "vehicle_type_diagram_views" (
 	"sort_order" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "vehicle_type_diagram_zones" (
+CREATE TABLE IF NOT EXISTS "vehicle_type_diagram_zones" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"diagram_view_id" uuid NOT NULL,
 	"zone_name" varchar(100) NOT NULL,
@@ -103,7 +124,7 @@ CREATE TABLE "vehicle_type_diagram_zones" (
 	"sort_order" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "vehicle_types" (
+CREATE TABLE IF NOT EXISTS "vehicle_types" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"tenant_id" uuid,
 	"name" varchar(100) NOT NULL,
@@ -116,24 +137,84 @@ CREATE TABLE "vehicle_types" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "vehicles" ADD COLUMN "vehicle_type_id" uuid;--> statement-breakpoint
-ALTER TABLE "inspection_categories" ADD CONSTRAINT "inspection_categories_template_id_inspection_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."inspection_templates"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "inspection_checklist_items" ADD CONSTRAINT "inspection_checklist_items_category_id_inspection_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."inspection_categories"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "inspection_damage_marks" ADD CONSTRAINT "inspection_damage_marks_inspection_id_vehicle_inspections_id_fk" FOREIGN KEY ("inspection_id") REFERENCES "public"."vehicle_inspections"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "inspection_damage_marks" ADD CONSTRAINT "inspection_damage_marks_diagram_view_id_vehicle_type_diagram_views_id_fk" FOREIGN KEY ("diagram_view_id") REFERENCES "public"."vehicle_type_diagram_views"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "inspection_photos" ADD CONSTRAINT "inspection_photos_inspection_id_vehicle_inspections_id_fk" FOREIGN KEY ("inspection_id") REFERENCES "public"."vehicle_inspections"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "inspection_photos" ADD CONSTRAINT "inspection_photos_damage_mark_id_inspection_damage_marks_id_fk" FOREIGN KEY ("damage_mark_id") REFERENCES "public"."inspection_damage_marks"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "inspection_photos" ADD CONSTRAINT "inspection_photos_response_id_inspection_responses_id_fk" FOREIGN KEY ("response_id") REFERENCES "public"."inspection_responses"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "inspection_responses" ADD CONSTRAINT "inspection_responses_inspection_id_vehicle_inspections_id_fk" FOREIGN KEY ("inspection_id") REFERENCES "public"."vehicle_inspections"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "inspection_responses" ADD CONSTRAINT "inspection_responses_checklist_item_id_inspection_checklist_items_id_fk" FOREIGN KEY ("checklist_item_id") REFERENCES "public"."inspection_checklist_items"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "inspection_templates" ADD CONSTRAINT "inspection_templates_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "inspection_templates" ADD CONSTRAINT "inspection_templates_vehicle_type_id_vehicle_types_id_fk" FOREIGN KEY ("vehicle_type_id") REFERENCES "public"."vehicle_types"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "vehicle_inspections" ADD CONSTRAINT "vehicle_inspections_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "vehicle_inspections" ADD CONSTRAINT "vehicle_inspections_work_order_id_work_orders_id_fk" FOREIGN KEY ("work_order_id") REFERENCES "public"."work_orders"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "vehicle_inspections" ADD CONSTRAINT "vehicle_inspections_vehicle_id_vehicles_id_fk" FOREIGN KEY ("vehicle_id") REFERENCES "public"."vehicles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "vehicle_inspections" ADD CONSTRAINT "vehicle_inspections_template_id_inspection_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."inspection_templates"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "vehicle_inspections" ADD CONSTRAINT "vehicle_inspections_inspected_by_users_id_fk" FOREIGN KEY ("inspected_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "vehicle_type_diagram_views" ADD CONSTRAINT "vehicle_type_diagram_views_vehicle_type_id_vehicle_types_id_fk" FOREIGN KEY ("vehicle_type_id") REFERENCES "public"."vehicle_types"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "vehicle_type_diagram_zones" ADD CONSTRAINT "vehicle_type_diagram_zones_diagram_view_id_vehicle_type_diagram_views_id_fk" FOREIGN KEY ("diagram_view_id") REFERENCES "public"."vehicle_type_diagram_views"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "vehicle_types" ADD CONSTRAINT "vehicle_types_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "vehicles" ADD CONSTRAINT "vehicles_vehicle_type_id_vehicle_types_id_fk" FOREIGN KEY ("vehicle_type_id") REFERENCES "public"."vehicle_types"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "vehicles" ADD COLUMN IF NOT EXISTS "vehicle_type_id" uuid;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "inspection_categories" ADD CONSTRAINT "inspection_categories_template_id_inspection_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."inspection_templates"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "inspection_checklist_items" ADD CONSTRAINT "inspection_checklist_items_category_id_inspection_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."inspection_categories"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "inspection_damage_marks" ADD CONSTRAINT "inspection_damage_marks_inspection_id_vehicle_inspections_id_fk" FOREIGN KEY ("inspection_id") REFERENCES "public"."vehicle_inspections"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "inspection_damage_marks" ADD CONSTRAINT "inspection_damage_marks_diagram_view_id_vehicle_type_diagram_views_id_fk" FOREIGN KEY ("diagram_view_id") REFERENCES "public"."vehicle_type_diagram_views"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "inspection_photos" ADD CONSTRAINT "inspection_photos_inspection_id_vehicle_inspections_id_fk" FOREIGN KEY ("inspection_id") REFERENCES "public"."vehicle_inspections"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "inspection_photos" ADD CONSTRAINT "inspection_photos_damage_mark_id_inspection_damage_marks_id_fk" FOREIGN KEY ("damage_mark_id") REFERENCES "public"."inspection_damage_marks"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "inspection_photos" ADD CONSTRAINT "inspection_photos_response_id_inspection_responses_id_fk" FOREIGN KEY ("response_id") REFERENCES "public"."inspection_responses"("id") ON DELETE set null ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "inspection_responses" ADD CONSTRAINT "inspection_responses_inspection_id_vehicle_inspections_id_fk" FOREIGN KEY ("inspection_id") REFERENCES "public"."vehicle_inspections"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "inspection_responses" ADD CONSTRAINT "inspection_responses_checklist_item_id_inspection_checklist_items_id_fk" FOREIGN KEY ("checklist_item_id") REFERENCES "public"."inspection_checklist_items"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "inspection_templates" ADD CONSTRAINT "inspection_templates_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "inspection_templates" ADD CONSTRAINT "inspection_templates_vehicle_type_id_vehicle_types_id_fk" FOREIGN KEY ("vehicle_type_id") REFERENCES "public"."vehicle_types"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "vehicle_inspections" ADD CONSTRAINT "vehicle_inspections_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "vehicle_inspections" ADD CONSTRAINT "vehicle_inspections_work_order_id_work_orders_id_fk" FOREIGN KEY ("work_order_id") REFERENCES "public"."work_orders"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "vehicle_inspections" ADD CONSTRAINT "vehicle_inspections_vehicle_id_vehicles_id_fk" FOREIGN KEY ("vehicle_id") REFERENCES "public"."vehicles"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "vehicle_inspections" ADD CONSTRAINT "vehicle_inspections_template_id_inspection_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."inspection_templates"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "vehicle_inspections" ADD CONSTRAINT "vehicle_inspections_inspected_by_users_id_fk" FOREIGN KEY ("inspected_by") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "vehicle_type_diagram_views" ADD CONSTRAINT "vehicle_type_diagram_views_vehicle_type_id_vehicle_types_id_fk" FOREIGN KEY ("vehicle_type_id") REFERENCES "public"."vehicle_types"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "vehicle_type_diagram_zones" ADD CONSTRAINT "vehicle_type_diagram_zones_diagram_view_id_vehicle_type_diagram_views_id_fk" FOREIGN KEY ("diagram_view_id") REFERENCES "public"."vehicle_type_diagram_views"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "vehicle_types" ADD CONSTRAINT "vehicle_types_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  ALTER TABLE "vehicles" ADD CONSTRAINT "vehicles_vehicle_type_id_vehicle_types_id_fk" FOREIGN KEY ("vehicle_type_id") REFERENCES "public"."vehicle_types"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

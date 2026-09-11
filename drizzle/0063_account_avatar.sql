@@ -1,1 +1,1 @@
-ALTER TABLE "accounts" ADD COLUMN "avatar_url" text;
+ALTER TABLE "accounts" ADD COLUMN IF NOT EXISTS "avatar_url" text;

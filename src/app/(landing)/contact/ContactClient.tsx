@@ -17,18 +17,18 @@ import ContactForm from '@/components/landing/ContactForm'
 import CTASection from '@/components/landing/CTASection'
 
 const defaultContactInfo = {
-  email: 'hello@retailsmarterp.com',
-  phone: '+94 77 840 7616',
-  whatsapp: '+94 77 840 7616',
+  email: 'hello@elitpos.elitjohnsdigital.co.ke',
+  phone: '+254 759 001 048',
+  whatsapp: '+254 759 001 048',
   address: 'No 31, Akuressa Road, Nupe, Matara, Sri Lanka',
-  companyName: 'Retail Smart ERP',
+  companyName: 'ElitPOS',
   businessHours: 'Mon-Fri 9:00 AM - 6:00 PM (IST)',
 }
 
 const trustItems = [
-  { icon: Sparkles, label: 'AI-Powered Platform', gradient: 'from-violet-500 to-purple-500' },
+  { icon: Sparkles, label: 'AI-Powered Platform', gradient: 'from-violet-500 to-green-400' },
   { icon: Shield, label: 'Advanced Security', gradient: 'from-emerald-500 to-teal-500' },
-  { icon: Users, label: 'Unlimited Users', gradient: 'from-blue-500 to-sky-500' },
+  { icon: Users, label: 'Unlimited Users', gradient: 'from-green-500 to-sky-500' },
   { icon: Send, label: 'Free Forever', gradient: 'from-amber-500 to-orange-500' },
 ]
 
@@ -57,11 +57,11 @@ export default function ContactClient() {
     const whatsappDigits = contactData.whatsapp.replace(/[^0-9]/g, '')
     const phoneDigits = contactData.phone.replace(/[^0-9]/g, '')
     return [
-      { icon: Mail, label: 'Email', value: contactData.email, href: `mailto:${contactData.email}`, gradient: 'from-blue-500 to-sky-500' },
+      { icon: Mail, label: 'Email', value: contactData.email, href: `mailto:${contactData.email}`, gradient: 'from-green-500 to-sky-500' },
       { icon: Phone, label: 'Phone', value: contactData.phone, href: `tel:+${phoneDigits}`, gradient: 'from-emerald-500 to-teal-500' },
       { icon: MessageCircle, label: 'WhatsApp', value: contactData.whatsapp, href: `https://wa.me/${whatsappDigits}`, gradient: 'from-green-500 to-emerald-500' },
       { icon: MapPin, label: 'Address', value: contactData.address, href: null, gradient: 'from-amber-500 to-orange-500' },
-      { icon: Building2, label: 'Company', value: contactData.companyName, href: null, gradient: 'from-violet-500 to-purple-500' },
+      { icon: Building2, label: 'Company', value: contactData.companyName, href: null, gradient: 'from-violet-500 to-green-400' },
       { icon: Clock, label: 'Business Hours', value: contactData.businessHours, href: null, gradient: 'from-pink-500 to-rose-500' },
     ]
   }, [contactData])
@@ -83,7 +83,7 @@ export default function ContactClient() {
           </BlurFadeIn>
           <BlurFadeIn delay={0.2}>
             <p className="mt-6 text-lg sm:text-xl text-zinc-400 leading-relaxed max-w-2xl mx-auto">
-              Have questions about RetailSmart ERP? We&apos;d love to hear from you. Our team is ready to help you get started — your first company is <span className="text-emerald-400 font-semibold">free forever</span>.
+              Have questions about ElitPOS? We&apos;d love to hear from you. Our team is ready to help you get started — your first company is <span className="text-emerald-400 font-semibold">free forever</span>.
             </p>
           </BlurFadeIn>
         </div>
@@ -97,7 +97,7 @@ export default function ContactClient() {
             <FadeIn className="lg:col-span-3">
               <div className="glass-card-v2 rounded-2xl p-6 sm:p-8">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-md bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-md bg-gradient-to-br from-green-600 to-violet-600 flex items-center justify-center">
                     <Send className="w-5 h-5 text-white" />
                   </div>
                   <h2 className="text-xl font-bold text-white">Send us a message</h2>

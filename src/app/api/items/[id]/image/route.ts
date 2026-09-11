@@ -5,6 +5,7 @@ import { withTenant } from '@/lib/db'
 import { items } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { uploadToR2, deleteFromR2, keyFromUrl } from '@/lib/files'
+import { imagekitEnabled, uploadToImageKit } from '@/lib/files/imagekit'
 import { requireQuota, adjustFileStorage } from '@/lib/db/storage-quota'
 import { logAndBroadcast } from '@/lib/websocket/broadcast'
 import { logError } from '@/lib/ai/error-logger'
@@ -55,20 +56,36 @@ export async function POST(
         return NextResponse.json({ error: 'Item not found' }, { status: 404 })
       }
 
-      // Delete old image from R2 if exists
+      // Delete old image if exists
       const oldSize = item.imageSize || 0
       if (item.imageUrl) {
-        const oldKey = keyFromUrl(item.imageUrl)
-        if (oldKey) {
-          try { await deleteFromR2(oldKey) } catch { /* ignore */ }
+        const ikOld = decodeImageKitUrl(item.imageUrl)
+        if (ikOld) {
+          const { deleteFromImageKit } = await import('@/lib/files/imagekit')
+          await deleteFromImageKit(ikOld.fileId).catch(() => {})
+        } else {
+          const oldKey = keyFromUrl(item.imageUrl)
+          if (oldKey) await deleteFromR2(oldKey).catch(() => {})
         }
       }
 
       const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
       const bytes = await file.arrayBuffer()
       const buffer = Buffer.from(bytes)
-      const r2Key = `items/${session!.user.tenantId}/${itemId}.${ext}`
-      const imageUrl = await uploadToR2(r2Key, buffer, file.type)
+      let imageUrl: string
+
+      if (imagekitEnabled()) {
+        const ikResult = await uploadToImageKit(
+          buffer,
+          `item-${itemId}.${ext}`,
+          file.type,
+          `items/${session!.user.tenantId}`,
+        )
+        imageUrl = ikResult.url  // plain URL — works directly as <img src>
+      } else {
+        const r2Key = `items/${session!.user.tenantId}/${itemId}.${ext}`
+        imageUrl = await uploadToR2(r2Key, buffer, file.type)
+      }
 
       // Update item imageUrl
       await db.update(items)
@@ -112,9 +129,10 @@ export async function DELETE(
       }
 
       if (item.imageUrl) {
-        const key = keyFromUrl(item.imageUrl)
-        if (key) {
-          try { await deleteFromR2(key) } catch { /* ignore */ }
+        // ImageKit: can't delete by URL without fileId — just unset in DB
+        if (!item.imageUrl.includes('imagekit.io')) {
+          const key = keyFromUrl(item.imageUrl)
+          if (key) await deleteFromR2(key).catch(() => {})
         }
       }
 

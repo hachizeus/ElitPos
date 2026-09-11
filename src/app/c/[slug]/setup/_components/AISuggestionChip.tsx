@@ -25,7 +25,7 @@ export function AISuggestionChip({
   if (loading) {
     return (
       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5 flex items-center gap-1">
-        <Sparkles size={12} className="animate-pulse text-blue-400" />
+        <Sparkles size={12} className="animate-pulse text-green-400" />
         Loading suggestions...
       </p>
     )
@@ -42,7 +42,7 @@ export function AISuggestionChip({
       className="mt-1.5"
     >
       <div className="flex items-center gap-2">
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full border border-blue-200 dark:border-blue-800">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full border border-green-200 dark:border-green-800">
           <Sparkles size={10} className="animate-sparkle" />
           AI suggests: {label}
         </span>
@@ -51,7 +51,7 @@ export function AISuggestionChip({
           onClick={onApply}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 font-medium underline underline-offset-2 transition-colors"
+          className="text-xs text-[#00cc6e] dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 font-medium underline underline-offset-2 transition-colors"
         >
           Apply
         </motion.button>
@@ -100,9 +100,9 @@ export function AISuggestionBanner({
 }: AISuggestionBannerProps) {
   if (loading) {
     return (
-      <div className="mb-4 p-3 rounded border border-blue-100 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-900/20">
+      <div className="mb-4 p-3 rounded border border-green-100 dark:border-green-900/50 bg-green-50/50 dark:bg-green-900/20">
         <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
-          <Sparkles size={12} className="animate-pulse text-blue-400" />
+          <Sparkles size={12} className="animate-pulse text-green-400" />
           Loading AI suggestions...
         </p>
       </div>
@@ -117,11 +117,11 @@ export function AISuggestionBanner({
       animate={{ opacity: 1, height: 'auto' }}
       exit={{ opacity: 0, height: 0 }}
       transition={{ duration: 0.3 }}
-      className="mb-4 p-3 rounded border border-blue-100 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-900/20"
+      className="mb-4 p-3 rounded border border-green-100 dark:border-green-900/50 bg-green-50/50 dark:bg-green-900/20"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-blue-700 dark:text-blue-300 flex items-center gap-1.5 mb-1.5">
+          <p className="text-xs font-medium text-green-700 dark:text-green-300 flex items-center gap-1.5 mb-1.5">
             <Sparkles size={12} className="animate-sparkle" />
             AI suggests {items.length} {itemLabel}
           </p>
@@ -138,7 +138,7 @@ export function AISuggestionBanner({
             onClick={onApplyAll}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="px-2.5 py-1 text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-800/50 hover:bg-blue-200 dark:hover:bg-blue-800 rounded-md transition-colors"
+            className="px-2.5 py-1 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-800/50 hover:bg-green-200 dark:hover:bg-[#00b35e] rounded-md transition-colors"
           >
             Apply All
           </motion.button>
@@ -167,9 +167,9 @@ interface AISuggestionTipProps {
 export function AISuggestionTip({ tip, loading }: AISuggestionTipProps) {
   if (loading) {
     return (
-      <div className="mb-4 p-3 rounded border border-blue-100 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-900/20">
+      <div className="mb-4 p-3 rounded border border-green-100 dark:border-green-900/50 bg-green-50/50 dark:bg-green-900/20">
         <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
-          <Sparkles size={12} className="animate-pulse text-blue-400" />
+          <Sparkles size={12} className="animate-pulse text-green-400" />
           Loading tips...
         </p>
       </div>
@@ -183,9 +183,9 @@ export function AISuggestionTip({ tip, loading }: AISuggestionTipProps) {
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="mb-4 p-3 rounded border border-blue-100 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-900/20"
+      className="mb-4 p-3 rounded border border-green-100 dark:border-green-900/50 bg-green-50/50 dark:bg-green-900/20"
     >
-      <p className="text-xs text-blue-700 dark:text-blue-300 flex items-start gap-1.5">
+      <p className="text-xs text-green-700 dark:text-green-300 flex items-start gap-1.5">
         <Sparkles size={12} className="shrink-0 mt-0.5 animate-sparkle" />
         <span>{tip}</span>
       </p>

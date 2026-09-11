@@ -63,31 +63,34 @@ export async function GET(request: NextRequest) {
 
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
-      // Get total count for pagination
-      const [{ count: totalCount }] = await db
-        .select({ count: sql<number>`count(*)::int` })
-        .from(sales)
-        .where(whereClause)
-
       // Calculate pagination
       const limit = all ? 1000 : Math.min(pageSize, 100) // Max 100 per page
       const offset = all ? undefined : (page - 1) * pageSize
 
-      const result = await db.query.sales.findMany({
-        where: whereClause,
-        with: {
-          customer: true,
-          user: true,
-          items: {
-            with: {
-              item: true,
+      // Run count and data queries in parallel — they're independent
+      const [countResult, result] = await Promise.all([
+        db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(sales)
+          .where(whereClause),
+        db.query.sales.findMany({
+          where: whereClause,
+          with: {
+            customer: true,
+            user: true,
+            items: {
+              with: {
+                item: true,
+              },
             },
           },
-        },
-        orderBy: [desc(sales.createdAt)],
-        limit,
-        offset,
-      })
+          orderBy: [desc(sales.createdAt)],
+          limit,
+          offset,
+        }),
+      ])
+
+      const totalCount = countResult[0]?.count ?? 0
 
       // Get returns only for original sales on the current page (not all returns in DB)
       const originalSaleIds = result
@@ -183,9 +186,7 @@ export async function GET(request: NextRequest) {
           .from(salesOrders)
           .where(sql`${salesOrders.id} IN ${soIds}`)
         soMap = Object.fromEntries(soRecords.map(so => [so.id, so.orderNo]))
-      }
-
-      const salesWithSource = salesWithReturnInfo.map((sale: { salesOrderId?: string | null }) => ({
+      }      const salesWithSource = salesWithReturnInfo.map((sale: { salesOrderId?: string | null }) => ({
         ...sale,
         salesOrderNo: sale.salesOrderId ? soMap[sale.salesOrderId] || null : null,
       }))
@@ -564,47 +565,50 @@ export async function POST(request: NextRequest) {
       // Note: This check uses a snapshot of reserved quantities and may be slightly stale.
       // The authoritative check happens INSIDE the transaction with FOR UPDATE locks.
       // This pre-check provides early validation and better error messages.
-      // Get reserved quantities from multiple sources (RLS scopes all queries)
+      // Run all 3 reservation source queries in parallel — they're independent.
+      const [
+        reservedFromWorkOrders,
+        heldSalesData,
+        reservedFromEstimates,
+      ] = await Promise.all([
+        // 1. Reserved from draft work orders (warehouse-scoped)
+        db
+          .select({
+            itemId: workOrderParts.itemId,
+            reservedQty: sql<string>`COALESCE(SUM(CAST(${workOrderParts.quantity} AS DECIMAL)), 0)`,
+          })
+          .from(workOrderParts)
+          .innerJoin(workOrders, eq(workOrderParts.workOrderId, workOrders.id))
+          .where(and(
+            eq(workOrders.status, 'draft'),
+            eq(workOrders.warehouseId, warehouseId!)
+          ))
+          .groupBy(workOrderParts.itemId),
 
-      // 1. Reserved from draft work orders (warehouse-scoped)
-      const reservedFromWorkOrders = await db
-        .select({
-          itemId: workOrderParts.itemId,
-          reservedQty: sql<string>`COALESCE(SUM(CAST(${workOrderParts.quantity} AS DECIMAL)), 0)`,
-        })
-        .from(workOrderParts)
-        .innerJoin(workOrders, eq(workOrderParts.workOrderId, workOrders.id))
-        .where(and(
-          eq(workOrders.status, 'draft'),
-          eq(workOrders.warehouseId, warehouseId!)
-        ))
-        .groupBy(workOrderParts.itemId)
+        // 2. Reserved from non-expired held sales (JSONB cart items) - warehouse-scoped
+        db.query.heldSales.findMany({
+          where: and(
+            eq(heldSales.warehouseId, warehouseId!),
+            sql`${heldSales.expiresAt} > NOW()`
+          ),
+        }),
 
-      // 2. Reserved from non-expired held sales (JSONB cart items) - warehouse-scoped
-      const heldSalesData = await db.query.heldSales.findMany({
-        where: and(
-          eq(heldSales.warehouseId, warehouseId!),
-          sql`${heldSales.expiresAt} > NOW()`
-        ),
-      })
-
-      // 3. Reserved from estimates with holdStock enabled - warehouse-scoped
-      const reservedFromEstimates = await db
-        .select({
-          itemId: insuranceEstimateItems.itemId,
-          reservedQty: sql<string>`COALESCE(SUM(CAST(${insuranceEstimateItems.quantity} AS DECIMAL)), 0)`,
-        })
-        .from(insuranceEstimateItems)
-        .innerJoin(insuranceEstimates, eq(insuranceEstimateItems.estimateId, insuranceEstimates.id))
-        .where(
-          and(
+        // 3. Reserved from estimates with holdStock enabled - warehouse-scoped
+        db
+          .select({
+            itemId: insuranceEstimateItems.itemId,
+            reservedQty: sql<string>`COALESCE(SUM(CAST(${insuranceEstimateItems.quantity} AS DECIMAL)), 0)`,
+          })
+          .from(insuranceEstimateItems)
+          .innerJoin(insuranceEstimates, eq(insuranceEstimateItems.estimateId, insuranceEstimates.id))
+          .where(and(
             eq(insuranceEstimates.holdStock, true),
             eq(insuranceEstimates.warehouseId, warehouseId!),
             sql`${insuranceEstimates.status} NOT IN ('cancelled', 'work_order_created')`,
             sql`${insuranceEstimateItems.itemId} IS NOT NULL`
-          )
-        )
-        .groupBy(insuranceEstimateItems.itemId)
+          ))
+          .groupBy(insuranceEstimateItems.itemId),
+      ])
 
     // Combine all sources into reservedMap
     const reservedMap = new Map<string, number>()
@@ -633,19 +637,30 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // Batch-fetch all cart items and their stock in 2 queries instead of 2N queries
+      const cartItemIds = [...new Set(expandedCartItems.map(c => c.itemId).filter(Boolean))]
+      const [batchedItems, batchedStock] = await Promise.all([
+        cartItemIds.length > 0
+          ? db.select().from(items).where(inArray(items.id, cartItemIds))
+          : Promise.resolve([]),
+        cartItemIds.length > 0
+          ? db.select().from(warehouseStock).where(
+              and(
+                inArray(warehouseStock.itemId, cartItemIds),
+                eq(warehouseStock.warehouseId, warehouseId!)
+              )
+            )
+          : Promise.resolve([]),
+      ])
+
+      const itemMap = new Map(batchedItems.map(i => [i.id, i]))
+      const stockMap = new Map(batchedStock.map(s => [s.itemId, s]))
+
       const insufficientStockItems: string[] = []
       for (const cartItem of expandedCartItems) {
-        const item = await db.query.items.findFirst({
-          where: eq(items.id, cartItem.itemId),
-        })
+        const item = itemMap.get(cartItem.itemId)
         if (item && item.trackStock) {
-          // Get stock from warehouseStock table (RLS scopes)
-          const stock = await db.query.warehouseStock.findFirst({
-            where: and(
-              eq(warehouseStock.itemId, item.id),
-              eq(warehouseStock.warehouseId, warehouseId)
-            ),
-          })
+          const stock = stockMap.get(item.id)
           const currentStock = stock ? parseFloat(stock.currentStock) : 0
           const reserved = reservedMap.get(item.id) || 0
           const availableStock = currentStock - reserved

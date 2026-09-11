@@ -2,18 +2,18 @@ import { test as base, expect, type Page, type BrowserContext } from '@playwrigh
 
 // Test credentials - must match existing database records
 export const TEST_TENANT = {
-  slug: 'gajanayaka',
-  name: 'Gajanayaka',
+  slug: 'elitjohns',
+  name: 'elitjohns',
   businessType: 'auto_service',
 }
 
 export const TEST_USER = {
-  email: 'ravindu2012@hotmail.com',
-  password: 'Gaje@7616',
+  email: 'info@elitjohnsdigital.co.ke',
+  password: '0a0b0c0D.',
 }
 
 export const TEST_USER_2 = {
-  email: 'ravindu@test.com',
+  email: 'elitjohns@test.com',
   password: 'TestPass123!',
 }
 

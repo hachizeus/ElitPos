@@ -12,7 +12,7 @@ import { checkRateLimit, recordRateLimitAttempt, clearRateLimit, LOGIN_RATE_LIMI
 // Determine cookie domain based on environment
 const getCookieDomain = () => {
   if (process.env.NODE_ENV === 'production') {
-    return '.retailsmarterp.com'
+    return '.elitjohnsdigital.co.ke'
   }
   return undefined
 }
@@ -191,8 +191,8 @@ export const {
               googleId: authAccount.providerAccountId,
               emailVerified: true,
               isActive: true,
-              country: 'LK',
-              currency: 'LKR',
+              country: 'KE',
+              currency: 'KES',
             }).returning()
             existingAccount = newAccount
           }
@@ -319,6 +319,6 @@ export const {
   },
   session: {
     strategy: 'jwt',
-    maxAge: 15 * 60, // 15 minutes — auto-refreshed by SessionProvider refetchInterval
+    maxAge: 24 * 60 * 60, // 24 hours
   },
 })

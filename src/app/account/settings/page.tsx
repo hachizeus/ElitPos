@@ -32,11 +32,12 @@ export default function SettingsPage() {
     language: 'en',
     timezone: 'UTC',
     dateFormat: 'MM/DD/YYYY',
-    currency: 'LKR',
+    currency: 'KES',
   })
 
   const [notifications, setNotifications] = useState({
     email: true,
+    sms: true,
     billing: true,
     security: true,
     marketing: false,
@@ -44,13 +45,13 @@ export default function SettingsPage() {
 
   // Track original values for unsaved changes detection
   const [originalProfile, setOriginalProfile] = useState({ fullName: '', email: '', phone: '' })
-  const [originalPreferences, setOriginalPreferences] = useState({ language: 'en', timezone: 'UTC', dateFormat: 'MM/DD/YYYY', currency: 'LKR' })
-  const [originalNotifications, setOriginalNotifications] = useState({ email: true, billing: true, security: true, marketing: false })
+  const [originalPreferences, setOriginalPreferences] = useState({ language: 'en', timezone: 'UTC', dateFormat: 'MM/DD/YYYY', currency: 'KES' })
+  const [originalNotifications, setOriginalNotifications] = useState({ email: true, sms: true, billing: true, security: true, marketing: false })
 
   const hasUnsavedChanges = useMemo(() => {
     const profileChanged = profile.fullName !== originalProfile.fullName || profile.phone !== originalProfile.phone
     const prefsChanged = preferences.language !== originalPreferences.language || preferences.timezone !== originalPreferences.timezone || preferences.dateFormat !== originalPreferences.dateFormat || preferences.currency !== originalPreferences.currency
-    const notifsChanged = notifications.email !== originalNotifications.email || notifications.billing !== originalNotifications.billing || notifications.security !== originalNotifications.security || notifications.marketing !== originalNotifications.marketing
+    const notifsChanged = notifications.email !== originalNotifications.email || notifications.sms !== originalNotifications.sms || notifications.billing !== originalNotifications.billing || notifications.security !== originalNotifications.security || notifications.marketing !== originalNotifications.marketing
     return profileChanged || prefsChanged || notifsChanged
   }, [profile, preferences, notifications, originalProfile, originalPreferences, originalNotifications])
 
@@ -83,10 +84,11 @@ export default function SettingsPage() {
           language: data.language || 'en',
           timezone: data.timezone || 'UTC',
           dateFormat: data.dateFormat || 'MM/DD/YYYY',
-          currency: data.currency || 'LKR',
+          currency: data.currency || 'KES',
         }
         const notifs = {
           email: data.notifications?.email ?? true,
+          sms: data.notifications?.sms ?? true,
           billing: data.notifications?.billing ?? true,
           security: data.notifications?.security ?? true,
           marketing: data.notifications?.marketing ?? false,
@@ -145,7 +147,7 @@ export default function SettingsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex-shrink-0 flex items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-md text-xs lg:text-sm font-medium transition-all lg:w-full ${
                   activeTab === tab.id
-                    ? 'bg-gray-900 dark:bg-gray-700 text-white shadow-lg'
+                    ? 'bg-green-600 text-white shadow-lg'
                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >

@@ -91,8 +91,13 @@ export default function LandingNav() {
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex-shrink-0">
-            <Logo variant="full" size={28} />
+          <Link href="/" className="flex-shrink-0 flex items-center h-16 py-1">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/icons/mainlogo.png"
+              alt="ElitPOS"
+              style={{ height: '100%', width: 'auto', display: 'block' }}
+            />
           </Link>
 
           {/* Desktop Nav */}

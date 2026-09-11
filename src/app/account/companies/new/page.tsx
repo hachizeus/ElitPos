@@ -161,8 +161,8 @@ function NewCompanyForm() {
   const [tiers, setTiers] = useState<PricingTier[]>([])
   const [selectedTier, setSelectedTier] = useState('')
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly')
-  const [accountCurrency, setAccountCurrency] = useState('USD')
-  const [tierCurrency, setTierCurrency] = useState('LKR')
+  const [accountCurrency, setAccountCurrency] = useState('KES')
+  const [tierCurrency, setTierCurrency] = useState('KES')
   const [exchangeRate, setExchangeRate] = useState(1)
 
   const [step, setStep] = useState(0)
@@ -258,17 +258,17 @@ function NewCompanyForm() {
             setTiers(paidTiers)
             // Store the currency tiers are priced in
             if (paidTiers.length > 0) {
-              setTierCurrency(paidTiers[0].currency || 'LKR')
+              setTierCurrency(paidTiers[0].currency || 'KES')
             }
           }
 
           if (walletRes.ok) {
             const walletData = await walletRes.json()
-            const userCurrency = walletData.currency || 'LKR'
+            const userCurrency = walletData.currency || 'KES'
             setAccountCurrency(userCurrency)
 
             // Convert from tier currency to account currency
-            const baseCurrency = paidTiers.length > 0 ? (paidTiers[0].currency || 'LKR') : 'LKR'
+            const baseCurrency = paidTiers.length > 0 ? (paidTiers[0].currency || 'KES') : 'KES'
             if (userCurrency !== baseCurrency) {
               const rate = await getExchangeRate(baseCurrency, userCurrency)
               if (rate) {
@@ -414,7 +414,7 @@ function NewCompanyForm() {
       <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
         <div className="px-4 sm:px-8 py-4 sm:py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-md flex items-center justify-center">
+            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-500 rounded-md flex items-center justify-center">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -439,7 +439,7 @@ function NewCompanyForm() {
                 <div className="flex items-center gap-2">
                   <div
                     className={`w-9 h-9 rounded-md flex items-center justify-center font-semibold text-sm transition-all ${
-                      step >= 0 ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-lg' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                      step >= 0 ? 'bg-green-600 text-white shadow-lg' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                     }`}
                     aria-current={step === 0 ? 'step' : undefined}
                   >
@@ -449,13 +449,13 @@ function NewCompanyForm() {
                     Plan
                   </span>
                 </div>
-                <div className={`w-6 sm:w-12 h-0.5 mx-1 sm:mx-3 ${step > 0 ? 'bg-gray-900 dark:bg-white' : 'bg-gray-200 dark:bg-gray-700'}`} />
+                <div className={`w-6 sm:w-12 h-0.5 mx-1 sm:mx-3 ${step > 0 ? 'bg-[#00FF88]' : 'bg-gray-200 dark:bg-gray-700'}`} />
               </>
             )}
             <div className="flex items-center gap-2">
               <div
                 className={`w-9 h-9 rounded-md flex items-center justify-center font-semibold text-sm transition-all ${
-                  step >= 1 ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-lg' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                  step >= 1 ? 'bg-green-600 text-white shadow-lg' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                 }`}
                 aria-current={step === 1 ? 'step' : undefined}
               >
@@ -465,11 +465,11 @@ function NewCompanyForm() {
                 Type
               </span>
             </div>
-            <div className={`w-6 sm:w-12 h-0.5 mx-1 sm:mx-3 ${step > 1 ? 'bg-gray-900 dark:bg-white' : 'bg-gray-200 dark:bg-gray-700'}`} />
+            <div className={`w-6 sm:w-12 h-0.5 mx-1 sm:mx-3 ${step > 1 ? 'bg-[#00FF88]' : 'bg-gray-200 dark:bg-gray-700'}`} />
             <div className="flex items-center gap-2">
               <div
                 className={`w-9 h-9 rounded-md flex items-center justify-center font-semibold text-sm transition-all ${
-                  step >= 2 ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-lg' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                  step >= 2 ? 'bg-green-600 text-white shadow-lg' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                 }`}
                 aria-current={step === 2 ? 'step' : undefined}
               >
@@ -526,8 +526,8 @@ function NewCompanyForm() {
                       }`}
                     >
                       {isTierSelected && (
-                        <div className="absolute top-3 right-3 w-6 h-6 bg-gray-900 dark:bg-white rounded-full flex items-center justify-center">
-                          <Check className="w-3.5 h-3.5 text-white dark:text-gray-900" />
+                        <div className="absolute top-3 right-3 w-6 h-6 bg-[#00FF88] rounded-full flex items-center justify-center">
+                          <Check className="w-3.5 h-3.5 text-black" />
                         </div>
                       )}
                       <div className="flex items-center justify-between">
@@ -561,7 +561,7 @@ function NewCompanyForm() {
                 <button
                   onClick={() => setStep(1)}
                   disabled={!selectedTier}
-                  className="px-6 py-3 bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                 >
                   Continue
                 </button>
@@ -573,9 +573,9 @@ function NewCompanyForm() {
           {step === 1 && (
             <div className="space-y-6" role="region" aria-label="Select business type">
               {hasExistingCompanies && selectedTierInfo && (
-                <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-md border border-blue-200 dark:border-blue-800">
-                  <CreditCard className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/30 rounded-md border border-green-200 dark:border-green-800">
+                  <CreditCard className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <span className="text-sm font-medium text-green-800 dark:text-green-300">
                     {selectedTierInfo.displayName} - {formatCurrencyWithSymbol(
                       convertPrice(billingCycle === 'monthly' ? selectedTierInfo.priceMonthly : selectedTierInfo.priceYearly / 12),
                       displayCurrency
@@ -583,7 +583,7 @@ function NewCompanyForm() {
                   </span>
                   <button
                     onClick={() => setStep(0)}
-                    className="ml-auto text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
+                    className="ml-auto text-sm text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 font-medium"
                   >
                     Change
                   </button>
@@ -609,8 +609,8 @@ function NewCompanyForm() {
                       }`}
                     >
                       {isSelected && (
-                        <div className="absolute top-3 right-3 w-6 h-6 bg-gray-900 dark:bg-white rounded-full flex items-center justify-center">
-                          <Check className="w-3.5 h-3.5 text-white dark:text-gray-900" />
+                        <div className="absolute top-3 right-3 w-6 h-6 bg-[#00FF88] rounded-full flex items-center justify-center">
+                          <Check className="w-3.5 h-3.5 text-black" />
                         </div>
                       )}
                       <div className={`w-12 h-12 rounded-md flex items-center justify-center mb-3 ${type.color}`}>
@@ -643,7 +643,7 @@ function NewCompanyForm() {
                 <button
                   onClick={() => setStep(2)}
                   disabled={!selectedType}
-                  className={`px-6 py-3 bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium ${!hasExistingCompanies ? 'ml-auto' : ''}`}
+                  className={`px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium ${!hasExistingCompanies ? 'ml-auto' : ''}`}
                 >
                   Continue
                 </button>
@@ -723,7 +723,7 @@ function NewCompanyForm() {
                       </div>
                       <div id="slug-preview" className="mt-1 flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
                         <Globe className="w-3 h-3" />
-                        <span className="font-mono">{formData.slug}.retailsmarterp.com</span>
+                        <span className="font-mono">{formData.slug}.elitpos.elitjohnsdigital.co.ke</span>
                       </div>
                     </>
                   )}

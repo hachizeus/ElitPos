@@ -5,6 +5,7 @@ import { tenants } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { logError } from '@/lib/ai/error-logger'
 import { uploadToR2, deleteFromR2, keyFromUrl } from '@/lib/files'
+import { imagekitEnabled, uploadToImageKit } from '@/lib/files/imagekit'
 import { requireQuota, adjustFileStorage } from '@/lib/db/storage-quota'
 import { logAndBroadcast } from '@/lib/websocket/broadcast'
 import { requirePermission } from '@/lib/auth/roles'
@@ -44,24 +45,29 @@ export async function POST(request: NextRequest) {
 
       const ext = file.name.split('.').pop() || 'png'
 
-      // Delete old logo from R2 if exists
+      // Delete old logo if exists
       const oldLogo = await db.query.tenants.findFirst({
         where: eq(tenants.id, session.user.tenantId),
         columns: { logoUrl: true, logoSize: true }
       })
 
       const oldSize = oldLogo?.logoSize || 0
-      if (oldLogo?.logoUrl) {
+      if (oldLogo?.logoUrl && !oldLogo.logoUrl.includes('imagekit.io')) {
         const oldKey = keyFromUrl(oldLogo.logoUrl)
-        if (oldKey) {
-          try { await deleteFromR2(oldKey) } catch { /* ignore */ }
-        }
+        if (oldKey) await deleteFromR2(oldKey).catch(() => {})
       }
 
-      const bytes = await file.arrayBuffer()
+      const bytes  = await file.arrayBuffer()
       const buffer = Buffer.from(bytes)
-      const r2Key = `logos/${session.user.tenantId}.${ext}`
-      const logoUrl = await uploadToR2(r2Key, buffer, file.type)
+      let logoUrl: string
+
+      if (imagekitEnabled()) {
+        const ikResult = await uploadToImageKit(buffer, `logo-${session.user.tenantId}.${ext}`, file.type, 'logos')
+        logoUrl = ikResult.url  // plain URL — works directly as <img src>
+      } else {
+        const r2Key = `logos/${session.user.tenantId}.${ext}`
+        logoUrl = await uploadToR2(r2Key, buffer, file.type)
+      }
 
       // Update tenant logoUrl and size
       await db.update(tenants)
@@ -99,11 +105,9 @@ export async function DELETE() {
         columns: { logoUrl: true, logoSize: true }
       })
 
-      if (tenant?.logoUrl) {
+      if (tenant?.logoUrl && !tenant.logoUrl.includes('imagekit.io')) {
         const key = keyFromUrl(tenant.logoUrl)
-        if (key) {
-          try { await deleteFromR2(key) } catch { /* ignore */ }
-        }
+        if (key) await deleteFromR2(key).catch(() => {})
       }
 
       // Clear logoUrl and size in database

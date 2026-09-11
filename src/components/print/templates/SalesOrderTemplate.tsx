@@ -51,7 +51,7 @@ export function SalesOrderTemplate({
   businessEmail,
   currencyCode
 }: SalesOrderTemplateProps) {
-  const currency = currencyCode || 'LKR'
+  const currency = currencyCode || 'KES'
   const formatCurrency = (value: string | null) => {
     if (!value) return '-'
     return `${currency} ${parseFloat(value).toLocaleString('en-US', { minimumFractionDigits: 2 })}`

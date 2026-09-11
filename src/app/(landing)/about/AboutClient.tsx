@@ -25,7 +25,7 @@ const values = [
   { icon: Lightbulb, title: 'Innovation', description: 'AI-powered features that push the boundaries of what business software can do.', gradient: 'from-amber-500 to-orange-500' },
   { icon: Heart, title: 'Customer First', description: 'Every feature is built with our customers\' success in mind. Your growth is our mission.', gradient: 'from-pink-500 to-rose-500' },
   { icon: Shield, title: 'Trust & Security', description: 'Complete data isolation, encrypted connections, and regular backups protect your data.', gradient: 'from-emerald-500 to-teal-500' },
-  { icon: Zap, title: 'Simplicity', description: 'Powerful doesn\'t mean complicated. Intuitive design for every business type.', gradient: 'from-blue-500 to-sky-500' },
+  { icon: Zap, title: 'Simplicity', description: 'Powerful doesn\'t mean complicated. Intuitive design for every business type.', gradient: 'from-green-500 to-sky-500' },
 ]
 
 const milestones = [
@@ -40,20 +40,20 @@ const techStack = [
   { name: 'Modern Stack', icon: Code2, color: 'text-white' },
   { name: 'Real-Time Sync', icon: Zap, color: 'text-amber-500' },
   { name: 'Data Isolation', icon: Shield, color: 'text-emerald-500' },
-  { name: 'Managed DB', icon: Database, color: 'text-blue-600' },
+  { name: 'Managed DB', icon: Database, color: 'text-green-600' },
   { name: 'AI Analytics', icon: Sparkles, color: 'text-violet-500' },
   { name: 'Cloud Native', icon: Code2, color: 'text-sky-500' },
   { name: 'Multi-Currency', icon: Code2, color: 'text-cyan-500' },
-  { name: 'Mobile Ready', icon: Code2, color: 'text-blue-500' },
+  { name: 'Mobile Ready', icon: Code2, color: 'text-green-500' },
 ]
 
 const platformHighlights = [
-  { icon: Users, value: 'Unlimited', label: 'Users per plan', gradient: 'from-blue-500 to-violet-500' },
+  { icon: Users, value: 'Unlimited', label: 'Users per plan', gradient: 'from-green-500 to-violet-500' },
   { icon: Globe, value: '4', label: 'Business types', gradient: 'from-emerald-500 to-teal-500' },
   { icon: Lock, value: 'Full', label: 'Data isolation', gradient: 'from-amber-500 to-orange-500' },
   { icon: BarChart3, value: 'AI', label: 'Powered analytics', gradient: 'from-pink-500 to-rose-500' },
-  { icon: Rocket, value: 'Real-time', label: 'Live sync', gradient: 'from-violet-500 to-purple-500' },
-  { icon: Shield, value: 'Multi', label: 'Role access', gradient: 'from-blue-600 to-sky-500' },
+  { icon: Rocket, value: 'Real-time', label: 'Live sync', gradient: 'from-violet-500 to-green-400' },
+  { icon: Shield, value: 'Multi', label: 'Role access', gradient: 'from-green-600 to-sky-500' },
 ]
 
 export default function AboutClient() {
@@ -114,22 +114,22 @@ export default function AboutClient() {
                 </h2>
                 <div className="space-y-4 text-zinc-400 leading-relaxed">
                   <p>
-                    RetailSmart ERP was born from a simple observation: small and medium businesses were struggling with fragmented, expensive, and overly complex software solutions. They needed a unified platform that could handle everything from point of sale to accounting, without the enterprise price tag.
+                    ElitPOS was born from a simple observation: small and medium businesses were struggling with fragmented, expensive, and overly complex software solutions. They needed a unified platform that could handle everything from point of sale to accounting, without the enterprise price tag.
                   </p>
                   <p>
-                    We set out to build a truly comprehensive business management platform that adapts to different business types. Whether you run a retail store, restaurant, supermarket, or auto service center, RetailSmart ERP provides the specific tools you need while maintaining a consistent, intuitive experience.
+                    We set out to build a truly comprehensive business management platform that adapts to different business types. Whether you run a retail store, restaurant, supermarket, or auto service center, ElitPOS provides the specific tools you need while maintaining a consistent, intuitive experience.
                   </p>
                   <p>
                     Today, our platform supports four distinct business types with specialized modules, database-level data isolation, real-time collaboration, and AI-assisted analytics that help you make smarter decisions.
                   </p>
                   <p>
-                    Making enterprise tools truly accessible means more than just building great software — it means removing financial barriers. That&apos;s why your first company on RetailSmart is <span className="text-emerald-400 font-semibold">completely free, forever</span>. No trial period, no credit card required, no feature restrictions.
+                    Making enterprise tools truly accessible means more than just building great software — it means removing financial barriers. That&apos;s why your first company on ElitPOS is <span className="text-emerald-400 font-semibold">completely free, forever</span>. No trial period, no credit card required, no feature restrictions.
                   </p>
                 </div>
               </div>
             </FadeInLeft>
             <FadeInRight>
-              <BrowserMockup url="app.retailsmarterp.com/dashboard">
+              <BrowserMockup url="app.elitpos.elitjohnsdigital.co.ke/dashboard">
                 <MockDashboard />
               </BrowserMockup>
             </FadeInRight>
@@ -214,7 +214,7 @@ export default function AboutClient() {
                   <div className="text-4xl sm:text-5xl font-extrabold text-white">
                     <SpringCounter value={stat.value} />{stat.suffix}
                   </div>
-                  <p className="mt-2 text-sm text-blue-300 font-medium">{stat.label}</p>
+                  <p className="mt-2 text-sm text-green-300 font-medium">{stat.label}</p>
                 </div>
               </FadeIn>
             ))}
@@ -270,7 +270,7 @@ export default function AboutClient() {
       {/* ── CTA ── */}
       <CTASection
         title="Start your free account"
-        subtitle="Start building your business with RetailSmart ERP today. Free forever plan available."
+        subtitle="Start building your business with ElitPOS today. Free forever plan available."
       />
     </PageWrapper>
   )

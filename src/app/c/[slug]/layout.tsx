@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { db, withTenant } from '@/lib/db'
 import { tenants, accounts, users } from '@/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
+import { unstable_cache } from 'next/cache'
 import { ConditionalSidebar } from '@/components/layout/ConditionalSidebar'
 import { Navbar } from '@/components/layout/Navbar'
 import { SessionProvider } from 'next-auth/react'
@@ -17,6 +18,34 @@ import { TrialBanner } from '@/components/layout/TrialBanner'
 import { StorageBanner } from '@/components/layout/StorageBanner'
 import { ChatHub } from '@/components/chat/ChatHub'
 import { SubdomainUrlCleaner } from '@/components/layout/SubdomainUrlCleaner'
+import { OfflineStatusBar } from '@/components/offline/OfflineStatusBar'
+
+// Cache tenant data for 60 seconds — avoids a DB round-trip on every page render
+// within the same deployment worker. Tags allow instant invalidation when tenant changes.
+const getCachedTenant = unstable_cache(
+  async (slug: string) => {
+    const tenant = await db.query.tenants.findFirst({
+      where: eq(tenants.slug, slug),
+    })
+    return tenant ?? null
+  },
+  ['tenant-by-slug'],
+  { revalidate: 60, tags: ['tenant'] }
+)
+
+// Cache user access check for 60 seconds — avoids withTenant overhead on every navigation
+const getCachedUserRecord = unstable_cache(
+  async (tenantId: string, userId: string) => {
+    const record = await withTenant(tenantId, async (tdb) => {
+      return tdb.query.users.findFirst({
+        where: and(eq(users.id, userId), eq(users.isActive, true)),
+      })
+    })
+    return record ?? null
+  },
+  ['user-record-for-layout'],
+  { revalidate: 60, tags: ['user'] }
+)
 
 interface CompanyLayoutProps {
   children: React.ReactNode
@@ -36,12 +65,16 @@ export default async function CompanyLayout({
   // ── PUBLIC PAGES: No auth required (breaks redirect loop for unauthenticated users) ──
   const isLoginPage = pathname === `/c/${slug}/login`
   if (isLoginPage) {
+    // SessionProvider is required here because the login page calls signIn() from
+    // next-auth/react, and because WebSocketProvider (inside ClientProviders) calls
+    // useSession() — both need the provider in the tree to avoid context errors.
+    const loginSession = await auth().catch(() => null)
     return (
-      <>
+      <SessionProvider session={loginSession ?? undefined} refetchInterval={3600}>
         <SubdomainUrlCleaner />
         {children}
         <ToastProvider />
-      </>
+      </SessionProvider>
     )
   }
 
@@ -70,10 +103,8 @@ export default async function CompanyLayout({
     }
   }
 
-  // ── TENANT LOOKUP ──
-  const tenant = await db.query.tenants.findFirst({
-    where: eq(tenants.slug, slug),
-  })
+  // ── TENANT LOOKUP (cached 60s) ──
+  const tenant = await getCachedTenant(slug)
 
   if (!tenant) {
     // Company not found - redirect to account page
@@ -84,7 +115,7 @@ export default async function CompanyLayout({
   const isLockedPage = pathname === `/c/${slug}/locked`
   if (isLockedPage) {
     return (
-      <SessionProvider session={session} refetchInterval={840}>
+      <SessionProvider session={session} refetchInterval={3600}>
         <ClientProviders>
           <SubdomainUrlCleaner />
           {children}
@@ -104,15 +135,8 @@ export default async function CompanyLayout({
     redirect('/account?error=suspended')
   }
 
-  // Verify user has access to this company
-  const userRecord = await withTenant(tenant.id, async (tdb) => {
-    return tdb.query.users.findFirst({
-      where: and(
-        eq(users.id, session.user.id),
-        eq(users.isActive, true)
-      ),
-    })
-  })
+  // Verify user has access to this company (cached 60s)
+  const userRecord = await getCachedUserRecord(tenant.id, session.user.id)
 
   if (!userRecord) {
     // No access to this company
@@ -135,15 +159,19 @@ export default async function CompanyLayout({
     businessType: tenant.businessType,
     role: userRecord.role,
     isOwner: userRecord.role === 'owner',
-    currency: tenant.currency || 'LKR',
+    currency: tenant.currency || 'KES',
     dateFormat: tenant.dateFormat || 'DD/MM/YYYY',
     timeFormat: tenant.timeFormat || '12h',
+    userId: session.user.id,
+    userName: session.user.name || '',
+    userEmail: session.user.email || '',
+    avatarUrl: (session.user as { avatarUrl?: string }).avatarUrl,
   }
 
   // Setup page: render minimal layout (no sidebar, navbar, etc.)
   if (isSetupPage) {
     return (
-      <SessionProvider session={session} refetchInterval={840}>
+      <SessionProvider session={session} refetchInterval={3600}>
         <CompanyContextProvider value={companyContext}>
           <SessionValidator scope="company" tenantSlug={slug}>
             <ActivityTracker scope="company" tenantSlug={slug} />
@@ -159,7 +187,7 @@ export default async function CompanyLayout({
   }
 
   return (
-    <SessionProvider session={session} refetchInterval={840}>
+    <SessionProvider session={session} refetchInterval={3600}>
       <CompanyContextProvider value={companyContext}>
         <SessionValidator scope="company" tenantSlug={slug}>
           <ActivityTracker scope="company" tenantSlug={slug} />
@@ -180,6 +208,7 @@ export default async function CompanyLayout({
                   <SystemAnnouncement />
                   <TrialBanner companySlug={slug} />
                   <StorageBanner companySlug={slug} />
+                  <OfflineStatusBar />
                   <div className="p-5">
                     {children}
                   </div>

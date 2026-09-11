@@ -2,7 +2,7 @@
 -- Supports direct messages (1-on-1) and group chats within a tenant
 
 -- Conversations (DM or group)
-CREATE TABLE staff_chat_conversations (
+CREATE TABLE IF NOT EXISTS staff_chat_conversations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL REFERENCES tenants(id),
   type VARCHAR(20) NOT NULL DEFAULT 'direct',  -- 'direct' or 'group'
@@ -18,7 +18,7 @@ CREATE TABLE staff_chat_conversations (
 );
 
 -- Participants (many-to-many users <-> conversations)
-CREATE TABLE staff_chat_participants (
+CREATE TABLE IF NOT EXISTS staff_chat_participants (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   conversation_id UUID NOT NULL REFERENCES staff_chat_conversations(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id),
@@ -33,7 +33,7 @@ CREATE TABLE staff_chat_participants (
 );
 
 -- Messages
-CREATE TABLE staff_chat_messages (
+CREATE TABLE IF NOT EXISTS staff_chat_messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   conversation_id UUID NOT NULL REFERENCES staff_chat_conversations(id) ON DELETE CASCADE,
   tenant_id UUID NOT NULL REFERENCES tenants(id),
@@ -48,18 +48,18 @@ CREATE TABLE staff_chat_messages (
 );
 
 -- Indexes
-CREATE INDEX idx_staff_chat_conv_tenant ON staff_chat_conversations(tenant_id);
-CREATE INDEX idx_staff_chat_conv_last_msg ON staff_chat_conversations(last_message_at DESC);
-CREATE INDEX idx_staff_chat_conv_type ON staff_chat_conversations(type);
+CREATE INDEX IF NOT EXISTS idx_staff_chat_conv_tenant ON staff_chat_conversations(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_staff_chat_conv_last_msg ON staff_chat_conversations(last_message_at DESC);
+CREATE INDEX IF NOT EXISTS idx_staff_chat_conv_type ON staff_chat_conversations(type);
 
-CREATE INDEX idx_staff_chat_part_conv ON staff_chat_participants(conversation_id);
-CREATE INDEX idx_staff_chat_part_user ON staff_chat_participants(user_id);
-CREATE INDEX idx_staff_chat_part_tenant ON staff_chat_participants(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_staff_chat_part_conv ON staff_chat_participants(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_staff_chat_part_user ON staff_chat_participants(user_id);
+CREATE INDEX IF NOT EXISTS idx_staff_chat_part_tenant ON staff_chat_participants(tenant_id);
 
-CREATE INDEX idx_staff_chat_msg_conv ON staff_chat_messages(conversation_id);
-CREATE INDEX idx_staff_chat_msg_tenant ON staff_chat_messages(tenant_id);
-CREATE INDEX idx_staff_chat_msg_created ON staff_chat_messages(created_at DESC);
-CREATE INDEX idx_staff_chat_msg_sender ON staff_chat_messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_staff_chat_msg_conv ON staff_chat_messages(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_staff_chat_msg_tenant ON staff_chat_messages(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_staff_chat_msg_created ON staff_chat_messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_staff_chat_msg_sender ON staff_chat_messages(sender_id);
 
 -- Enable RLS
 ALTER TABLE staff_chat_conversations ENABLE ROW LEVEL SECURITY;
@@ -67,11 +67,20 @@ ALTER TABLE staff_chat_participants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE staff_chat_messages ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies (tenant isolation)
-CREATE POLICY tenant_isolation_staff_chat_conversations ON staff_chat_conversations
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_staff_chat_conversations ON staff_chat_conversations
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY tenant_isolation_staff_chat_participants ON staff_chat_participants
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_staff_chat_participants ON staff_chat_participants
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY tenant_isolation_staff_chat_messages ON staff_chat_messages
-  FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY tenant_isolation_staff_chat_messages ON staff_chat_messages
+    FOR ALL USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

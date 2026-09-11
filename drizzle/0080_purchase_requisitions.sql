@@ -2,10 +2,13 @@
 -- Formal purchase request workflow: draft -> pending_approval -> approved -> ordered
 
 -- Enum for purchase requisition status
-CREATE TYPE "public"."purchase_requisition_status" AS ENUM('draft', 'pending_approval', 'approved', 'partially_ordered', 'ordered', 'rejected', 'cancelled');
+DO $$ BEGIN
+  CREATE TYPE "public"."purchase_requisition_status" AS ENUM('draft', 'pending_approval', 'approved', 'partially_ordered', 'ordered', 'rejected', 'cancelled');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Purchase requisitions table
-CREATE TABLE "purchase_requisitions" (
+CREATE TABLE IF NOT EXISTS "purchase_requisitions" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   "tenant_id" uuid NOT NULL REFERENCES "tenants"("id"),
   "requisition_no" varchar(50) NOT NULL,
@@ -30,7 +33,7 @@ CREATE TABLE "purchase_requisitions" (
 );
 
 -- Purchase requisition items table
-CREATE TABLE "purchase_requisition_items" (
+CREATE TABLE IF NOT EXISTS "purchase_requisition_items" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   "tenant_id" uuid NOT NULL REFERENCES "tenants"("id"),
   "requisition_id" uuid NOT NULL REFERENCES "purchase_requisitions"("id") ON DELETE CASCADE,
@@ -46,20 +49,26 @@ CREATE TABLE "purchase_requisition_items" (
 );
 
 -- Indexes
-CREATE INDEX "idx_purchase_requisitions_tenant" ON "purchase_requisitions" ("tenant_id");
-CREATE INDEX "idx_purchase_requisitions_status" ON "purchase_requisitions" ("tenant_id", "status");
-CREATE INDEX "idx_purchase_requisition_items_requisition" ON "purchase_requisition_items" ("requisition_id");
+CREATE INDEX IF NOT EXISTS "idx_purchase_requisitions_tenant" ON "purchase_requisitions" ("tenant_id");
+CREATE INDEX IF NOT EXISTS "idx_purchase_requisitions_status" ON "purchase_requisitions" ("tenant_id", "status");
+CREATE INDEX IF NOT EXISTS "idx_purchase_requisition_items_requisition" ON "purchase_requisition_items" ("requisition_id");
 
 -- Enable RLS
 ALTER TABLE "purchase_requisitions" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "purchase_requisition_items" ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
-CREATE POLICY "tenant_isolation_policy" ON "purchase_requisitions"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation_policy" ON "purchase_requisitions"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE POLICY "tenant_isolation_policy" ON "purchase_requisition_items"
-  USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY "tenant_isolation_policy" ON "purchase_requisition_items"
+    USING ("tenant_id" = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Grant permissions to app_user role
 GRANT SELECT, INSERT, UPDATE, DELETE ON "purchase_requisitions" TO app_user;

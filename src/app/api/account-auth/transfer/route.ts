@@ -70,7 +70,7 @@ export async function POST(request: Request) {
         userAgent,
       },
       secret,
-      { expiresIn: '30s' }
+      { expiresIn: '2m' }
     )
 
     return NextResponse.json({

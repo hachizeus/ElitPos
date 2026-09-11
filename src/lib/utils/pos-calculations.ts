@@ -74,7 +74,7 @@ export function calculateVariance(
  * Format currency for display within POS calculations module.
  * For general use, prefer `formatCurrency` from `@/lib/utils/currency`.
  */
-function formatPOSCurrency(amount: number, currency: string = 'LKR'): string {
+function formatPOSCurrency(amount: number, currency: string = 'KES'): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,

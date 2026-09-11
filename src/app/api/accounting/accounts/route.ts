@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
         .where(eq(tenants.id, tenantId))
         .limit(1)
 
-      const tenantCurrency = tenant[0]?.currency || 'LKR'
+      const tenantCurrency = tenant[0]?.currency || 'KES'
 
       const [newAccount] = await db.insert(chartOfAccounts).values({
         tenantId,

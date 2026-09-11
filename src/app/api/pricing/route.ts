@@ -8,7 +8,7 @@ import { logError } from '@/lib/ai/error-logger'
 // GET /api/pricing?currency=USD - Get pricing tiers with optional currency conversion
 export async function GET(request: NextRequest) {
   try {
-    const targetCurrency = request.nextUrl.searchParams.get('currency') || 'LKR'
+    const targetCurrency = request.nextUrl.searchParams.get('currency') || 'KES'
 
     const tiers = await db.query.pricingTiers.findMany({
       where: eq(pricingTiers.isActive, true),
@@ -23,11 +23,11 @@ export async function GET(request: NextRequest) {
         let convertedMonthly = priceMonthly
         let convertedYearly = priceYearly
 
-        if (targetCurrency !== 'LKR' && priceMonthly > 0) {
-          const cm = await convertCurrencyAmount(priceMonthly, 'LKR', targetCurrency)
+        if (targetCurrency !== 'KES' && priceMonthly > 0) {
+          const cm = await convertCurrencyAmount(priceMonthly, 'KES', targetCurrency)
           if (cm !== null) convertedMonthly = cm
 
-          const cy = await convertCurrencyAmount(priceYearly, 'LKR', targetCurrency)
+          const cy = await convertCurrencyAmount(priceYearly, 'KES', targetCurrency)
           if (cy !== null) convertedYearly = cy
         }
 
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       tiers: tiersWithConversion,
-      baseCurrency: 'LKR',
+      baseCurrency: 'KES',
       displayCurrency: targetCurrency,
     })
   } catch (error) {

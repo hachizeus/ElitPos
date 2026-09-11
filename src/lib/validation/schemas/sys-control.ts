@@ -75,7 +75,7 @@ export const sysCreatePricingTierSchema = z.object({
   displayName: shortTextSchema,
   priceMonthly: z.coerce.number().min(0).optional(),
   priceYearly: z.coerce.number().min(0).optional(),
-  currency: z.string().min(2).max(10).default('LKR'),
+  currency: z.string().min(2).max(10).default('KES'),
   maxUsers: z.coerce.number().int().min(1).optional(),
   maxSalesMonthly: z.coerce.number().int().min(1).optional(),
   maxDatabaseBytes: z.coerce.number().int().min(0).optional(),

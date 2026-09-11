@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server'
 import { accountAuth as auth } from '@/lib/auth/account-auth'
 import { db } from '@/lib/db'
-import { staffInvites, tenants } from '@/lib/db/schema'
+import { staffInvites, tenants, accounts } from '@/lib/db/schema'
 import { eq, and, isNull, gt, sql, inArray } from 'drizzle-orm'
 import crypto from 'crypto'
 import { logError } from '@/lib/ai/error-logger'
 import { validateBody } from '@/lib/validation/helpers'
 import { createInviteSchema } from '@/lib/validation/schemas/account'
 import { userRoleValues } from '@/lib/validation/schemas/common'
+import { sendStaffInviteEmail } from '@/lib/email/system-email'
 
 // GET /api/account/invites - List sent invites
 export async function GET() {
@@ -139,13 +140,43 @@ export async function POST(request: Request) {
       role: a.role,
     }))
 
+    const inviteUrl = `${process.env.NEXTAUTH_URL || ''}/invite/${invite.token}`
+
+    // Send invite emails — one per tenant assignment so the email references each company
+    const inviterAccount = await db.query.accounts.findFirst({
+      where: eq(accounts.id, session.user.accountId),
+      columns: { fullName: true },
+    })
+    const inviterName = inviterAccount?.fullName || 'A team member'
+
+    let emailSent = false
+    const emailErrors: string[] = []
+    for (const a of tenantDetails) {
+      try {
+        await sendStaffInviteEmail({
+          email: invite.email,
+          inviterName,
+          companyName: a.tenantName,
+          role: a.role,
+          inviteUrl,
+        })
+        emailSent = true
+      } catch (emailError) {
+        const msg = emailError instanceof Error ? emailError.message : String(emailError)
+        emailErrors.push(`${a.tenantName}: ${msg}`)
+        logError('api/account/invites', emailError)
+      }
+    }
+
     return NextResponse.json({
       id: invite.id,
       email: invite.email,
       token: invite.token,
       tenantAssignments: tenantDetails,
       expiresAt: invite.expiresAt,
-      inviteUrl: `${process.env.NEXTAUTH_URL || ''}/invite/${invite.token}`,
+      inviteUrl,
+      emailSent,
+      ...(emailErrors.length > 0 ? { warning: 'Invite created but some confirmation emails failed to send.', emailErrors } : {}),
     }, { status: 201 })
   } catch (error) {
     logError('api/account/invites', error)

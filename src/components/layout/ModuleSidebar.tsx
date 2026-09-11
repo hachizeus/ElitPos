@@ -8,7 +8,6 @@ import { useSidebar } from './Sidebar'
 import { getModuleFromPathname, getModuleSidebar, isDetailPage } from '@/lib/navigation/module-sidebar'
 import { useModuleAccess } from '@/hooks/useModuleAccess'
 import { ICON_MAP } from '@/components/workspace/icon-map'
-import { X } from 'lucide-react'
 
 interface ModuleSidebarProps {
   companySlug: string
@@ -18,7 +17,7 @@ export function ModuleSidebar({ companySlug }: ModuleSidebarProps) {
   const pathname = usePathname()
   const { data: session } = useSession()
   const company = useCompanyOptional()
-  const { mobileOpen, setMobileOpen } = useSidebar()
+  const { setMobileOpen } = useSidebar()
   const { isModuleEnabled } = useModuleAccess()
 
   const businessType = company?.businessType || session?.user?.businessType
@@ -110,54 +109,18 @@ export function ModuleSidebar({ companySlug }: ModuleSidebarProps) {
   )
 
   return (
-    <>
-      {/* Mobile overlay */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          style={{ top: '48px' }}
-          onClick={() => setMobileOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Mobile sidebar (slides in below navbar) */}
-      <aside
-        className={`fixed left-0 bottom-0 z-50 w-[220px] flex flex-col text-sm transform transition-transform duration-200 ease-in-out lg:hidden ${
-          mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-        style={{
-          top: '48px',
-          backgroundColor: 'var(--sidebar-bg)',
-          borderRight: '1px solid var(--sidebar-border)',
-        }}
-      >
-        {/* Mobile close button */}
-        <button
-          type="button"
-          onClick={() => setMobileOpen(false)}
-          className="absolute top-2 right-2 p-1 rounded-md transition-colors"
-          style={{ color: 'var(--sidebar-text-muted)' }}
-          aria-label="Close menu"
-        >
-          <X size={18} />
-        </button>
-        {sidebarContent}
-      </aside>
-
-      {/* Desktop sidebar (below navbar, sticky) */}
-      <aside
-        className="hidden lg:flex flex-col text-sm shrink-0 w-[220px]"
-        style={{
-          position: 'sticky',
-          top: '48px',
-          height: 'calc(100vh - 48px)',
-          backgroundColor: 'var(--sidebar-bg)',
-          borderRight: '1px solid var(--sidebar-border)',
-        }}
-      >
-        {sidebarContent}
-      </aside>
-    </>
+    /* Desktop-only sub-nav panel — AppSidebar handles mobile navigation */
+    <aside
+      className="hidden lg:flex flex-col text-sm shrink-0 w-[200px]"
+      style={{
+        position: 'sticky',
+        top: '48px',
+        height: 'calc(100vh - 48px)',
+        backgroundColor: 'var(--sidebar-bg)',
+        borderRight: '1px solid var(--sidebar-border)',
+      }}
+    >
+      {sidebarContent}
+    </aside>
   )
 }

@@ -13,7 +13,7 @@ BEGIN
     WHERE enumlabel = 'rejected'
     AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'stock_transfer_status')
   ) THEN
-    ALTER TYPE stock_transfer_status ADD VALUE 'rejected';
+    ALTER TYPE stock_transfer_status ADD VALUE IF NOT EXISTS 'rejected';
   END IF;
 END
 $$;

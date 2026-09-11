@@ -201,8 +201,8 @@ export const accounts = pgTable('accounts', {
   passwordHash: text('password_hash').notNull(),
   fullName: varchar('full_name', { length: 255 }).notNull(),
   phone: varchar('phone', { length: 50 }).notNull().unique(),
-  country: varchar('country', { length: 2 }).notNull().default('LK'), // ISO 3166-1 alpha-2
-  currency: varchar('currency', { length: 3 }).notNull().default('LKR'), // ISO 4217
+  country: varchar('country', { length: 2 }).notNull().default('KE'), // ISO 3166-1 alpha-2
+  currency: varchar('currency', { length: 3 }).notNull().default('KES'), // ISO 4217
   // Preferences
   language: varchar('language', { length: 10 }).notNull().default('en'),
   timezone: varchar('timezone', { length: 50 }).notNull().default('Asia/Colombo'),
@@ -213,6 +213,7 @@ export const accounts = pgTable('accounts', {
   notifyBilling: boolean('notify_billing').notNull().default(true),
   notifySecurity: boolean('notify_security').notNull().default(true),
   notifyMarketing: boolean('notify_marketing').notNull().default(false),
+  notifySms: boolean('notify_sms').notNull().default(true),
   // Wallet balance
   walletBalance: decimal('wallet_balance', { precision: 10, scale: 2 }).notNull().default('0'),
   googleId: varchar('google_id', { length: 255 }),
@@ -256,7 +257,7 @@ export const pricingTiers = pgTable('pricing_tiers', {
   displayName: varchar('display_name', { length: 100 }).notNull(),
   priceMonthly: decimal('price_monthly', { precision: 10, scale: 2 }),
   priceYearly: decimal('price_yearly', { precision: 10, scale: 2 }),
-  currency: varchar('currency', { length: 3 }).notNull().default('LKR'), // ISO 4217 currency code
+  currency: varchar('currency', { length: 3 }).notNull().default('KES'), // ISO 4217 currency code
   maxUsers: integer('max_users'),
   maxSalesMonthly: integer('max_sales_monthly'),
   maxDatabaseBytes: bigint('max_database_bytes', { mode: 'number' }),
@@ -280,8 +281,8 @@ export const tenants = pgTable('tenants', {
   logoUrl: text('logo_url'),
   logoSize: integer('logo_size'), // Logo file size in bytes (for storage tracking)
   businessType: businessTypeEnum('business_type').notNull().default('retail'),
-  country: varchar('country', { length: 2 }).notNull().default('LK'), // ISO 3166-1 alpha-2
-  currency: varchar('currency', { length: 3 }).notNull().default('LKR'), // ISO 4217
+  country: varchar('country', { length: 2 }).notNull().default('KE'), // ISO 3166-1 alpha-2
+  currency: varchar('currency', { length: 3 }).notNull().default('KES'), // ISO 4217
   dateFormat: varchar('date_format', { length: 20 }).notNull().default('DD/MM/YYYY'),
   timeFormat: varchar('time_format', { length: 10 }).notNull().default('12h'),
   timezone: varchar('timezone', { length: 50 }).notNull().default('Asia/Colombo'),
@@ -459,7 +460,7 @@ export const paymentDeposits = pgTable('payment_deposits', {
   accountId: uuid('account_id').notNull().references(() => accounts.id),
   subscriptionId: uuid('subscription_id').references(() => subscriptions.id),
   amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
-  currency: varchar('currency', { length: 3 }).notNull().default('LKR'),
+  currency: varchar('currency', { length: 3 }).notNull().default('KES'),
   bankReference: varchar('bank_reference', { length: 100 }), // Bank transaction reference
   depositDate: date('deposit_date').notNull(), // When user made the deposit
   receiptUrl: text('receipt_url'), // Uploaded receipt image
@@ -514,7 +515,7 @@ export const creditTransactions = pgTable('credit_transactions', {
   accountId: uuid('account_id').notNull().references(() => accounts.id),
   type: varchar('type', { length: 10 }).notNull(), // 'credit' or 'debit'
   amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
-  currency: varchar('currency', { length: 3 }).notNull().default('LKR'),
+  currency: varchar('currency', { length: 3 }).notNull().default('KES'),
   description: text('description').notNull(),
   balanceAfter: decimal('balance_after', { precision: 12, scale: 2 }).notNull(),
   // Reference to payment deposit if this was from a bank deposit
@@ -536,6 +537,15 @@ export const accountNotifications = pgTable('account_notifications', {
   link: varchar('link', { length: 500 }), // Optional link to related page
   isRead: boolean('is_read').notNull().default(false),
   readAt: timestamp('read_at'),
+  
+  // Multi-channel delivery tracking
+  emailSent: boolean('email_sent').notNull().default(false),
+  emailSentAt: timestamp('email_sent_at'),
+  emailError: text('email_error'),
+  smsSent: boolean('sms_sent').notNull().default(false),
+  smsSentAt: timestamp('sms_sent_at'),
+  smsError: text('sms_error'),
+  
   metadata: jsonb('metadata').default('{}'), // Additional context
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
@@ -4577,7 +4587,7 @@ export const payhereTransactions = pgTable('payhere_transactions', {
   orderId: varchar('order_id', { length: 100 }).notNull().unique(),
   payherePaymentId: varchar('payhere_payment_id', { length: 100 }),
   amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
-  currency: varchar('currency', { length: 3 }).notNull().default('LKR'),
+  currency: varchar('currency', { length: 3 }).notNull().default('KES'),
   status: payhereTransactionStatusEnum('status').notNull().default('pending'),
   paymentMethod: varchar('payment_method', { length: 50 }),
   description: text('description'),
@@ -4657,7 +4667,7 @@ export const chartOfAccounts = pgTable('chart_of_accounts', {
   rootType: accountRootTypeEnum('root_type').notNull(),
   accountType: accountTypeEnum('account_type').notNull(),
   isGroup: boolean('is_group').notNull().default(false),
-  currency: varchar('currency', { length: 3 }).notNull().default('LKR'),
+  currency: varchar('currency', { length: 3 }).notNull().default('KES'),
   balance: decimal('balance', { precision: 15, scale: 2 }).notNull().default('0'),
   isSystemAccount: boolean('is_system_account').notNull().default(false),
   isActive: boolean('is_active').notNull().default(true),
@@ -5240,7 +5250,7 @@ export const paymentRequests = pgTable('payment_requests', {
   partyType: paymentEntryPartyTypeEnum('party_type').notNull(),
   partyId: uuid('party_id').notNull(),
   amount: decimal('amount', { precision: 15, scale: 2 }).notNull(),
-  currency: varchar('currency', { length: 3 }).notNull().default('LKR'),
+  currency: varchar('currency', { length: 3 }).notNull().default('KES'),
   emailTo: varchar('email_to', { length: 255 }),
   subject: varchar('subject', { length: 255 }),
   message: text('message'),
@@ -5759,4 +5769,110 @@ export const customRolesRelations = relations(customRoles, ({ one, many }) => ({
 export const rolePermissionOverridesRelations = relations(rolePermissionOverrides, ({ one }) => ({
   tenant: one(tenants, { fields: [rolePermissionOverrides.tenantId], references: [tenants.id] }),
   customRole: one(customRoles, { fields: [rolePermissionOverrides.customRoleId], references: [customRoles.id] }),
+}))
+
+// ==================== PAYMENT GATEWAYS ====================
+
+// Gateway status enums
+export const gatewayTransactionStatusEnum = pgEnum('gateway_transaction_status', [
+  'pending', 'processing', 'success', 'failed', 'cancelled', 'expired', 'refunded'
+])
+
+export const paymentGatewayEnum = pgEnum('payment_gateway', [
+  'mpesa', 'stripe', 'paystack', 'payhero'
+])
+
+export const gatewayContextEnum = pgEnum('gateway_context', [
+  'subscription', 'pos_sale'
+])
+
+// Per-tenant gateway configuration (encrypted secrets stored server-side)
+export const paymentGatewayConfigs = pgTable('payment_gateway_configs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').notNull().references(() => tenants.id).unique(),
+
+  // M-Pesa Daraja
+  mpesaEnabled: boolean('mpesa_enabled').notNull().default(false),
+  mpesaEnvironment: varchar('mpesa_environment', { length: 20 }).default('sandbox'), // sandbox | production
+  mpesaConsumerKey: text('mpesa_consumer_key'),
+  mpesaConsumerSecret: text('mpesa_consumer_secret'),
+  mpesaShortcode: varchar('mpesa_shortcode', { length: 20 }),
+  mpesaPasskey: text('mpesa_passkey'),
+  mpesaCallbackBaseUrl: text('mpesa_callback_base_url'),
+
+  // Stripe
+  stripeEnabled: boolean('stripe_enabled').notNull().default(false),
+  stripePublishableKey: text('stripe_publishable_key'),
+  stripeSecretKey: text('stripe_secret_key'),
+  stripeWebhookSecret: text('stripe_webhook_secret'),
+  stripeCurrency: varchar('stripe_currency', { length: 3 }).default('KES'),
+
+  // Paystack
+  paystackEnabled: boolean('paystack_enabled').notNull().default(false),
+  paystackPublicKey: text('paystack_public_key'),
+  paystackSecretKey: text('paystack_secret_key'),
+  paystackWebhookSecret: text('paystack_webhook_secret'),
+  paystackCurrency: varchar('paystack_currency', { length: 3 }).default('KES'),
+
+  // PayHero
+  payheroEnabled: boolean('payhero_enabled').notNull().default(false),
+  payheroApiUsername: text('payhero_api_username'),
+  payheroApiPassword: text('payhero_api_password'),
+  payheroChannelId: varchar('payhero_channel_id', { length: 50 }),
+
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+// Unified gateway transaction log (covers all gateways and contexts)
+export const gatewayTransactions = pgTable('gateway_transactions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  tenantId: uuid('tenant_id').references(() => tenants.id), // null for account-level (subscription)
+  accountId: uuid('account_id').references(() => accounts.id), // account paying subscription
+
+  // Context: what is being paid
+  context: gatewayContextEnum('context').notNull(), // subscription | pos_sale
+  saleId: uuid('sale_id').references(() => sales.id), // set when context=pos_sale
+  subscriptionId: uuid('subscription_id').references(() => subscriptions.id), // set when context=subscription
+  pendingCompanyId: uuid('pending_company_id').references(() => pendingCompanies.id), // set when paying for a new company
+
+  // Which gateway
+  gateway: paymentGatewayEnum('gateway').notNull(),
+  gatewayReference: varchar('gateway_reference', { length: 255 }), // gateway's own transaction ID
+  internalReference: varchar('internal_reference', { length: 100 }).notNull(), // our order/ref ID
+
+  // Amount
+  amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
+  currency: varchar('currency', { length: 3 }).notNull().default('KES'),
+
+  // Status
+  status: gatewayTransactionStatusEnum('status').notNull().default('pending'),
+
+  // Customer info captured at payment initiation
+  customerPhone: varchar('customer_phone', { length: 30 }),
+  customerEmail: varchar('customer_email', { length: 255 }),
+  customerName: varchar('customer_name', { length: 255 }),
+
+  // Raw gateway metadata (receipt number, payment method details etc.)
+  metadata: jsonb('metadata'),
+
+  // Timestamps
+  initiatedAt: timestamp('initiated_at').defaultNow().notNull(),
+  completedAt: timestamp('completed_at'),
+  expiresAt: timestamp('expires_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+// Relations
+export const paymentGatewayConfigsRelations = relations(paymentGatewayConfigs, ({ one }) => ({
+  tenant: one(tenants, { fields: [paymentGatewayConfigs.tenantId], references: [tenants.id] }),
+}))
+
+export const gatewayTransactionsRelations = relations(gatewayTransactions, ({ one }) => ({
+  tenant: one(tenants, { fields: [gatewayTransactions.tenantId], references: [tenants.id] }),
+  account: one(accounts, { fields: [gatewayTransactions.accountId], references: [accounts.id] }),
+  sale: one(sales, { fields: [gatewayTransactions.saleId], references: [sales.id] }),
+  subscription: one(subscriptions, { fields: [gatewayTransactions.subscriptionId], references: [subscriptions.id] }),
+  pendingCompany: one(pendingCompanies, { fields: [gatewayTransactions.pendingCompanyId], references: [pendingCompanies.id] }),
 }))

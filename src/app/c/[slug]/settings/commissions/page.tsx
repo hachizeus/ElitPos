@@ -711,9 +711,9 @@ function CommissionsTab() {
   }
 
   function formatCurrency(amount: string | number) {
-    return new Intl.NumberFormat('en-LK', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'LKR',
+      currency: 'KES',
       minimumFractionDigits: 2,
     }).format(Number(amount))
   }
@@ -1179,9 +1179,9 @@ function PayoutsTab() {
   }
 
   function formatCurrency(amount: string | number) {
-    return new Intl.NumberFormat('en-LK', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'LKR',
+      currency: 'KES',
       minimumFractionDigits: 2,
     }).format(Number(amount))
   }

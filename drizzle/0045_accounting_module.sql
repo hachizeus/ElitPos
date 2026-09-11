@@ -214,49 +214,73 @@ ALTER TABLE "cost_centers" ENABLE ROW LEVEL SECURITY;
 
 -- RLS policies for fiscal_years
 DROP POLICY IF EXISTS "fiscal_years_tenant_isolation" ON "fiscal_years";
-CREATE POLICY "fiscal_years_tenant_isolation" ON "fiscal_years"
-  USING (tenant_id::text = current_setting('app.tenant_id', true));
+DO $$ BEGIN
+  CREATE POLICY "fiscal_years_tenant_isolation" ON "fiscal_years"
+    USING (tenant_id::text = current_setting('app.tenant_id', true));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- RLS policies for chart_of_accounts
 DROP POLICY IF EXISTS "chart_of_accounts_tenant_isolation" ON "chart_of_accounts";
-CREATE POLICY "chart_of_accounts_tenant_isolation" ON "chart_of_accounts"
-  USING (tenant_id::text = current_setting('app.tenant_id', true));
+DO $$ BEGIN
+  CREATE POLICY "chart_of_accounts_tenant_isolation" ON "chart_of_accounts"
+    USING (tenant_id::text = current_setting('app.tenant_id', true));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- RLS policies for gl_entries
 DROP POLICY IF EXISTS "gl_entries_tenant_isolation" ON "gl_entries";
-CREATE POLICY "gl_entries_tenant_isolation" ON "gl_entries"
-  USING (tenant_id::text = current_setting('app.tenant_id', true));
+DO $$ BEGIN
+  CREATE POLICY "gl_entries_tenant_isolation" ON "gl_entries"
+    USING (tenant_id::text = current_setting('app.tenant_id', true));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- RLS policies for accounting_settings
 DROP POLICY IF EXISTS "accounting_settings_tenant_isolation" ON "accounting_settings";
-CREATE POLICY "accounting_settings_tenant_isolation" ON "accounting_settings"
-  USING (tenant_id::text = current_setting('app.tenant_id', true));
+DO $$ BEGIN
+  CREATE POLICY "accounting_settings_tenant_isolation" ON "accounting_settings"
+    USING (tenant_id::text = current_setting('app.tenant_id', true));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- RLS policies for journal_entries
 DROP POLICY IF EXISTS "journal_entries_tenant_isolation" ON "journal_entries";
-CREATE POLICY "journal_entries_tenant_isolation" ON "journal_entries"
-  USING (tenant_id::text = current_setting('app.tenant_id', true));
+DO $$ BEGIN
+  CREATE POLICY "journal_entries_tenant_isolation" ON "journal_entries"
+    USING (tenant_id::text = current_setting('app.tenant_id', true));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- RLS policies for journal_entry_items (through journal_entries)
 DROP POLICY IF EXISTS "journal_entry_items_tenant_isolation" ON "journal_entry_items";
-CREATE POLICY "journal_entry_items_tenant_isolation" ON "journal_entry_items"
-  USING (
-    EXISTS (
-      SELECT 1 FROM "journal_entries" je
-      WHERE je.id = journal_entry_id
-      AND je.tenant_id::text = current_setting('app.tenant_id', true)
-    )
-  );
+DO $$ BEGIN
+  CREATE POLICY "journal_entry_items_tenant_isolation" ON "journal_entry_items"
+    USING (
+      EXISTS (
+        SELECT 1 FROM "journal_entries" je
+        WHERE je.id = journal_entry_id
+        AND je.tenant_id::text = current_setting('app.tenant_id', true)
+      )
+    );
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- RLS policies for payment_allocations
 DROP POLICY IF EXISTS "payment_allocations_tenant_isolation" ON "payment_allocations";
-CREATE POLICY "payment_allocations_tenant_isolation" ON "payment_allocations"
-  USING (tenant_id::text = current_setting('app.tenant_id', true));
+DO $$ BEGIN
+  CREATE POLICY "payment_allocations_tenant_isolation" ON "payment_allocations"
+    USING (tenant_id::text = current_setting('app.tenant_id', true));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- RLS policies for cost_centers
 DROP POLICY IF EXISTS "cost_centers_tenant_isolation" ON "cost_centers";
-CREATE POLICY "cost_centers_tenant_isolation" ON "cost_centers"
-  USING (tenant_id::text = current_setting('app.tenant_id', true));
+DO $$ BEGIN
+  CREATE POLICY "cost_centers_tenant_isolation" ON "cost_centers"
+    USING (tenant_id::text = current_setting('app.tenant_id', true));
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- ==================== TENANT USAGE TRIGGERS ====================
 -- Update tenant_usage counts for new accounting tables

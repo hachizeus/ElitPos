@@ -47,7 +47,7 @@ export function ThemeToggle({ onThemeChange }: ThemeToggleProps) {
         className="p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         aria-label="Toggle theme"
       >
-        <CurrentIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+        <CurrentIcon className="w-5 h-5 text-[#00cc6e] dark:text-[#00FF88]" />
       </button>
 
       {isOpen && (
@@ -63,14 +63,14 @@ export function ThemeToggle({ onThemeChange }: ThemeToggleProps) {
                 onClick={() => handleSelect(option.value)}
                 className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors
                   ${isSelected
-                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    ? 'bg-[rgba(0,255,136,0.10)] text-[#00cc6e] dark:bg-[rgba(0,255,136,0.12)] dark:text-[#00FF88]'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
               >
                 <Icon className="w-4 h-4" />
                 {option.label}
                 {isSelected && (
-                  <span className="ml-auto text-blue-600 dark:text-blue-400">✓</span>
+                  <span className="ml-auto text-[#00cc6e] dark:text-[#00FF88]">✓</span>
                 )}
               </button>
             )

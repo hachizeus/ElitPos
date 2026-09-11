@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useRealtimeData } from '@/hooks'
+import { resolveFileUrl } from '@/lib/files/client'
 // useSession removed — company switching now uses transfer tokens
 import Link from 'next/link'
 import {
@@ -100,17 +101,17 @@ export default function SitesPage() {
 
       const { transferToken, slug } = await res.json()
 
-      // Navigate to company subdomain with transfer token
-      const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'retailsmarterp.com'
+      // Navigate to company subdomain with transfer token in a new tab
+      const baseDomain = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'elitpos.elitjohnsdigital.co.ke'
       const isProduction = window.location.hostname.includes(baseDomain)
 
-      if (isProduction) {
-        // Production: redirect to subdomain
-        window.location.href = `https://${slug}.${baseDomain}/login?transfer=${encodeURIComponent(transferToken)}`
-      } else {
-        // Local dev: redirect to /c/slug/login with transfer token
-        window.location.href = `/c/${slug}/login?transfer=${encodeURIComponent(transferToken)}`
-      }
+      const targetUrl = isProduction
+        ? `https://${slug}.${baseDomain}/login?transfer=${encodeURIComponent(transferToken)}`
+        : `/c/${slug}/login?transfer=${encodeURIComponent(transferToken)}`
+
+      // Open in new tab
+      window.open(targetUrl, '_blank', 'noopener,noreferrer')
+      setSwitching(null)
     } catch (error) {
       console.error('Failed to switch:', error)
       setSwitching(null)
@@ -191,7 +192,7 @@ export default function SitesPage() {
         </div>
         <Link
           href="/account/sites/new"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors font-medium"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
         >
           <Plus className="w-4 h-4" />
           New Site
@@ -217,7 +218,7 @@ export default function SitesPage() {
               onClick={() => setFilter(f)}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-all capitalize ${
                 filter === f
-                  ? 'bg-gray-900 text-white shadow-lg'
+                  ? 'bg-green-600 text-white shadow-lg'
                   : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
               }`}
             >
@@ -244,7 +245,7 @@ export default function SitesPage() {
           {sites.length === 0 && (
             <Link
               href="/account/sites/new"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors font-medium"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
             >
               <Plus className="w-4 h-4" />
               Create Site
@@ -268,7 +269,7 @@ export default function SitesPage() {
                       <div className="w-14 h-14 bg-gradient-to-br from-gray-100 to-gray-200 rounded-md flex items-center justify-center group-hover:from-gray-200 group-hover:to-gray-300 transition-colors">
                         {site.logoUrl ? (
                           /* eslint-disable-next-line @next/next/no-img-element */
-                          <img src={site.logoUrl} alt={site.name} className="w-12 h-12 rounded object-cover" />
+                          <img src={resolveFileUrl(site.logoUrl) ?? ''} alt={site.name} className="w-12 h-12 rounded object-cover" />
                         ) : (
                           <BusinessIcon className="w-7 h-7 text-gray-500 dark:text-gray-400" />
                         )}
@@ -362,7 +363,7 @@ export default function SitesPage() {
                   <button
                     onClick={() => handleOpen(site.id)}
                     disabled={switching === site.id}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50 font-medium"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 font-medium"
                   >
                     {switching === site.id ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -406,8 +407,8 @@ export default function SitesPage() {
               </div>
 
               {deleteModal.site?.subscription && ['trial', 'active', 'past_due'].includes(deleteModal.site.subscription.status) && (
-                <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                <div className="mb-6 p-4 bg-green-50 dark:bg-blue-900/20 border border-green-200 dark:border-green-800 rounded-md">
+                  <p className="text-sm text-green-800 dark:text-blue-200">
                     Your remaining {deleteModal.site.subscription.status === 'trial' ? 'free plan' : 'plan'} time will be saved and applied to your next company.
                   </p>
                 </div>
