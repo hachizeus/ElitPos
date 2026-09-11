@@ -30,7 +30,7 @@ Or for detailed instructions: `HOSTAFRICA_SETUP_GUIDE.md`
 
 ### 3. Database Setup
 Create PostgreSQL database in HostAfrica:
-- Database: `retail_smart_erp`
+- Database: `elit_pos`
 - User: `elitpos_user`
 - Password: Strong password
 
@@ -83,7 +83,7 @@ t86mcdsDCMF7Hzfjxy3hWOknwlBXIYur
 
 ### Database (Update in .env)
 ```env
-DATABASE_URL=postgresql://elitpos_user:YOUR_PASSWORD@localhost:5432/retail_smart_erp
+DATABASE_URL=postgresql://elitpos_user:YOUR_PASSWORD@localhost:5432/elit_pos
 ```
 
 ---

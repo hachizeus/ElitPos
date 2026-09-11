@@ -43,9 +43,9 @@ scp -r ./ElitPOS/* root@your-server-ip:/var/www/elitpos/
 sudo -i -u postgres psql
 
 # In PostgreSQL:
-CREATE DATABASE retail_smart_erp;
+CREATE DATABASE elit_pos;
 CREATE USER elitpos_user WITH PASSWORD 'StrongPassword123!';
-GRANT ALL PRIVILEGES ON DATABASE retail_smart_erp TO elitpos_user;
+GRANT ALL PRIVILEGES ON DATABASE elit_pos TO elitpos_user;
 \q
 exit
 ```
@@ -93,7 +93,7 @@ sudo certbot --nginx -d elitpos.elitjohnsdigital.co.ke
 
 #### 1. Create Database (3 minutes)
 - cPanel → PostgreSQL Databases
-- Create: `elitpos_retail_smart_erp`
+- Create: `elit_pos`
 - User: `elitpos_user`
 - Password: Strong password
 - Add user to database
@@ -135,7 +135,7 @@ npm run build:server
 ## 📝 Production .env Template
 
 ```env
-DATABASE_URL=postgresql://elitpos_user:YOUR_PASSWORD@localhost:5432/elitpos_retail_smart_erp
+DATABASE_URL=postgresql://elitpos_user:YOUR_PASSWORD@localhost:5432/elit_pos
 NEXTAUTH_URL=https://elitpos.elitjohnsdigital.co.ke
 NEXTAUTH_SECRET=GENERATE_WITH_PREPARE_SCRIPT
 NEXT_PUBLIC_BASE_DOMAIN=elitpos.elitjohnsdigital.co.ke
@@ -200,10 +200,10 @@ npm run build
 pm2 restart elitpos
 
 # Backup database
-pg_dump -U elitpos_user retail_smart_erp > backup.sql
+pg_dump -U elitpos_user elit_pos > backup.sql
 
 # Restore database
-psql -U elitpos_user retail_smart_erp < backup.sql
+psql -U elitpos_user elit_pos < backup.sql
 
 # Check disk space
 df -h

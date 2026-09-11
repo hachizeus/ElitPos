@@ -44,7 +44,7 @@ SERVER SETUP STEPS
 ================================================================================
 
 STEP 1: CREATE DATABASE (cPanel or PostgreSQL)
-  [ ] Create database: retail_smart_erp
+  [ ] Create database: elit_pos
   [ ] Create user: elitpos_user
   [ ] Set strong password
   [ ] Grant all privileges to user

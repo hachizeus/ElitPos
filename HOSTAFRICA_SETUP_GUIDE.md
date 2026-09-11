@@ -85,16 +85,16 @@ psql
 In PostgreSQL prompt:
 ```sql
 -- Create database
-CREATE DATABASE retail_smart_erp;
+CREATE DATABASE elit_pos;
 
 -- Create user with password
 CREATE USER elitpos_user WITH ENCRYPTED PASSWORD 'YourStrongPassword123!';
 
 -- Grant privileges
-GRANT ALL PRIVILEGES ON DATABASE retail_smart_erp TO elitpos_user;
+GRANT ALL PRIVILEGES ON DATABASE elit_pos TO elitpos_user;
 
 -- Grant schema privileges
-\c retail_smart_erp
+\c elit_pos
 GRANT ALL ON SCHEMA public TO elitpos_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO elitpos_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO elitpos_user;
@@ -166,7 +166,7 @@ nano .env
 
 ```env
 # Database
-DATABASE_URL=postgresql://elitpos_user:YourStrongPassword123!@localhost:5432/retail_smart_erp
+DATABASE_URL=postgresql://elitpos_user:YourStrongPassword123!@localhost:5432/elit_pos
 
 # Auth
 NEXTAUTH_URL=https://elitpos.elitjohnsdigital.co.ke
@@ -375,7 +375,7 @@ Wait 10-30 minutes for DNS propagation.
 
 1. In cPanel File Manager, edit `.env`:
    ```env
-   DATABASE_URL=postgresql://elitpos_user:password@localhost:5432/elitpos_retail_smart_erp
+   DATABASE_URL=postgresql://elitpos_user:password@localhost:5432/elit_pos
    NEXTAUTH_URL=https://elitpos.elitjohnsdigital.co.ke
    NEXTAUTH_SECRET=your-secret-here
    NODE_ENV=production
@@ -442,7 +442,7 @@ DATE=$(date +%Y%m%d_%H%M%S)
 mkdir -p $BACKUP_DIR
 
 # Backup database
-pg_dump -U elitpos_user -h localhost retail_smart_erp | gzip > $BACKUP_DIR/db_backup_$DATE.sql.gz
+pg_dump -U elitpos_user -h localhost elit_pos | gzip > $BACKUP_DIR/db_backup_$DATE.sql.gz
 
 # Keep only last 7 days
 find $BACKUP_DIR -name "db_backup_*.sql.gz" -mtime +7 -delete
@@ -472,7 +472,7 @@ pm2 logs elitpos --lines 100
 
 ### Check Database Performance
 ```bash
-sudo -u postgres psql retail_smart_erp
+sudo -u postgres psql elit_pos
 ```
 ```sql
 -- Active connections
@@ -515,10 +515,10 @@ pm2 restart elitpos
 sudo systemctl status postgresql
 
 # Check if database exists
-sudo -u postgres psql -l | grep retail_smart_erp
+sudo -u postgres psql -l | grep elit_pos
 
 # Test connection
-psql "postgresql://elitpos_user:password@localhost:5432/retail_smart_erp"
+psql "postgresql://elitpos_user:password@localhost:5432/elit_pos"
 ```
 
 ### Issue: "Port 3000 already in use"
